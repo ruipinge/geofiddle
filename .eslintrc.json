@@ -1,0 +1,34 @@
+{
+    "env": {
+        "browser": true
+    },
+    "extends": "eslint:recommended",
+    "rules": {
+        "indent": [
+            "error",
+            4
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "no-multiple-empty-lines": 2
+    },
+    "globals": {
+        "define": true,
+        "_": true,
+        "jQuery": true,
+        "$": true,
+        "require": true,
+        "moment": true,
+        "Backbone": true
+    }
+}

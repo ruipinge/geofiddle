@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+DIR="$(command cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+export NVM_DIR="$DIR/.nvm"
+
+\. "$DIR/.nvm/nvm.sh" --no-use
+
+NVMRC_PATH="$(nvm_find_nvmrc)"
+
+if [ -n "$NVMRC_PATH" ]; then
+    NODE_VERSION=$(cat "$NVMRC_PATH")
+else
+    echo "No .nvmrc file found" >&2
+    exit 127
+fi
+
+export NODE_VERSION
+
+NVM_RES="$(nvm version "$NODE_VERSION")"
+
+if [ "_$NVM_RES" = "_N/A" ]; then
+    echo "Node version $NODE_VERSION not found. Installing..."
+    nvm install "$NODE_VERSION"
+else
+    nvm use "$NODE_VERSION" || exit 127
+fi
+
+exec "$@"
+

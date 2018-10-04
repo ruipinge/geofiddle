@@ -1,0 +1,13 @@
+{
+    "name": "GeoFiddle-Backbone",
+    "version": "0.9.0",
+    "author": "Rui Pinge",
+    "devDependencies": {
+        "http-server": "0.11.1"
+    },
+    "dependencies": {},
+    "scripts": {
+        "start": "./node_modules/http-server/bin/http-server ./www",
+        "build": "node ./tools/r.js -o ./tools/build.js"
+    }
+}

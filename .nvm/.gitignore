@@ -1,0 +1,15 @@
+# gitignore
+.cache
+v*
+alias
+
+node_modules/
+npm-debug.log
+
+current
+default-packages
+
+# Only apps should have lockfiles
+npm-shrinkwrap.json
+package-lock.json
+yarn.lock

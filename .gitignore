@@ -1,0 +1,6 @@
+node_modules
+.DS_Store
+*.swp
+Thumbs.db
+npm-debug.log
+www/main.min.js
