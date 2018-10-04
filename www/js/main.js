@@ -8,12 +8,37 @@ require.config({
         'jquery': 'lib/jquery-3.3.1',
         'underscore': 'lib/lodash-4.17.10',
         'backbone': 'lib/backbone-1.3.3',
-        'modernizr': 'lib/modernizr-3.6.0.min' // From HTML5 Boilerplate
+
+        // From HTML5 Boilerplate (v6.1.0): https://html5boilerplate.com/
+        'modernizr': 'lib/modernizr-3.6.0.min',
+
+        // From Geodesy functions: https://github.com/chrisveness/geodesy
+        'vector3d': 'lib/vector3d',
+        'dms': 'lib/dms',
+        'latlon-ellipsoidal': 'lib/latlon-ellipsoidal',
+        'osgridref': 'lib/osgridref'
     },
 
     shim: {
         'modernizr': {
             exports: 'Modernizr'
+        },
+        'vector3d': {
+            exports: 'Vector3d'
+        },
+        'dms': {
+            exports: 'Dms'
+        },
+        'latlon-ellipsoidal': {
+            deps: [
+                'vector3d',
+                'dms'
+            ],
+            exports: 'LatLon'
+        },
+        'osgridref': {
+            deps: ['latlon-ellipsoidal'],
+            exports: 'OsGridRef'
         }
     }
 
@@ -22,16 +47,21 @@ require.config({
 require([
 
     'domReady',
+    'osgridref',
     'jquery',
     'underscore',
     'backbone',
     'modernizr'
 
-], function(domReady) {
+], function(domReady, OsGridRef) {
 
     domReady(function() {
 
-        // Everything starts here!
+        var osGridRef = new OsGridRef(429157, 623009),
+            latLon = OsGridRef.osGridToLatLon(osGridRef);
+
+        console.log(osGridRef.easting, osGridRef.northing);
+        console.log(latLon.lat, latLon.lon);
 
     });
 
