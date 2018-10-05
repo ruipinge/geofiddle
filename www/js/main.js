@@ -53,41 +53,26 @@ require.config({
 require([
 
     'domReady',
-    'osgridref',
-    'wkt',
-    'views/from',
-    'jquery',
-    'underscore',
-    'backbone',
-    'modernizr'
+    'models/convert',
+    'views/convert-form',
+    'views/convert-result'
 
-], function(domReady, OsGridRef, Wkt, FromView) {
+], function(domReady, ConvertModel, ConvertFormView, ConvertResultView) {
 
     domReady(function() {
 
-        var osGridRef = new OsGridRef(429157, 623009),
-            latLon = OsGridRef.osGridToLatLon(osGridRef);
+        var model = new ConvertModel();
 
-        console.log(osGridRef.easting, osGridRef.northing);
-        console.log(latLon.lat, latLon.lon);
-
-
-        var wkt = new Wkt.Wkt();
-        // Read in any kind of WKT string
-        wkt.read('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))');
-        // Convert to GeoJSON
-        console.log(wkt.toJson()); // Outputs an object
-        console.log(JSON.stringify(wkt.toJson())); // Outputs a string
-
-        var view = new FromView({
-            el: $('#from-container')
+        var view = new ConvertFormView({
+            el: $('#convert-form-container'),
+            model: model
         });
         view.render();
 
-        view = new FromView({
-            el: $('#into-container')
+        var view = new ConvertResultView({
+            el: $('#convert-result-container'),
+            model: model
         });
-        view.render();
 
     });
 

@@ -1,24 +1,16 @@
 define([
 
-    'views/ui/select'
+    'views/ui/select',
+    'models/convert'
 
-], function (SelectView) {
+], function (SelectView, ConvertModel) {
 
     return SelectView.extend({
 
         options: {
-            label: 'Projection',
-            selected: 'auto',
-            options: [{
-                label: '(Auto detect)',
-                value: 'auto'
-            }, {
-                label: 'Well-known text (WKT)',
-                value: 'wkt'
-            }, {
-                label: 'GeoJSON',
-                value: 'geojson'
-            }]
+            label: 'Format',
+            nameAttr: 'format',
+            options: _.concat([ConvertModel.AUTO_DETECT_OPTION], ConvertModel.FORMAT_OPTIONS)
         }
 
     });

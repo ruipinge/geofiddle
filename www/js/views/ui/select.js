@@ -10,16 +10,26 @@ define([
 
         className: 'mdc-select',
 
-        options: {
-            label: null,
-            selected: null,
-            options: [{
-                label: null,
-                value: null
-            }, {
-                label: null,
-                value: null
-            }]
+        events: {
+            'change select': 'setValue'
+        },
+
+        initialize: function(options) {
+            options || (options = {});
+            this.attr = options.attr;
+        },
+
+        setValue: function(ev) {
+            var $i = $(ev.currentTarget);
+            if (this.model && this.options.name) {
+                this.model.set(this.options.name, $i.val());
+            }
+        },
+
+        renderValue: function() {
+            if (this.model && this.attr) {
+                this.select.value = this.model.get(this.attr);
+            }
         },
 
         render: function(template) {
@@ -44,12 +54,14 @@ define([
                     .text(option.label));
             }.bind(this));
 
-            // Set selected value
-            if (options.selected) {
-                $select.val(options.selected);
+            // Set name attribute
+            if (options.nameAttr) {
+                $select.attr('name', options.nameAttr);
             }
 
-            mdc.select.MDCSelect.attachTo(this.$el[0]);
+            this.select = new mdc.select.MDCSelect(this.$el[0]);
+
+            this.renderValue();
 
             return this;
         }

@@ -23,13 +23,14 @@ html, body {
 }
 
 .form {
+    border-collapse: separate;
+    border-spacing: 10px;
     display: table;
     height: 100%;
     width: 100%;
 }
 
 .form-toolbar {
-    background: #f5f5f5;
     display: table-row;
     height: 56px;
     z-index: 1;

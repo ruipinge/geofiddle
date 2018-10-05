@@ -1,24 +1,16 @@
 define([
 
-    'views/ui/select'
+    'views/ui/select',
+    'models/convert'
 
-], function (SelectView) {
+], function (SelectView, ConvertModel) {
 
     return SelectView.extend({
 
         options: {
             label: 'Projection',
-            selected: 'auto',
-            options: [{
-                label: '(Auto detect)',
-                value: 'auto'
-            }, {
-                label: 'World Geodetic System (WGS84)',
-                value: 'wgs84'
-            }, {
-                label: 'British National Grid (BNG)',
-                value: 'bng'
-            }]
+            name: 'projection',
+            options: _.concat([ConvertModel.AUTO_DETECT_OPTION], ConvertModel.PROJECTION_OPTIONS)
         }
 
     });
