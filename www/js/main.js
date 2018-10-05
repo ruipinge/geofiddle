@@ -69,10 +69,11 @@ require([
         });
         view.render();
 
-        var view = new ConvertResultView({
+        view = new ConvertResultView({
             el: $('#convert-result-container'),
             model: model
         });
+        view.render();
 
     });
 

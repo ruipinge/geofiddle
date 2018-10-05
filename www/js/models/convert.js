@@ -2,16 +2,42 @@ define([
 
     'backbone',
     'osgridref',
-    'wkt'
+    'wkt',
+    'formats',
+    'projections'
 
-], function(Backbone, OsGridRef, Wkt) {
+], function(Backbone, OsGridRef, Wkt, Formats, Projections) {
 
     return Backbone.Model.extend({
 
         defaults: {
             text: null,
-            projection: 'auto',
-            format: 'auto'
+            projection: Formats.AUTO_DETECT,
+            format: Formats.AUTO_DETECT
+        },
+
+        hasText: function() {
+            return !!_.trim(this.get('text'));
+        },
+
+        getFormat: function(autoDetect) {
+            var format = this.get('format');
+            if (autoDetect && format === Formats.AUTO_DETECT) {
+                return Formats.autoDetectFormat(this.get('text')) || format;
+            }
+            return format;
+        },
+
+        getProjection: function(autoDetect) {
+            var projection = this.get('projection');
+            if (autoDetect && projection === Projections.AUTO_DETECT) {
+                return Projections.autoDetectProjection(this.get('text')) || projection;
+            }
+            return projection;
+        },
+
+        getConvertedText: function(format, projection) {
+            return 'pinge'; // TODO:
         },
 
         f: function() {
@@ -28,33 +54,6 @@ define([
             // Convert to GeoJSON
             console.log(wkt.toJson()); // Outputs an object
             console.log(JSON.stringify(wkt.toJson())); // Outputs a string
-        },
-
-        getConvertedText: function() {
-            return this.get('convert_from_text');
-        }
-
-    }, {
-
-        FORMAT_OPTIONS: [{
-            label: 'Well-known text (WKT)',
-            value: 'wkt'
-        }, {
-            label: 'GeoJSON',
-            value: 'geojson'
-        }],
-
-        PROJECTION_OPTIONS: [{
-            label: 'World Geodetic System (WGS84)',
-            value: 'wgs84'
-        }, {
-            label: 'British National Grid (BNG)',
-            value: 'bng'
-        }],
-
-        AUTO_DETECT_OPTION: {
-            label: '(Auto detect)',
-            value: 'auto'
         }
 
     });
