@@ -20,7 +20,9 @@ require.config({
 
         // From K. Arthur Endsley: https://github.com/arthur-e/Wicket
         // Supports WKT and GeoJSON parsing and formatting
-        'wkt': 'lib/wicket'
+        'wkt': 'lib/wicket',
+
+        'mdc': 'lib/material-components-web-0.40.0.min'
     },
 
     shim: {
@@ -53,12 +55,13 @@ require([
     'domReady',
     'osgridref',
     'wkt',
+    'views/from',
     'jquery',
     'underscore',
     'backbone',
     'modernizr'
 
-], function(domReady, OsGridRef, Wkt) {
+], function(domReady, OsGridRef, Wkt, FromView) {
 
     domReady(function() {
 
@@ -75,6 +78,11 @@ require([
         // Convert to GeoJSON
         console.log(wkt.toJson()); // Outputs an object
         console.log(JSON.stringify(wkt.toJson())); // Outputs a string
+
+
+        var view = new FromView();
+        $('body').append(view.el);
+        view.render();
 
     });
 
