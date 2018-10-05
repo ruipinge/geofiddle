@@ -16,7 +16,11 @@ require.config({
         'vector3d': 'lib/vector3d',
         'dms': 'lib/dms',
         'latlon-ellipsoidal': 'lib/latlon-ellipsoidal',
-        'osgridref': 'lib/osgridref'
+        'osgridref': 'lib/osgridref',
+
+        // From K. Arthur Endsley: https://github.com/arthur-e/Wicket
+        // Supports WKT and GeoJSON parsing and formatting
+        'wkt': 'lib/wicket'
     },
 
     shim: {
@@ -48,12 +52,13 @@ require([
 
     'domReady',
     'osgridref',
+    'wkt',
     'jquery',
     'underscore',
     'backbone',
     'modernizr'
 
-], function(domReady, OsGridRef) {
+], function(domReady, OsGridRef, Wkt) {
 
     domReady(function() {
 
@@ -62,6 +67,14 @@ require([
 
         console.log(osGridRef.easting, osGridRef.northing);
         console.log(latLon.lat, latLon.lon);
+
+
+        var wkt = new Wkt.Wkt();
+        // Read in any kind of WKT string
+        wkt.read('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))');
+        // Convert to GeoJSON
+        console.log(wkt.toJson()); // Outputs an object
+        console.log(JSON.stringify(wkt.toJson())); // Outputs a string
 
     });
 
