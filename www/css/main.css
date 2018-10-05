@@ -1,0 +1,23 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.content {
+    border-collapse: separate;
+    border-spacing: 0;
+    display: table;
+    height: 100%;
+    width: 100%;
+}
+
+.col {
+    display: table-cell;
+    width: 30%;
+}
+
+.row {
+    display: table-row;
+    height: 30%;
+}

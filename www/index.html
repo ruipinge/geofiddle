@@ -12,6 +12,7 @@
   <link rel="apple-touch-icon" href="icon.png">
 
   <link rel="stylesheet" href="css/material-components-web.0.40.0.min.css">
+  <link rel="stylesheet" href="css/main.css">
 
   <!-- Development version -->
   <script data-main="js/main" src="js/lib/require.js"></script>
@@ -26,8 +27,16 @@
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
   <![endif]-->
 
-  <!-- Add your site or application content here -->
-  <p>Hello world! This is GeoFiddler - Backbone version.</p>
+  <!-- Layout inspiration: https://stackoverflow.com/questions/3652591/full-height-and-full-width-css-layout -->
+  <div class="content">
+      <div class="col">
+        <div class="content">
+          <div id="from-container" class="row">from</div>
+          <div id="into-container" class="row">into</div>
+        </div>
+      </div>
+      <div id="map-container" class="col">map</div>
+  </div>
 
 </body>
 
