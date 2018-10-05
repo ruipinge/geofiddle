@@ -79,6 +79,16 @@ require([
         console.log(wkt.toJson()); // Outputs an object
         console.log(JSON.stringify(wkt.toJson())); // Outputs a string
 
+        var view = new FromView({
+            el: $('#from-container')
+        });
+        view.render();
+
+        view = new FromView({
+            el: $('#into-container')
+        });
+        view.render();
+
     });
 
 });

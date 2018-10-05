@@ -21,3 +21,21 @@ html, body {
     display: table-row;
     height: 30%;
 }
+
+.form {
+    display: table;
+    height: 100%;
+    width: 100%;
+}
+
+.form-toolbar {
+    background: #f5f5f5;
+    display: table-row;
+    height: 56px;
+    z-index: 1;
+}
+
+.form-input {
+    height: 100%;
+    width: 100%;
+}

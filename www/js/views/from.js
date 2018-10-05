@@ -2,9 +2,11 @@ define([
 
     'backbone',
     'mdc',
+    'views/format-select',
+    'views/projection-select',
     'text!templates/from.html'
 
-], function (Backbone, mdc, tpl) {
+], function (Backbone, mdc, FormatSelectView, ProjectionSelectView, tpl) {
 
     return Backbone.View.extend({
 
@@ -12,7 +14,13 @@ define([
             var html = _.template(tpl, {});
             this.$el.html(html);
 
-            mdc.ripple.MDCRipple.attachTo(this.$el.find('.foo-button')[0]);
+            var view = new FormatSelectView();
+            this.$el.find('.form-toolbar').append(view.el);
+            view.render();
+
+            view = new ProjectionSelectView();
+            this.$el.find('.form-toolbar').append(view.el);
+            view.render();
 
             return this;
         }
