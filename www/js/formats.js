@@ -1,4 +1,9 @@
-define([], function() {
+define([
+
+    'wkt',
+    'util'
+
+], function(Wkt, Util) {
 
     var AUTO_DETECT = 'auto',
         GEOJSON = 'geojson',
@@ -46,14 +51,46 @@ define([], function() {
         },
 
         autoDetect: function(s) {
-            s = _.trim(s).replace('/[\r\n]/', '');
+            s = Util.stringClean(s);
 
             if (s[0] === '{') {
                 return GEOJSON;
             } else if (/^[a-zA-Z]/.test(s)) {
                 return WKT;
             }
-            // TODO: CSV
+        },
+
+        parse: function(s, format) {
+            s = Util.stringClean(s);
+
+            var wkt = new Wkt.Wkt();
+
+            try {
+
+                // Read in any kind of WKT or GeoJSON string
+                wkt.read(s);
+
+                // Forces validation, throwing exception when invalid
+                // Eg. a 'POIT(1 2)' is valid WKT for parsing, but not its Geometry
+                wkt.toJson();
+
+                return wkt;
+
+            } catch (e) {
+                return;
+            }
+        },
+
+        format: function(wkt, format) {
+            if (format === WKT) {
+                return wkt.write();
+            } else if (format === GEOJSON) {
+                return JSON.stringify(wkt.toJson(), null, 4);
+            }
+        },
+
+        getLabel: function(code) {
+            return LABELS[code];
         }
 
     };

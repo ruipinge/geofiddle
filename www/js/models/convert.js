@@ -1,12 +1,11 @@
 define([
 
     'backbone',
-    'osgridref',
     'wkt',
     'formats',
     'projections'
 
-], function(Backbone, OsGridRef, Wkt, Formats, Projections) {
+], function(Backbone, Wkt, Formats, Projections) {
 
     return Backbone.Model.extend({
 
@@ -16,14 +15,15 @@ define([
             format: Formats.AUTO_DETECT
         },
 
-        hasText: function() {
-            return !!_.trim(this.get('text'));
+        getWkt: function() {
+            var format = this.getFormat(true);
+            return Formats.parse(this.get('text'), format);
         },
 
         getFormat: function(autoDetect) {
             var format = this.get('format');
             if (autoDetect && format === Formats.AUTO_DETECT) {
-                return Formats.autoDetectFormat(this.get('text')) || format;
+                return Formats.autoDetect(this.get('text')) || format;
             }
             return format;
         },
@@ -31,29 +31,26 @@ define([
         getProjection: function(autoDetect) {
             var projection = this.get('projection');
             if (autoDetect && projection === Projections.AUTO_DETECT) {
-                return Projections.autoDetectProjection(this.get('text')) || projection;
+                return Projections.autoDetect(this.get('text')) || projection;
             }
             return projection;
         },
 
-        getConvertedText: function(format, projection) {
-            return 'pinge'; // TODO:
-        },
+        getConvertedText: function(toFormat, toProjection, wkt) {
+            var fromProjection = this.getProjection(true);
 
-        f: function() {
-            var osGridRef = new OsGridRef(429157, 623009),
-            latLon = OsGridRef.osGridToLatLon(osGridRef);
+            if (!fromProjection) {
+                return;
+            }
 
-            console.log(osGridRef.easting, osGridRef.northing);
-            console.log(latLon.lat, latLon.lon);
+            wkt || (wkt = this.getWkt());
+            if (!wkt) {
+                return;
+            }
 
+            wkt.components = Projections.convert(wkt.components, fromProjection, toProjection);
 
-            var wkt = new Wkt.Wkt();
-            // Read in any kind of WKT string
-            wkt.read('POLYGON ((30 10, 10 20, 20 40, 40 40, 30 10))');
-            // Convert to GeoJSON
-            console.log(wkt.toJson()); // Outputs an object
-            console.log(JSON.stringify(wkt.toJson())); // Outputs a string
+            return Formats.format(wkt, toFormat);
         }
 
     });

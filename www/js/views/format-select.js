@@ -10,7 +10,7 @@ define([
 
         options: {
             label: 'Format',
-            nameAttr: 'format',
+            attr: 'format',
             options: _.concat([Formats.AUTO_DETECT_OPTION], Formats.OPTIONS)
         },
 

@@ -25,8 +25,7 @@ define([
 
         renderFormatSelect: function() {
             this.formatSelectView = new FormatSelectView({
-                model: this.model,
-                attr: 'format'
+                model: this.model
             });
             this.$el.find('.form-toolbar').append(this.formatSelectView.el);
             this.formatSelectView.render();
@@ -34,8 +33,7 @@ define([
 
         renderProjectionSelect: function() {
             this.projectionSelectView = new ProjectionSelectView({
-                model: this.model,
-                attr: 'projection'
+                model: this.model
             });
             this.$el.find('.form-toolbar').append(this.projectionSelectView.el);
             this.projectionSelectView.render();

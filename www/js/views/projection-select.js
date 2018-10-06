@@ -10,7 +10,7 @@ define([
 
         options: {
             label: 'Projection',
-            nameAttr: 'projection',
+            attr: 'projection',
             options: _.concat([Projections.AUTO_DETECT_OPTION], Projections.OPTIONS)
         },
 

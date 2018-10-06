@@ -16,13 +16,13 @@ define([
 
         initialize: function(options) {
             options || (options = {});
-            this.attr = options.attr;
+            this.attr = this.options.attr;
         },
 
         setValue: function(ev) {
             var $i = $(ev.currentTarget);
-            if (this.model && this.options.name) {
-                this.model.set(this.options.name, $i.val());
+            if (this.model && this.attr) {
+                this.model.set(this.attr, $i.val());
             }
         },
 
@@ -55,8 +55,8 @@ define([
             }.bind(this));
 
             // Set name attribute
-            if (options.nameAttr) {
-                $select.attr('name', options.nameAttr);
+            if (options.attr) {
+                $select.attr('name', options.attr);
             }
 
             this.select = new mdc.select.MDCSelect(this.$el[0]);

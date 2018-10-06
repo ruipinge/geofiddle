@@ -1,6 +1,7 @@
 html, body {
     height: 100%;
     margin: 0;
+    overflow: hidden;
     padding: 0;
 }
 
@@ -14,12 +15,12 @@ html, body {
 
 .col {
     display: table-cell;
-    width: 30%;
+    width: 50%;
 }
 
 .row {
     display: table-row;
-    height: 30%;
+    height: 50%;
 }
 
 .form {
@@ -39,4 +40,14 @@ html, body {
 .form-input {
     height: 100%;
     width: 100%;
+}
+
+.geo-input-text {
+    font-family: "Courier New", Courier, monospace;
+    line-height: 1.2rem;
+}
+
+.scrollable {
+    height: 100%;
+    overflow: auto;
 }

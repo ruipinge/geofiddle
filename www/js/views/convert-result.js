@@ -12,41 +12,42 @@ define([
     return Backbone.View.extend({
 
         initialize: function() {
-            this.listenTo(this.model, 'change:text', this.renderConversions);
+            this.listenTo(this.model, 'change', this.renderConversions);
         },
 
         renderConversion: function(format, projection) {
-            var $h = $('<h7></h7>').text(format.label + '/' + projection.label).addClass('mdc-typography--headline6'),
-                $pre = $('<pre></pre>').text(this.model.getConvertedText(format, projection));
-            this.$form.append($h);
-            this.$form.append($pre);
+            var projLabel = Projections.getLabel(projection),
+                formatLabel = Formats.getLabel(format),
+                $pre = $('<pre></pre>').text(
+                    '// ' + formatLabel + '/' + projLabel + '\n' +
+                    this.model.getConvertedText(format, projection));
+            this.$scrollable.append($pre);
         },
 
         renderConversions: function() {
-            this.$form.empty();
+            this.$scrollable.empty();
 
-            if (!this.model.hasText()) {
+            var wkt = this.model.getWkt();
+            if (!wkt || !wkt.components) {
                 return;
             }
 
-            if (!this.model.isValid()) {
-                // TODO: render error
-                return;
-            }
-
-            this.renderConversion(Formats.OPTIONS[0], Projections.OPTIONS[0]);
-            // _.each(ConvertModel.FORMAT_OPTIONS, function(format) {
-            //     _.each(ConvertModel.PROJECTION_OPTIONS, function(projection) {
-            //         this.renderConversion(format, projection);
-            //     }.bind(this));
-            // }.bind(this));
+            _.each(Formats.OPTIONS, function(format) {
+                _.each(Projections.OPTIONS, function(projection) {
+                    if (format.value === this.model.getFormat(true) &&
+                        projection.value === this.model.getProjection(true)) {
+                        return;
+                    }
+                    this.renderConversion(format.value, projection.value, wkt);
+                }.bind(this));
+            }.bind(this));
         },
 
         render: function() {
             var html = _.template(tpl, {});
             this.$el.html(html);
 
-            this.$form = this.$el.find('.form');
+            this.$scrollable = this.$el.find('.scrollable');
 
             this.renderConversions();
 
