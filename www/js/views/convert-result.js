@@ -27,8 +27,8 @@ define([
         renderConversions: function() {
             this.$scrollable.empty();
 
-            var wkt = this.model.getWkt();
-            if (!wkt || !wkt.components) {
+            var wkt = this.model.buildWkt();
+            if (!wkt) {
                 return;
             }
 

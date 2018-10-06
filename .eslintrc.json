@@ -29,6 +29,7 @@
         "$": true,
         "require": true,
         "moment": true,
-        "Backbone": true
+        "Backbone": true,
+        "google": true
     }
 }

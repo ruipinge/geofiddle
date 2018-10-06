@@ -59,7 +59,7 @@ define([
      * @param {string} to - The Projection to convert to
      * @return {array} - The converted Wkt object components
      */
-    var convert = function(components, from, to) {
+    var convertWktComponents = function(components, from, to) {
         if (!from || !to) {
             throw new Error('Projection to convert from or to not provided.');
         }
@@ -78,7 +78,7 @@ define([
 
         if (_.isArray(components)) {
             return _.map(components, function(c) {
-                return convert(c, from, to);
+                return convertWktComponents(c, from, to);
             });
         }
 
@@ -143,7 +143,10 @@ define([
             return LABELS[code];
         },
 
-        convert: convert
+        convert: function(wkt, from, to) {
+            wkt.components = convertWktComponents(wkt.components, from, to);
+            return wkt;
+        }
 
     };
 

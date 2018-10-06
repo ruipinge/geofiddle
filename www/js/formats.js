@@ -1,6 +1,6 @@
 define([
 
-    'wkt',
+    'wicket',
     'util'
 
 ], function(Wkt, Util) {
@@ -73,6 +73,10 @@ define([
                 // Forces validation, throwing exception when invalid
                 // Eg. a 'POIT(1 2)' is valid WKT for parsing, but not its Geometry
                 wkt.toJson();
+
+                if (!wkt.components) {
+                    return;
+                }
 
                 return wkt;
 

@@ -1,7 +1,7 @@
 define([
 
     'backbone',
-    'wkt',
+    'wicket',
     'formats',
     'projections'
 
@@ -15,9 +15,16 @@ define([
             format: Formats.AUTO_DETECT
         },
 
-        getWkt: function() {
-            var format = this.getFormat(true);
-            return Formats.parse(this.get('text'), format);
+        buildWkt: function(projection) {
+            var format = this.getFormat(true),
+                wkt = Formats.parse(this.get('text'), format);
+            if (!wkt || !wkt.components) {
+                return;
+            }
+            if (!projection || projection === this.getProjection(true)) {
+                return wkt;
+            }
+            return Projections.convert(wkt, this.getProjection(true), projection);
         },
 
         getFormat: function(autoDetect) {
@@ -43,14 +50,14 @@ define([
                 return;
             }
 
-            wkt || (wkt = this.getWkt());
+            wkt || (wkt = this.buildWkt());
             if (!wkt) {
                 return;
             }
 
-            wkt.components = Projections.convert(wkt.components, fromProjection, toProjection);
+            var converted = Projections.convert(wkt, fromProjection, toProjection);
 
-            return Formats.format(wkt, toFormat);
+            return Formats.format(converted, toFormat);
         }
 
     });
