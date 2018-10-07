@@ -1,7 +1,5 @@
 html, body {
-    height: 100%;
     margin: 0;
-    overflow: hidden;
     padding: 0;
 }
 
@@ -13,49 +11,22 @@ pre {
     word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
 
-.content {
-    border-collapse: separate;
-    border-spacing: 0;
-    display: table;
-    height: 100%;
-    width: 100%;
+.mdc-top-app-bar--fixed-adjust {
+    padding-top: 88px;
 }
 
-.col {
-    display: table-cell;
-    width: 50%;
-}
-
-.row {
-    display: table-row;
-    height: 50%;
-}
-
-.form {
-    border-collapse: separate;
-    border-spacing: 10px;
-    display: table;
-    height: 100%;
+.map {
+    height: 600px;
     width: 100%;
 }
 
 .form-toolbar {
-    display: table-row;
-    height: 56px;
-    z-index: 1;
-}
-
-.form-input {
-    height: 100%;
+    display: block;
+    padding-bottom: 24px;
     width: 100%;
 }
 
 .geo-input-text {
     font-family: "Courier New", Courier, monospace;
     line-height: 1.2rem;
-}
-
-.scrollable {
-    height: 100%;
-    overflow: auto;
 }

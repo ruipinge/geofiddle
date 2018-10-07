@@ -41,11 +41,16 @@ require([
     'models/convert',
     'views/convert-form',
     'views/convert-result',
-    'views/map'
+    'views/map',
+    'mdc'
 
-], function(domReady, ConvertModel, ConvertFormView, ConvertResultView, MapView) {
+], function(domReady, ConvertModel, ConvertFormView, ConvertResultView, MapView, mdc) {
 
     domReady(function() {
+
+        // Instantiation
+        var topAppBarElement = document.querySelector('.mdc-top-app-bar');
+        mdc.topAppBar.MDCTopAppBar.attachTo(topAppBarElement);
 
         var model = new ConvertModel();
 

@@ -22,20 +22,30 @@
 
 </head>
 
-<body>
+<body class="mdc-typography">
   <!--[if lte IE 9]>
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
   <![endif]-->
 
-  <!-- Layout inspiration: https://stackoverflow.com/questions/3652591/full-height-and-full-width-css-layout -->
-  <div class="content">
-      <div class="col">
-        <div class="content">
-          <div id="convert-form-container" class="row"></div>
-          <div id="convert-result-container" class="row"></div>
-        </div>
+  <header class="mdc-top-app-bar mdc-top-app-bar--fixed">
+    <div class="mdc-top-app-bar__row">
+      <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+        <!-- <a href="#" class="material-icons mdc-top-app-bar__navigation-icon">menu</a> -->
+        <span class="mdc-top-app-bar__title">GeoFiddle</span>
+      </section>
+    </div>
+  </header>
+
+  <div class="mdc-layout-grid mdc-top-app-bar--fixed-adjust">
+    <div class="mdc-layout-grid__inner">
+      <div class="mdc-layout-grid__cell--span-6-desktop mdc-layout-grid__cell--span-8-tablet mdc-layout-grid__cell--span-4-phone">
+          <div id="convert-form-container"></div>
+          <div id="convert-result-container"></div>
       </div>
-      <div id="map-container" class="col"></div>
+      <div class="mdc-layout-grid__cell--span-6-desktop mdc-layout-grid__cell--span-8-tablet mdc-layout-grid__cell--span-4-phone">
+        <div id="map-container" class="map"></div>
+      </div>
+    </div>
   </div>
 
 </body>
