@@ -30,23 +30,6 @@ require.config({
     shim: {
         'modernizr': {
             exports: 'Modernizr'
-        },
-        'vector3d': {
-            exports: 'Vector3d'
-        },
-        'dms': {
-            exports: 'Dms'
-        },
-        'latlon-ellipsoidal': {
-            deps: [
-                'vector3d',
-                'dms'
-            ],
-            exports: 'LatLon'
-        },
-        'osgridref': {
-            deps: ['latlon-ellipsoidal'],
-            exports: 'OsGridRef'
         }
     }
 
