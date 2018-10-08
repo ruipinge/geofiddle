@@ -3,7 +3,7 @@ define([
     'backbone',
     'projections',
     'wicket-gmap3',
-    'async!//maps.googleapis.com/maps/api/js?libraries=geometry'
+    'async!//maps.googleapis.com/maps/api/js?key=AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ&libraries=geometry'
 
 ], function(Backbone, Projections) {
 
