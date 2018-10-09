@@ -3,4 +3,3 @@ node_modules
 *.swp
 Thumbs.db
 npm-debug.log
-www/main.min.js
