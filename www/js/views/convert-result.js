@@ -21,9 +21,10 @@ define([
 
             var projLabel = Projections.getLabel(projection),
                 formatLabel = Formats.getLabel(format),
-                $pre = $('<pre></pre>').text(
-                    '// ' + formatLabel + '/' + projLabel + '\n' +
-                    this.model.getConvertedText(format, projection));
+                $header = $('<h4></h4>').text(formatLabel + '/' + projLabel + ':'),
+                $pre = $('<pre></pre>').text(this.model.getConvertedText(format, projection));
+
+            this.$el.append($header);
             this.$el.append($pre);
         },
 
