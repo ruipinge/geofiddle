@@ -41,43 +41,44 @@ require([
     'backbone',
     'router',
     'models/convert',
+    'views/top-bar',
     'views/convert-form',
     'views/convert-result',
-    'views/maps/google',
-    'mdc'
+    'views/maps/google'
 
-], function(domReady, Backbone, Router, ConvertModel, ConvertFormView, ConvertResultView, GoogleMapView, mdc) {
+], function(domReady, Backbone, Router, ConvertModel, TopBarView, ConvertFormView, ConvertResultView, GoogleMapView) {
 
     domReady(function() {
 
-        // Instantiation
-        var topAppBarElement = document.querySelector('.mdc-top-app-bar');
-        mdc.topAppBar.MDCTopAppBar.attachTo(topAppBarElement);
-
         var model = new ConvertModel();
 
-        var view = new ConvertFormView({
+        // App Top Bar view
+        var topBarView = new TopBarView();
+        $('body').prepend(topBarView.el);
+        topBarView.render();
+
+        // Conversion Form (top left) view
+        new ConvertFormView({
             el: $('#convert-form-container'),
             model: model
-        });
-        view.render();
+        }).render();
 
-        view = new ConvertResultView({
+        // Conversion Form (bottom left) view
+        new ConvertResultView({
             el: $('#convert-result-container'),
             model: model
-        });
-        view.render();
+        }).render();
 
-        view = new GoogleMapView({
+        // Map (top right) view
+        new GoogleMapView({
             el: $('#map-container'),
             model: model
-        });
-        view.render();
+        }).render();
 
+        // Routing
         new Router({
             model: model
         });
-
         Backbone.history.start({
             root: window.location.pathname
         });
