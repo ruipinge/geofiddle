@@ -4,7 +4,7 @@ define([
     'projections',
     'views/maps/google-styles',
     'wicket-gmap3',
-    'async!//maps.googleapis.com/maps/api/js?key=AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ&libraries=geometry'
+    'async!//maps.googleapis.com/maps/api/js?key=AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ&language=en&region=GB&libraries=geometry'
 
 ], function(Backbone, Projections, GoogleMapStyles) {
 
