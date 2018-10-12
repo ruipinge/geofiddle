@@ -20,7 +20,7 @@ cp $SRC_DIR/*.* $DST_DIR
 cp -r $SRC_DIR/css $DST_DIR
 
 # Generate main.min.js JavaScript minified file
-npm run build
+./nvmw npm run build
 
 # Remove development JavaScript file reference
 sed -i '' -e 's/^.*JS Development version.*$//' $DST_DIR/index.html
