@@ -18,6 +18,10 @@ define([
             'keyup textarea': 'setValue'
         },
 
+        initialize: function() {
+            this.listenTo(this.model, 'change:text', this.renderValues);
+        },
+
         setValue: function(ev) {
             var $i = $(ev.currentTarget);
             this.model.set('text', $i.val());
@@ -52,6 +56,10 @@ define([
             this.mdcTextField.disabled = !!this.options.disabled;
 
             $textarea.focus();
+        },
+
+        renderValues: function() {
+            this.mdcTextField.value = this.model.get('text');
         },
 
         render: function() {

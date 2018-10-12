@@ -38,13 +38,15 @@ require.config({
 require([
 
     'domReady',
+    'backbone',
+    'router',
     'models/convert',
     'views/convert-form',
     'views/convert-result',
     'views/map',
     'mdc'
 
-], function(domReady, ConvertModel, ConvertFormView, ConvertResultView, MapView, mdc) {
+], function(domReady, Backbone, Router, ConvertModel, ConvertFormView, ConvertResultView, MapView, mdc) {
 
     domReady(function() {
 
@@ -71,6 +73,14 @@ require([
             model: model
         });
         view.render();
+
+        new Router({
+            model: model
+        });
+
+        Backbone.history.start({
+            root: window.location.pathname
+        });
 
     });
 

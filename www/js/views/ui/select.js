@@ -17,6 +17,7 @@ define([
         initialize: function(options) {
             options || (options = {});
             this.attr = this.options.attr;
+            this.listenTo(this.model, 'change:' + this.attr, this.renderValue);
         },
 
         setValue: function(ev) {
