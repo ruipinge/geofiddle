@@ -11,7 +11,7 @@ define([
         options: {
             label: 'Projection',
             attr: 'projection',
-            options: _.concat([Projections.AUTO_DETECT_OPTION], Projections.OPTIONS)
+            options: Projections.OPTIONS
         },
 
         initialize: function(options) {

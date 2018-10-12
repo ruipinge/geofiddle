@@ -7,32 +7,67 @@ define([
 
 ], function(_, OsGridRef, LatLon, Util) {
 
-    var MAX_LON = 180.0,
-        AUTO_DETECT = 'auto',
-        WGS84 = 'wgs84',
-        BNG = 'bng',
-        AUTO_DETECT_OPTION = {
-            label: 'Auto detect',
-            value: AUTO_DETECT
-        },
-        WGS84_OPTION = {
-            label: 'WGS84',
-            description: 'World Geodetic System (WGS84)',
-            value: WGS84
-        },
-        BNG_OPTION = {
-            label: 'BNG',
-            description: 'British National Grid (BNG)',
-            value: BNG
-        },
-        SUPPORTED_PROJECTIONS = [WGS84, BNG],
-        LABELS = {};
+    var P = {};
 
-    LABELS[WGS84] = WGS84_OPTION.label;
-    LABELS[BNG] = BNG_OPTION.label;
-    LABELS[AUTO_DETECT] = AUTO_DETECT_OPTION.label;
+    P.MAX_LON = 180.0;
+    P.AUTO_DETECT_LABEL = 'Auto detect';
+    P.AUTO_DETECT = 'auto';
+    P.WGS84 = 'wgs84';
+    P.BNG = 'bng';
 
-    var convertBngToLatLon = function(easting, northing) {
+    P.SUPPORTED_PROJECTIONS = [P.WGS84, P.BNG];
+
+    P.OPTIONS = [{
+        label: P.AUTO_DETECT_LABEL,
+        value: P.AUTO_DETECT
+    }, {
+        label: 'WGS84',
+        description: 'World Geodetic System (WGS84)',
+        value: P.WGS84
+    }, {
+        label: 'BNG',
+        description: 'British National Grid (BNG)',
+        value: P.BNG
+    }];
+
+    P.findOption = function(code) {
+        return _.find(P.OPTIONS, function(obj) {
+            return obj.value === code;
+        });
+    };
+
+    P.getLabel = function(code) {
+        return P.findOption(code).label;
+    };
+
+    P.formatAutoDetectLabel = function(code) {
+        if (!code) {
+            return P.AUTO_DETECT_LABEL;
+        }
+        var obj = P.findOption(code);
+        return P.AUTO_DETECT_LABEL + ' (' + obj.label + ')';
+    };
+
+    P.autoDetect = function(s) {
+        s = Util.stringClean(s);
+
+        var numbers = _.filter(_.split(s, /[^-.\d]/), function(n) {
+            return !!_.trim(n);
+        });
+
+        if (!numbers || !numbers.length) {
+            return;
+        }
+
+        var largeNumbers = _.some(numbers, function(n) {
+            return Math.abs(parseFloat(n)) > P.MAX_LON;
+        });
+
+        // Large numbers mean is not WGS84
+        return largeNumbers ? P.BNG : P.WGS84;
+    };
+
+    P.convertBngToLatLon = function(easting, northing) {
         var osGridRef = new OsGridRef(easting, northing),
             latLon = OsGridRef.osGridToLatLon(osGridRef);
 
@@ -42,7 +77,7 @@ define([
         };
     };
 
-    var convertLatLonToBng = function(lat, lon) {
+    P.convertLatLonToBng = function(lat, lon) {
         var latLon = new LatLon(lat, lon),
             osGridRef = OsGridRef.latLonToOsGrid(latLon);
 
@@ -59,16 +94,16 @@ define([
      * @param {string} to - The Projection to convert to
      * @return {array} - The converted Wkt object components
      */
-    var convertWktComponents = function(components, from, to) {
+    P.convertWktComponents = function(components, from, to) {
         if (!from || !to) {
             throw new Error('Projection to convert from or to not provided.');
         }
 
-        if (!_.includes(SUPPORTED_PROJECTIONS, from)) {
+        if (!_.includes(P.SUPPORTED_PROJECTIONS, from)) {
             throw new Error('Projection not supported: ' + from + '.');
         }
 
-        if (!_.includes(SUPPORTED_PROJECTIONS, to)) {
+        if (!_.includes(P.SUPPORTED_PROJECTIONS, to)) {
             throw new Error('Projection not supported: ' + to + '.');
         }
 
@@ -78,7 +113,7 @@ define([
 
         if (_.isArray(components)) {
             return _.map(components, function(c) {
-                return convertWktComponents(c, from, to);
+                return P.convertWktComponents(c, from, to);
             });
         }
 
@@ -90,64 +125,19 @@ define([
             throw new TypeError('Provided coordinate x/y attributes are not numbers.');
         }
 
-        if (from === BNG && to === WGS84) {
-            return convertBngToLatLon(components.x, components.y);
-        } else if (from === WGS84 && to === BNG) {
-            return convertLatLonToBng(components.y, components.x);
+        if (from === P.BNG && to === P.WGS84) {
+            return P.convertBngToLatLon(components.x, components.y);
+        } else if (from === P.WGS84 && to === P.BNG) {
+            return P.convertLatLonToBng(components.y, components.x);
         }
 
     };
 
-    return {
-
-        AUTO_DETECT: AUTO_DETECT,
-
-        WGS84: WGS84,
-
-        BNG: BNG,
-
-        AUTO_DETECT_OPTION: AUTO_DETECT_OPTION,
-
-        OPTIONS: [
-            WGS84_OPTION,
-            BNG_OPTION
-        ],
-
-        formatAutoDetectLabel: function(proj) {
-            if (!proj) {
-                return LABELS[AUTO_DETECT];
-            }
-            return LABELS[AUTO_DETECT] + ' (' + LABELS[proj] + ')';
-        },
-
-        autoDetect: function(s) {
-            s = Util.stringClean(s);
-
-            var numbers = _.filter(_.split(s, /[^-.\d]/), function(n) {
-                return !!_.trim(n);
-            });
-
-            if (!numbers || !numbers.length) {
-                return;
-            }
-
-            var largeNumbers = _.some(numbers, function(n) {
-                return Math.abs(parseFloat(n)) > MAX_LON;
-            });
-
-            // Large numbers mean is not WGS84
-            return largeNumbers ? BNG : WGS84;
-        },
-
-        getLabel: function(code) {
-            return LABELS[code];
-        },
-
-        convert: function(wkt, from, to) {
-            wkt.components = convertWktComponents(wkt.components, from, to);
-            return wkt;
-        }
-
+    P.convert = function(wkt, from, to) {
+        wkt.components = P.convertWktComponents(wkt.components, from, to);
+        return wkt;
     };
+
+    return P;
 
 });

@@ -15,6 +15,10 @@ define([
         },
 
         renderConversion: function(format, projection) {
+            if (format === 'auto' || projection === 'auto') {
+                return;
+            }
+
             var projLabel = Projections.getLabel(projection),
                 formatLabel = Formats.getLabel(format),
                 $pre = $('<pre></pre>').text(

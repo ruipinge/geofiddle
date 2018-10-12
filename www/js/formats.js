@@ -1,102 +1,93 @@
 define([
 
+    'underscore',
     'wicket',
     'util'
 
-], function(Wkt, Util) {
+], function(_, Wkt, Util) {
 
-    var AUTO_DETECT = 'auto',
-        GEOJSON = 'geojson',
-        WKT = 'wkt',
-        AUTO_DETECT_OPTION = {
-            label: 'Auto detect',
-            value: AUTO_DETECT
-        },
-        GEOJSON_OPTION = {
-            label: 'GeoJSON',
-            description: 'GeoJSON',
-            value: GEOJSON
-        },
-        WKT_OPTION = {
-            label: 'WKT',
-            description: 'Well-known text (WKT)',
-            value: WKT
-        },
-        LABELS = {};
+    var F = {};
 
-    LABELS[GEOJSON] = GEOJSON_OPTION.label;
-    LABELS[WKT] = WKT_OPTION.label;
-    LABELS[AUTO_DETECT] = AUTO_DETECT_OPTION.label;
+    F.AUTO_DETECT_LABEL = 'Auto detect';
+    F.AUTO_DETECT = 'auto';
+    F.GEOJSON = 'geojson';
+    F.WKT = 'wkt';
 
-    return {
+    F.OPTIONS = [{
+        label: F.AUTO_DETECT_LABEL,
+        value: F.AUTO_DETECT
+    }, {
+        label: 'GeoJSON',
+        description: 'GeoJSON',
+        value: F.GEOJSON
+    }, {
+        label: 'WKT',
+        description: 'Well-known text (WKT)',
+        value: F.WKT
+    }];
 
-        AUTO_DETECT: AUTO_DETECT,
+    F.findOption = function(code) {
+        return _.find(F.OPTIONS, function(obj) {
+            return obj.value === code;
+        });
+    };
 
-        GEOJSON: GEOJSON,
+    F.getLabel = function(code) {
+        return F.findOption(code).label;
+    };
 
-        WKT: WKT,
+    F.formatAutoDetectLabel = function(code) {
+        if (!code) {
+            return F.AUTO_DETECT_LABEL;
+        }
+        var obj = F.findOption(code);
+        return F.AUTO_DETECT_LABEL + ' (' + obj.label + ')';
+    };
 
-        AUTO_DETECT_OPTION: AUTO_DETECT_OPTION,
+    F.autoDetect = function(s) {
+        s = Util.stringClean(s);
 
-        OPTIONS: [
-            GEOJSON_OPTION,
-            WKT_OPTION
-        ],
+        if (s[0] === '{') {
+            return F.GEOJSON;
+        } else if (/^[a-zA-Z]/.test(s)) {
+            return F.WKT;
+        }
+    };
 
-        formatAutoDetectLabel: function(format) {
-            if (!format) {
-                return LABELS[AUTO_DETECT];
-            }
-            return LABELS[AUTO_DETECT] + ' (' + LABELS[format] + ')';
-        },
+    F.parse = function(s, format) {
+        s = Util.stringClean(s);
 
-        autoDetect: function(s) {
-            s = Util.stringClean(s);
+        var wkt = new Wkt.Wkt();
 
-            if (s[0] === '{') {
-                return GEOJSON;
-            } else if (/^[a-zA-Z]/.test(s)) {
-                return WKT;
-            }
-        },
+        try {
 
-        parse: function(s, format) {
-            s = Util.stringClean(s);
+            // Read in any kind of WKT or GeoJSON string
+            wkt.read(s);
 
-            var wkt = new Wkt.Wkt();
+            // Forces validation, throwing exception when invalid
+            // Eg. a 'POIT(1 2)' is valid WKT for parsing, but not its Geometry
+            wkt.toJson();
 
-            try {
-
-                // Read in any kind of WKT or GeoJSON string
-                wkt.read(s);
-
-                // Forces validation, throwing exception when invalid
-                // Eg. a 'POIT(1 2)' is valid WKT for parsing, but not its Geometry
-                wkt.toJson();
-
-                if (!wkt.components) {
-                    return;
-                }
-
-                return wkt;
-
-            } catch (e) {
+            if (!wkt.components) {
                 return;
             }
-        },
 
-        format: function(wkt, format) {
-            if (format === WKT) {
-                return wkt.write();
-            } else if (format === GEOJSON) {
-                return JSON.stringify(wkt.toJson(), null, 4);
-            }
-        },
+            return wkt;
 
-        getLabel: function(code) {
-            return LABELS[code];
+        } catch (e) {
+            return;
         }
-
     };
+
+    F.format = function(wkt, format) {
+        if (format === F.WKT) {
+            return wkt.write();
+        } else if (format === F.GEOJSON) {
+            return JSON.stringify(wkt.toJson(), null, 4);
+        }
+        throw new Error('Format not supported: ' + format + '.');
+    };
+
+    return F;
 
 });

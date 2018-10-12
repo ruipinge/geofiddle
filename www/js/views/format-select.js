@@ -11,7 +11,7 @@ define([
         options: {
             label: 'Format',
             attr: 'format',
-            options: _.concat([Formats.AUTO_DETECT_OPTION], Formats.OPTIONS)
+            options: Formats.OPTIONS
         },
 
         initialize: function(options) {
