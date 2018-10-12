@@ -96,7 +96,7 @@ define([
             }
 
             var centerLatLng,
-                zoom = 17; // Default zoom level
+                zoom = 14; // Default zoom level
 
             if (bounds.length === 1 || (bounds.length >= 2 &&
                 bounds[0].lat === bounds[1].lat && bounds[0].lon === bounds[1].lon)) {
@@ -128,7 +128,11 @@ define([
 
                 centerLatLng = googleBounds.getCenter();
 
+            }
 
+            var currBounds = this.map.getBounds();
+            if (currBounds && currBounds.contains(centerLatLng)) {
+                return;
             }
 
             this.map.setCenter(centerLatLng);
@@ -165,6 +169,7 @@ define([
                     lat: a.y
                 };
             });
+
             this.fitBounds(bounds);
 
         },
