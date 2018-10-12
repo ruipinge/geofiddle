@@ -2,10 +2,11 @@ define([
 
     'backbone',
     'projections',
+    'views/maps/google-styles',
     'wicket-gmap3',
     'async!//maps.googleapis.com/maps/api/js?key=AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ&libraries=geometry'
 
-], function(Backbone, Projections) {
+], function(Backbone, Projections, GoogleMapStyles) {
 
     /**
      * Calculates the distance in metres between the given points.
@@ -180,7 +181,9 @@ define([
                     lat: -34.397,
                     lng: 150.644
                 },
-                zoom: 8
+                zoom: 8,
+                styles: GoogleMapStyles,
+                disableDefaultUI: true
             });
         }
 

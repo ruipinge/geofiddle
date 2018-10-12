@@ -43,10 +43,10 @@ require([
     'models/convert',
     'views/convert-form',
     'views/convert-result',
-    'views/map',
+    'views/maps/google',
     'mdc'
 
-], function(domReady, Backbone, Router, ConvertModel, ConvertFormView, ConvertResultView, MapView, mdc) {
+], function(domReady, Backbone, Router, ConvertModel, ConvertFormView, ConvertResultView, GoogleMapView, mdc) {
 
     domReady(function() {
 
@@ -68,7 +68,7 @@ require([
         });
         view.render();
 
-        view = new MapView({
+        view = new GoogleMapView({
             el: $('#map-container'),
             model: model
         });
