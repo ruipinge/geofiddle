@@ -12,6 +12,7 @@ define([
     F.AUTO_DETECT = 'auto';
     F.GEOJSON = 'geojson';
     F.WKT = 'wkt';
+    F.DSV = 'dsv';
 
     F.OPTIONS = [{
         label: F.AUTO_DETECT_LABEL,
@@ -24,6 +25,10 @@ define([
         label: 'WKT',
         description: 'Well-known text (WKT)',
         value: F.WKT
+    }, {
+        label: 'DSV',
+        description: 'Delimiter-separated values (DSV)',
+        value: F.DSV
     }];
 
     F.findOption = function(code) {
@@ -51,14 +56,50 @@ define([
             return F.GEOJSON;
         } else if (/^[a-zA-Z]/.test(s)) {
             return F.WKT;
+        } else if (/[,0-9.-]/.test(s.replace(/\s/g, ''))) {
+            return F.DSV;
         }
     };
 
-    F.parse = function(s, format) {
-        s = Util.stringClean(s);
+    F.parseDsv = function(s) {
+        var vals;
+        try {
+            vals = Util.parseDsv(s);
+        } catch (e) {
+            return;
+        }
 
+        // Validation: no ordinates, or odd number of ordinates
+        var len = vals.length;
+        if (!len || len % 2 === 1) {
+            return;
+        }
+
+        var ords = [];
+        for (var i = 0; i < len; i += 2) {
+            ords.push('' + vals[i] + ' ' + vals[i + 1]);
+        }
+        ords = ords.join(',');
+
+        // At least 4 vertex (8 ordinates) and first point is the
+        // same as last: it's a Polygon
+        var wkt = new Wkt.Wkt();
+        if (len > 6 && vals[0] === vals[len - 2] && vals[1] === vals[len - 1]) {
+            wkt.read('POLYGON((' + ords + '))');
+        } else if (len > 2) {
+            wkt.read('LINESTRING(' + ords + ')');
+        } else {
+            wkt.read('POINT(' + ords + ')');
+        }
+
+        return wkt;
+    };
+
+    F.parseWkt = function(s) {
+        s = Util.stringClean(s);
         var wkt = new Wkt.Wkt();
 
+        // WKT or GeoJSON
         try {
 
             // Read in any kind of WKT or GeoJSON string
@@ -79,11 +120,27 @@ define([
         }
     };
 
+    F.parse = function(s, format) {
+
+        // DSV
+        if (format === F.DSV) {
+            return F.parseDsv(s);
+        }
+
+        // Try WKT or GeoJSON
+        return F.parseWkt(s);
+
+    };
+
     F.format = function(wkt, format) {
         if (format === F.WKT) {
             return wkt.write();
         } else if (format === F.GEOJSON) {
             return JSON.stringify(wkt.toJson(), null, 4);
+        } else if (format === F.DSV) {
+            return _.map(_.flattenDeep(wkt.components), function(coord) {
+                return '' + coord.x + ', ' + coord.y;
+            }).join(', ');
         }
         throw new Error('Format not supported: ' + format + '.');
     };

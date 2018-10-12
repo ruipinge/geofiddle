@@ -14,7 +14,7 @@ Supported formats:
 - [GeoJSON](http://geojson.org/)
 - [Well-Known Text](https://en.wikipedia.org/wiki/Well-known_text) (WKT)
 - [Polyline](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) (under development!)
-- Delimiter-separated values (DSV) (under development!)
+- [Delimiter-separated values](https://en.wikipedia.org/wiki/Delimiter-separated_values) (DSV)
 
 Supported projections:
 
@@ -38,6 +38,14 @@ Try writting some of the following geometries [here](https://ruipinge.github.com
 
 ```
 POINT(-9.129814 38.736847)
+```
+
+```
+-0.1068354 51.5114059
+```
+
+```
+200300 200200 200300 200300 200400 200300 200300 200200
 ```
 
 
