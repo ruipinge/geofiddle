@@ -1,4 +1,4 @@
-# GeoFiddle
+# GeoFiddle [![Build Status](https://travis-ci.org/ruipinge/geofiddle.svg?branch=master)](https://travis-ci.org/ruipinge/geofiddle)
 
 Plot, share, and convert geometries using different formats and projections. Try it [here](https://ruipinge.github.com/geofiddle).
 

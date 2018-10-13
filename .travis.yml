@@ -7,3 +7,16 @@ branches:
 cache:
   directories:
     - "node_modules"
+before_deploy:
+  - npm run build
+  - sed -ri -e "s/^.*JS Development version.*$//" ./www/index.html
+  - sed -ri -e "s/^.*JS Production version (.*) -->.*$/  \1/" ./www/index.html
+deploy:
+  provider: pages
+  skip-cleanup: true
+  local-dir: ./www
+  target-branch: gh-pages
+  github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+  keep-history: false
+  on:
+    branch: master

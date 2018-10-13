@@ -23,7 +23,7 @@
   },
   "scripts": {
     "test": "jest",
-    "build": "npm test && node ./tools/r.js -o ./tools/build.js",
+    "build": "node ./tools/r.js -o ./tools/build.js",
     "start": "./node_modules/http-server/bin/http-server ./www",
     "clean": "rm -rf ./node_modules ./coverage ./main.min.js ./npm-debug.log .nvm/.cache .nvm/alias .nvm/versions"
   }

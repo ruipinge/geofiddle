@@ -2,7 +2,7 @@
     "name": "main",
     "mainConfigFile": "../www/js/main.js",
     "include": "main",
-    "out": "../main.min.js",
+    "out": "../www/main.min.js",
     "wrap": true,
     "baseUrl": "../www/js",
     "preserveLicenseComments": false,
