@@ -53,15 +53,24 @@ POINT(-9.129814 38.736847)
 
 - [Wicket](https://github.com/arthur-e/Wicket) for WKT and GeoJSON parsing and formatting
 - [Geodesy](https://github.com/chrisveness/geodesy) for projection conversions
-- [RequireJS](https://requirejs.org/), [Backbone](http://backbonejs.org/), [jQuery](https://jquery.com/), [Lodash](https://lodash.com/)
+- [RequireJS](https://requirejs.org/), [Backbone](http://backbonejs.org/), [jQuery](https://jquery.com/), [Lodash](https://lodash.com/), [Jest](https://jestjs.io/)
 - [HTML5 Boilerplate](https://html5boilerplate.com/), [Material Components](https://github.com/material-components/material-components-web)
 
 
 ## Development Environment
 
-Using [nvm](https://github.com/creationix/nvm), GeoFiddle can run locally by:
+Using [nvm](https://github.com/creationix/nvm), GeoFiddle can be served locally by running:
 
 ```
 geofiddle > ./nvmw npm install
+geofiddle > ./nvmw npm test
 geofiddle > ./nvmw npm start
 ```
+
+Code can be tested by running:
+```
+geofiddle > ./nvmw npm install
+geofiddle > ./nvmw npm test
+```
+
+Run ```./nvmw npm run clean``` to remove all downloaded, generated and/or temporary files including node.js modules, nvm node.js versions, coverage reports, etc.

@@ -1,13 +1,30 @@
 {
-    "name": "GeoFiddle-Backbone",
-    "version": "0.9.0",
-    "author": "Rui Pinge",
-    "devDependencies": {
-        "http-server": "0.11.1"
+  "name": "GeoFiddle",
+  "version": "0.9.0",
+  "author": "Rui Pinge",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:ruipinge/geofiddle.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "0.11.1",
+    "jest": "^23.6.0"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/www/js/lib/"
+    ],
+    "moduleNameMapper": {
+      "^underscore$": "<rootDir>/www/js/lib/lodash-4.17.10"
     },
-    "dependencies": {},
-    "scripts": {
-        "start": "./node_modules/http-server/bin/http-server ./www",
-        "build": "node ./tools/r.js -o ./tools/build.js"
-    }
+    "testEnvironment": "node"
+  },
+  "scripts": {
+    "test": "jest",
+    "build": "npm test && node ./tools/r.js -o ./tools/build.js",
+    "start": "./node_modules/http-server/bin/http-server ./www",
+    "clean": "rm -rf ./node_modules ./coverage ./main.min.js ./npm-debug.log .nvm/.cache .nvm/alias .nvm/versions"
+  }
 }
