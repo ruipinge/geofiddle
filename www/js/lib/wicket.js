@@ -21,12 +21,12 @@
 
 (function (root, factory) {
 
-    if (typeof define === "function" && define.amd) {
+    if (typeof define === 'function' && define.amd) {
         // AMD (+ global for extensions)
         define(function () {
             return factory();
         });
-    } else if (typeof module !== 'undefined' && typeof exports === "object") {
+    } else if (typeof module !== 'undefined' && typeof exports === 'object') {
         // CommonJS
         module.exports = factory();
     } else {

@@ -1,8 +1,21 @@
-define([
+(function (root, factory) {
 
-    'underscore'
+    // istanbul ignore next line
+    if (typeof define === 'function' && define.amd) {
+        // AMD (+ global for extensions)
+        define(['underscore'], function (_) {
+            return factory(_);
+        });
+    } else if (typeof module !== 'undefined' && typeof exports === 'object') {
+        // CommonJS
+        var _ = require('underscore');
+        module.exports = factory(_);
+    } else {
+        // Browser
+        root.Util = factory(root._);
+    }
 
-], function(_) {
+}(this, function (_) {
 
     var Util = {};
 
@@ -31,7 +44,7 @@ define([
 
             var n = _.toNumber(a);
             if (_.isNaN(n)) {
-                throw Error('Invalid number: ' + n);
+                throw Error('Invalid number: ' + a);
             }
 
             memo.push(n);
@@ -43,4 +56,4 @@ define([
 
     return Util;
 
-});
+}));
