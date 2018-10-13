@@ -1,0 +1,9 @@
+sudo: false
+dist: trusty
+language: node_js
+branches:
+  only:
+  - master
+cache:
+  directories:
+    - "node_modules"
