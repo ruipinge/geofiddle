@@ -132,15 +132,32 @@ define([
 
     };
 
-    F.format = function(wkt, format) {
+    F.formatOrdinates = function(ordinates, ordinateSep, coordinateSep) {
+        ordinateSep || (ordinateSep = ' ');
+        coordinateSep || (coordinateSep = ', ');
+
+        var ords = [];
+        for (var i = 0; i < ordinates.length; i += 2) {
+            ords.push('' + ordinates[i] + ordinateSep + ordinates[i + 1]);
+        }
+        return ords.join(coordinateSep);
+    };
+
+    F.formatComponents = function(components, ordinateSep, coordinateSep) {
+        return F.formatOrdinates(_.reduce(_.flattenDeep(components), function(memo, comp) {
+            memo.push(comp.x);
+            memo.push(comp.y);
+            return memo;
+        }, []), ordinateSep, coordinateSep);
+    };
+
+    F.format = function(wkt, format, ordinateSep, coordinateSep) {
         if (format === F.WKT) {
             return wkt.write();
         } else if (format === F.GEOJSON) {
             return JSON.stringify(wkt.toJson(), null, 4);
         } else if (format === F.DSV) {
-            return _.map(_.flattenDeep(wkt.components), function(coord) {
-                return '' + coord.x + ', ' + coord.y;
-            }).join(', ');
+            return F.formatComponents(wkt.components, ordinateSep, coordinateSep);
         }
         throw new Error('Format not supported: ' + format + '.');
     };

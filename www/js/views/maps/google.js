@@ -1,12 +1,13 @@
 define([
 
     'backbone',
+    'formats',
     'projections',
     'views/maps/google-styles',
     'wicket-gmap3',
-    'async!//maps.googleapis.com/maps/api/js?key=AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ&language=en&region=GB&libraries=geometry'
+    'async!//maps.googleapis.com/maps/api/js?key=AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ&language=en&region=GB&libraries=geometry,drawing'
 
-], function(Backbone, Projections, GoogleMapStyles) {
+], function(Backbone, Formats, Projections, GoogleMapStyles) {
 
     /**
      * Calculates the distance in metres between the given points.
@@ -175,6 +176,113 @@ define([
 
         },
 
+        renderDrawing: function() {
+            this.drawingManager = new google.maps.drawing.DrawingManager({
+                drawingMode: google.maps.drawing.OverlayType.MARKER,
+                drawingControl: true,
+                drawingControlOptions: {
+                    position: google.maps.ControlPosition.TOP_CENTER,
+                    drawingModes: [
+                        'marker',
+                        // 'circle',
+                        'polygon',
+                        'polyline',
+                        'rectangle']
+                },
+                markerOptions: {
+                    icon: {
+                        url: 'http://maps.gstatic.com/mapfiles/api-3/images/spotlight-poi2_hdpi.png',
+                        size: new google.maps.Size(54, 86),
+                        origin: new google.maps.Point(0, 0),
+                        anchor: new google.maps.Point(13, 43),
+                        scaledSize: new google.maps.Size(27, 43)
+                    }
+                },
+                circleOptions: {
+                    fillColor: '#ffff00',
+                    fillOpacity: 1,
+                    strokeWeight: 5,
+                    clickable: false,
+                    editable: true,
+                    zIndex: 1
+                }
+            });
+            this.drawingManager.setMap(this.map);
+
+            google.maps.event.addListener(this.drawingManager, 'markercomplete', this.processMarker.bind(this));
+            google.maps.event.addListener(this.drawingManager, 'polylinecomplete', this.processPolyline.bind(this));
+            google.maps.event.addListener(this.drawingManager, 'polygoncomplete', this.processPolygon.bind(this));
+            google.maps.event.addListener(this.drawingManager, 'rectanglecomplete', this.processRectangle.bind(this));
+            // google.maps.event.addListener(this.drawingManager, 'circlecomplete', this.processPolygon.bind(this));
+
+        },
+
+        processRectangle: function(rectangle) {
+            var bounds = rectangle.getBounds(),
+                ne = bounds.getNorthEast(),
+                sw = bounds.getSouthWest();
+
+            this.processFeature(rectangle, [
+                // top left corner
+                sw.lng(),
+                ne.lat(),
+                // top right corner
+                ne.lng(),
+                ne.lat(),
+                // bottom right corner
+                ne.lng(),
+                sw.lat(),
+                // bottom left corner
+                sw.lng(),
+                sw.lat(),
+                // top left corner (again, to close)
+                sw.lng(),
+                ne.lat(),
+            ]);
+        },
+
+        processPolyline: function(polyline) {
+            this.processPolygon(polyline, true);
+        },
+
+        processPolygon: function(polygon, skipClose) {
+            var ords = _.reduce(polygon.getPath().getArray(), function(memo, vertex) {
+                memo.push(vertex.lng());
+                memo.push(vertex.lat());
+                return memo;
+            }, []);
+
+            // Closing Polygon, since Google Maps API doesn't do it
+            if (skipClose !== true) {
+                ords.push(ords[0]);
+                ords.push(ords[1]);
+            }
+
+            this.processFeature(polygon, ords);
+        },
+
+        processMarker: function(marker) {
+            var position = marker.getPosition();
+            this.processFeature(marker, [
+                position.lng(),
+                position.lat()
+            ]);
+        },
+
+        processFeature: function(feature, ordinates) {
+            this.features.push(feature);
+            this.model.set({
+                text: Formats.formatOrdinates(ordinates),
+                format: Formats.DSV,
+                projection: Projections.WGS84
+            });
+        },
+
+        remove: function() {
+            google.maps.event.removeListener(this.drawingManager, 'markercomplete');
+            // TODO: kill google map
+        },
+
         render: function() {
             this.map = new google.maps.Map(this.el, {
                 center: {
@@ -185,6 +293,10 @@ define([
                 styles: GoogleMapStyles,
                 disableDefaultUI: true
             });
+
+            this.renderDrawing();
+
+            return this;
         }
 
     });
