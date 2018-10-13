@@ -5,7 +5,7 @@
 set -e
 
 export PUBLISH_BRANCH=gh-pages
-export CACHE_BUSTER="$(date +%s)"
+export BUILD_ID="$(date +%s)"
 export SRC_DIR="./www"
 export DST_DIR="./"
 
@@ -30,7 +30,9 @@ sed -i '' -e 's/^.*JS Production version \(.*\) -->.*$/  \1/' $DST_DIR/index.htm
 
 # Deploy by adding and pushing
 git add $DST_DIR
-git commit -m"Build $CACHE_BUSTER publish."
+git commit -m"Build $BUILD_ID publish."
 git push -f origin $PUBLISH_BRANCH
+
+git tag -a $BUILD_ID master -m"Build $BUILD_ID"
 
 popd
