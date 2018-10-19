@@ -15,7 +15,7 @@ define([
         },
 
         renderConversion: function(format, projection) {
-            if (format === 'auto' || projection === 'auto') {
+            if (format === Formats.AUTO_DETECT || projection === Projections.AUTO_DETECT) {
                 return;
             }
 
