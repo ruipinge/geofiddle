@@ -20,7 +20,7 @@
 
     // Next for Node.js or CommonJS.
     } else if (typeof module !== 'undefined' && typeof exports === 'object') {
-        var LatLon = require('latlon-ellipsoidal');
+        var LatLon = require('./latlon-ellipsoidal');
         module.exports = factory(LatLon);
 
     // Finally, as a browser global.

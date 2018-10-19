@@ -20,8 +20,8 @@
 
     // Next for Node.js or CommonJS.
     } else if (typeof module !== 'undefined' && typeof exports === 'object') {
-        var Vector3d = require('vector3d'),
-            Dms = require('dms');
+        var Vector3d = require('./vector3d'),
+            Dms = require('./dms');
         module.exports = factory(Vector3d, Dms);
 
     // Finally, as a browser global.

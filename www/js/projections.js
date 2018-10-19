@@ -1,11 +1,24 @@
-define([
+(function (root, factory) {
 
-    'underscore',
-    'osgridref',
-    'latlon-ellipsoidal',
-    'util'
+    // istanbul ignore next line
+    if (typeof define === 'function' && define.amd) {
+        // AMD (+ global for extensions)
+        define(['underscore', 'osgridref', 'latlon-ellipsoidal', 'util'], function (_, OsGridRef, LatLon, Util) {
+            return factory(_, OsGridRef, LatLon, Util);
+        });
+    } else if (typeof module !== 'undefined' && typeof exports === 'object') {
+        // CommonJS
+        var _ = require('./lib/lodash-4.17.10'),
+            OsGridRef = require('./lib/osgridref'),
+            LatLon = require('./lib/latlon-ellipsoidal'),
+            Util = require('./util');
+        module.exports = factory(_, OsGridRef, LatLon, Util);
+    } else {
+        // Browser
+        root.Projections = factory(root._, root.OsGridRef, root.LatLon, root.Util);
+    }
 
-], function(_, OsGridRef, LatLon, Util) {
+}(this, function (_, OsGridRef, LatLon, Util) {
 
     var P = {};
 
@@ -48,7 +61,11 @@ define([
         return P.AUTO_DETECT_LABEL + ' (' + obj.label + ')';
     };
 
-    P.autoDetect = function(s) {
+    P.autoDetect = function(s, projection) {
+        if (projection && projection !== P.AUTO_DETECT) {
+            return projection;
+        }
+
         s = Util.stringClean(s);
 
         var numbers = _.filter(_.split(s, /[^-.\d]/), function(n) {
@@ -140,4 +157,4 @@ define([
 
     return P;
 
-});
+}));
