@@ -8,7 +8,7 @@
         });
     } else if (typeof module !== 'undefined' && typeof exports === 'object') {
         // CommonJS
-        var _ = require('./lib/lodash-4.17.10');
+        var _ = require('underscore');
         module.exports = factory(_);
     } else {
         // Browser

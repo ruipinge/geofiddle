@@ -11,8 +11,6 @@ after_success:
   - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
 before_deploy:
   - npm run build
-  - sed -ri -e "s/^.*JS Development version.*$//" ./www/index.html
-  - sed -ri -e "s/^.*JS Production version (.*) -->.*$/  \1/" ./www/index.html
 deploy:
   provider: pages
   skip-cleanup: true

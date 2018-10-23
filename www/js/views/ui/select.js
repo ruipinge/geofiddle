@@ -1,10 +1,11 @@
 define([
 
+    'jquery',
     'backbone',
     'mdc',
-    'text!templates/ui/select.html'
+    'templates/ui/select.html'
 
-], function (Backbone, mdc, tpl) {
+], function ($, Backbone, mdc, tpl) {
 
     return Backbone.View.extend({
 

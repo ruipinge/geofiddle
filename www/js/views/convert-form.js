@@ -1,12 +1,13 @@
 define([
 
+    'jquery',
     'backbone',
     'mdc',
     'views/format-select',
     'views/projection-select',
-    'text!templates/convert-form.html'
+    'templates/convert-form.html'
 
-], function (Backbone, mdc, FormatSelectView, ProjectionSelectView, tpl) {
+], function ($, Backbone, mdc, FormatSelectView, ProjectionSelectView, tpl) {
 
     return Backbone.View.extend({
 

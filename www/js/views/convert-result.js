@@ -1,12 +1,13 @@
 define([
 
+    'jquery',
     'backbone',
     'models/convert',
     'formats',
     'projections',
-    'text!templates/convert-result.html'
+    'templates/convert-result.html'
 
-], function (Backbone, ConvertModel, Formats, Projections, tpl) {
+], function ($, Backbone, ConvertModel, Formats, Projections, tpl) {
 
     return Backbone.View.extend({
 

@@ -3,15 +3,15 @@
     // istanbul ignore next line
     if (typeof define === 'function' && define.amd) {
         // AMD (+ global for extensions)
-        define(['underscore', 'osgridref', 'latlon-ellipsoidal', 'util'], function (_, OsGridRef, LatLon, Util) {
+        define(['underscore', 'geodesy/osgridref', 'geodesy/latlon-ellipsoidal', 'geofiddle-util'], function (_, OsGridRef, LatLon, Util) {
             return factory(_, OsGridRef, LatLon, Util);
         });
     } else if (typeof module !== 'undefined' && typeof exports === 'object') {
         // CommonJS
-        var _ = require('./lib/lodash-4.17.10'),
-            OsGridRef = require('./lib/osgridref'),
-            LatLon = require('./lib/latlon-ellipsoidal'),
-            Util = require('./util');
+        var _ = require('underscore'),
+            OsGridRef = require('geodesy/osgridref'),
+            LatLon = require('geodesy/latlon-ellipsoidal'),
+            Util = require('geofiddle-util');
         module.exports = factory(_, OsGridRef, LatLon, Util);
     } else {
         // Browser

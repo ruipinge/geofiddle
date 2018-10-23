@@ -1,13 +1,30 @@
 define([
 
+    'jquery',
     'backbone',
     'formats',
     'projections',
     'views/maps/google-styles',
-    'wicket-gmap3',
-    'async!//maps.googleapis.com/maps/api/js?key=AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ&language=en&region=GB&libraries=geometry,drawing'
+    'google-maps',
+    'wicket/wicket-gmap3'
 
-], function(Backbone, Formats, Projections, GoogleMapStyles) {
+], function($, Backbone, Formats, Projections, GoogleMapStyles, GoogleMapsLoader) {
+
+    GoogleMapsLoader.KEY = 'AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ';
+    GoogleMapsLoader.LIBRARIES = ['geometry', 'drawing'];
+    GoogleMapsLoader.LANGUAGE = 'en';
+    GoogleMapsLoader.REGION = 'GB';
+    GoogleMapsLoader.VERSION = 'quarterly';
+
+    var OPTIONS = {
+        center: {
+            lat: -34.397,
+            lng: 150.644
+        },
+        zoom: 8,
+        styles: GoogleMapStyles,
+        disableDefaultUI: true
+    };
 
     /**
      * Calculates the distance in metres between the given points.
@@ -76,7 +93,6 @@ define([
 
         initialize: function() {
             this.features = [];
-            this.listenTo(this.model, 'change', this.plot);
         },
 
         clearMap: function() {
@@ -280,21 +296,18 @@ define([
 
         remove: function() {
             google.maps.event.removeListener(this.drawingManager, 'markercomplete');
-            // TODO: kill google map
+            GoogleMapsLoader.release();
         },
 
         render: function() {
-            this.map = new google.maps.Map(this.el, {
-                center: {
-                    lat: -34.397,
-                    lng: 150.644
-                },
-                zoom: 8,
-                styles: GoogleMapStyles,
-                disableDefaultUI: true
-            });
+            GoogleMapsLoader.load(function(google) {
+                this.map = new google.maps.Map(this.el, OPTIONS); // TODO: center on existing geometry, if any
 
-            this.renderDrawing();
+                this.plot();
+                this.listenTo(this.model, 'change', this.plot);
+
+                this.renderDrawing();
+            }.bind(this));
 
             return this;
         }

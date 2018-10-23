@@ -3,14 +3,14 @@
     // istanbul ignore next line
     if (typeof define === 'function' && define.amd) {
         // AMD (+ global for extensions)
-        define(['underscore', 'wicket', 'util'], function (_, Wkt, Util) {
+        define(['underscore', 'wicket', 'geofiddle-util'], function (_, Wkt, Util) {
             return factory(_, Wkt, Util);
         });
     } else if (typeof module !== 'undefined' && typeof exports === 'object') {
         // CommonJS
-        var _ = require('./lib/lodash-4.17.10'),
-            Wicket = require('./lib/wicket'),
-            Util = require('./util');
+        var _ = require('underscore'),
+            Wicket = require('wicket'),
+            Util = require('geofiddle-util');
         module.exports = factory(_, Wicket, Util);
     } else {
         // Browser

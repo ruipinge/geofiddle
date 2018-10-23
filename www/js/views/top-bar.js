@@ -2,7 +2,7 @@ define([
 
     'backbone',
     'mdc',
-    'text!templates/top-bar.html'
+    'templates/top-bar.html'
 
 ], function (Backbone, mdc, tpl) {
 
