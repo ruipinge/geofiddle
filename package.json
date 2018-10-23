@@ -42,6 +42,6 @@
     "test": "jest",
     "build": "webpack --mode=production",
     "start": "webpack-dev-server --progress",
-    "clean": "rm -rf ./node_modules ./coverage ./npm-debug.log .nvm/.cache .nvm/alias .nvm/versions ./dist"
+    "clean": "rm -rf ./node_modules ./coverage ./npm-debug.log .nvm/.cache .nvm/alias .nvm/versions ./www/dist"
   }
 }

@@ -5,8 +5,9 @@ module.exports = {
     mode: 'development',
     entry: './main.js',
     output: {
+        path: path.resolve(__dirname, 'www/dist'),
         filename: 'bundle.js',
-        publicPath: '/dist/'
+        publicPath: 'dist/'
     },
     resolve: {
         modules: [path.resolve(__dirname, 'www/js'), 'node_modules'],
