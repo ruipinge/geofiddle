@@ -12,8 +12,7 @@ module.exports = {
     resolve: {
         modules: [path.resolve(__dirname, 'www/js'), 'node_modules'],
         alias: {
-            'underscore': 'lodash',
-            'mdc': path.resolve(__dirname, 'www/js/lib/material-components-web-0.40.0.min'),
+            'underscore': 'lodash'
         }
     },
     module: {
@@ -22,6 +21,20 @@ module.exports = {
             use: {
                 loader: 'html-loader'
             }
+        }, {
+            test: /\.scss$/,
+            use: [{
+                loader: 'style-loader'
+            }, {
+                loader: 'css-loader'
+            }, {
+                loader: 'postcss-loader'
+            }, {
+                loader: 'sass-loader',
+                options: {
+                    includePaths: ['./node_modules']
+                }
+            }]
         }]
     },
     devServer: {

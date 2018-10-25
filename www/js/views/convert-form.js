@@ -2,12 +2,12 @@ define([
 
     'jquery',
     'backbone',
-    'mdc',
+    '@material/textfield',
     'views/format-select',
     'views/projection-select',
     'templates/convert-form.html'
 
-], function ($, Backbone, mdc, FormatSelectView, ProjectionSelectView, tpl) {
+], function ($, Backbone, textfield, FormatSelectView, ProjectionSelectView, tpl) {
 
     return Backbone.View.extend({
 
@@ -53,7 +53,7 @@ define([
             var $textarea = this.$el.find('textarea');
             this.$el.find('.convert-input-label').text(this.options.label);
 
-            this.mdcTextField = mdc.textField.MDCTextField.attachTo(this.$el.find('.mdc-text-field')[0]);
+            this.mdcTextField = textfield.MDCTextField.attachTo(this.$el.find('.mdc-text-field')[0]);
             this.mdcTextField.disabled = !!this.options.disabled;
 
             $textarea.focus();

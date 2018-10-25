@@ -2,10 +2,10 @@ define([
 
     'jquery',
     'backbone',
-    'mdc',
+    '@material/select',
     'templates/ui/select.html'
 
-], function ($, Backbone, mdc, tpl) {
+], function ($, Backbone, select, tpl) {
 
     return Backbone.View.extend({
 
@@ -61,7 +61,7 @@ define([
                 $select.attr('name', options.attr);
             }
 
-            this.select = new mdc.select.MDCSelect(this.$el[0]);
+            this.select = new select.MDCSelect(this.$el[0]);
 
             this.renderValue();
 

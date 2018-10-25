@@ -1,10 +1,10 @@
 define([
 
     'backbone',
-    'mdc',
+    '@material/top-app-bar',
     'templates/top-bar.html'
 
-], function (Backbone, mdc, tpl) {
+], function (Backbone, topAppBar, tpl) {
 
     return Backbone.View.extend({
 
@@ -16,7 +16,7 @@ define([
             var html = _.template(tpl, {});
             this.$el.html(html);
 
-            mdc.topAppBar.MDCTopAppBar.attachTo(this.$el[0]);
+            topAppBar.MDCTopAppBar.attachTo(this.$el[0]);
 
             return this;
         }
