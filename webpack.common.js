@@ -1,12 +1,11 @@
 const path = require('path');
-const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
 
 const basePath = path.resolve(__dirname, 'www/js');
 
 module.exports = {
     context: basePath,
-    mode: 'development',
     entry: './main.js',
     plugins: [
 
@@ -21,9 +20,6 @@ module.exports = {
         new webpack.HashedModuleIdsPlugin()
 
     ],
-    output: {
-        filename: '[name].[contenthash].js'
-    },
     optimization: {
       runtimeChunk: 'single',
       splitChunks: {
@@ -64,8 +60,5 @@ module.exports = {
                 }
             }]
         }]
-    },
-    devServer: {
-        contentBase: path.join(__dirname, 'www')
     }
 };

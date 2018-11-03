@@ -34,7 +34,8 @@
     "style-loader": "^0.23.1",
     "webpack": "^4.21.0",
     "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.9"
+    "webpack-dev-server": "^3.1.9",
+    "webpack-merge": "^4.1.4"
   },
   "jest": {
     "collectCoverage": true,
@@ -52,8 +53,8 @@
   },
   "scripts": {
     "test": "jest",
-    "build": "webpack --mode=production",
-    "start": "webpack-dev-server --progress",
+    "build": "webpack --config webpack.prd.js",
+    "start": "webpack-dev-server --progress --config webpack.dev.js",
     "clean": "rm -rf ./node_modules ./coverage ./npm-debug.log .nvm/.cache .nvm/alias .nvm/versions ./dist"
   }
 }
