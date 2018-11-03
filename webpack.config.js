@@ -1,16 +1,43 @@
 const path = require('path');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+const basePath = path.resolve(__dirname, 'www/js');
 
 module.exports = {
-    context: path.resolve(__dirname, 'www/js'),
+    context: basePath,
     mode: 'development',
     entry: './main.js',
+    plugins: [
+
+        // Simplifies creation of HTML files to serve the bundles
+        new HtmlWebpackPlugin({
+            // Uses existing HTML file instead of creating one from scratch
+            template: '../index.html'
+        }),
+
+        // Fixes module order, since the hash ids are based on the relative path
+        // https://webpack.js.org/guides/caching/#module-identifiers
+        new webpack.HashedModuleIdsPlugin()
+
+    ],
     output: {
-        path: path.resolve(__dirname, 'www/dist'),
-        filename: 'bundle.js',
-        publicPath: 'dist/'
+        filename: '[name].[contenthash].js'
+    },
+    optimization: {
+      runtimeChunk: 'single',
+      splitChunks: {
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all'
+          }
+        }
+      }
     },
     resolve: {
-        modules: [path.resolve(__dirname, 'www/js'), 'node_modules'],
+        modules: [basePath, 'node_modules'],
         alias: {
             'underscore': 'lodash'
         }
@@ -28,6 +55,7 @@ module.exports = {
             }, {
                 loader: 'css-loader'
             }, {
+                // Fixes Material Design missing browser CSS rules vendor prefixes (-moz-, -webkit-)
                 loader: 'postcss-loader'
             }, {
                 loader: 'sass-loader',
