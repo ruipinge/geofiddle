@@ -12,6 +12,7 @@
             OsGridRef = require('geodesy/osgridref'),
             LatLon = require('geodesy/latlon-ellipsoidal'),
             Util = require('geofiddle-util');
+        // eslint-disable-next-line no-undef
         module.exports = factory(_, OsGridRef, LatLon, Util);
     } else {
         // Browser

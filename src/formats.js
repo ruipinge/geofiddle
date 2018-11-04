@@ -11,6 +11,7 @@
         var _ = require('underscore'),
             Wicket = require('wicket'),
             Util = require('geofiddle-util');
+        // eslint-disable-next-line no-undef
         module.exports = factory(_, Wicket, Util);
     } else {
         // Browser

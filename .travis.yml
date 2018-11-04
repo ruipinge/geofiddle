@@ -8,6 +8,7 @@ cache:
   directories:
     - "node_modules"
 after_success:
+  - npm run eslint
   - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
 before_deploy:
   - npm run build

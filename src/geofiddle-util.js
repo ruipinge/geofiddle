@@ -9,6 +9,7 @@
     } else if (typeof module !== 'undefined' && typeof exports === 'object') {
         // CommonJS
         var _ = require('underscore');
+        // eslint-disable-next-line no-undef
         module.exports = factory(_);
     } else {
         // Browser
