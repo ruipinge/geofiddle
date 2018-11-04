@@ -73,4 +73,6 @@ geofiddle > ./nvmw npm install
 geofiddle > ./nvmw npm test
 ```
 
+Note: ```nvmw``` it's just a *nvm wrapper* that automatically *installs* and/or *uses* the configured node.js version.
+
 Run ```./nvmw npm run clean``` to remove all downloaded, generated and/or temporary files including node.js modules, nvm node.js versions, coverage reports, etc.
