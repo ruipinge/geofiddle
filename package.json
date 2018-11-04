@@ -39,14 +39,11 @@
   },
   "jest": {
     "collectCoverage": true,
-    "coveragePathIgnorePatterns": [
-      "<rootDir>/www/js/lib/"
-    ],
     "moduleNameMapper": {
       "^underscore$": "lodash"
     },
     "modulePaths": [
-      "<rootDir>/www/js/",
+      "<rootDir>/src/",
       "<rootDir>/node_modules"
     ],
     "testEnvironment": "node"

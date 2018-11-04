@@ -12,7 +12,7 @@ module.exports = merge(common, {
         new webpack.HotModuleReplacementPlugin()
     ],
     devServer: {
-        contentBase: path.join(__dirname, 'www'),
+        contentBase: path.join(__dirname, 'src/www'),
         hot: true
     }
 });

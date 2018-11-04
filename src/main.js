@@ -1,4 +1,4 @@
-import '../sass/main.scss';
+import './main.scss';
 
 import $ from 'jquery';
 import Backbone from 'backbone';

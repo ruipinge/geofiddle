@@ -2,7 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
-const basePath = path.resolve(__dirname, 'www/js');
+const basePath = path.resolve(__dirname, 'src');
 
 module.exports = {
     context: basePath,
@@ -12,7 +12,7 @@ module.exports = {
         // Simplifies creation of HTML files to serve the bundles
         new HtmlWebpackPlugin({
             // Uses existing HTML file instead of creating one from scratch
-            template: '../index.html'
+            template: './index.html'
         }),
 
         // Fixes module order, since the hash ids are based on the relative path
