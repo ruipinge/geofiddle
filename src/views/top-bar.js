@@ -1,26 +1,20 @@
-define([
+import Backbone from 'backbone';
+import {MDCTopAppBar} from '@material/top-app-bar';
+import tpl from 'templates/top-bar.html';
 
-    'backbone',
-    '@material/top-app-bar',
-    'templates/top-bar.html'
+export default Backbone.View.extend({
 
-], function (Backbone, topAppBar, tpl) {
+    tagName: 'header',
 
-    return Backbone.View.extend({
+    className: 'mdc-top-app-bar mdc-top-app-bar--fixed',
 
-        tagName: 'header',
+    render: function() {
+        var html = _.template(tpl, {});
+        this.$el.html(html);
 
-        className: 'mdc-top-app-bar mdc-top-app-bar--fixed',
+        MDCTopAppBar.attachTo(this.$el[0]);
 
-        render: function() {
-            var html = _.template(tpl, {});
-            this.$el.html(html);
-
-            topAppBar.MDCTopAppBar.attachTo(this.$el[0]);
-
-            return this;
-        }
-
-    });
+        return this;
+    }
 
 });

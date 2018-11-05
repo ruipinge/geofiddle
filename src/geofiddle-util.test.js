@@ -1,4 +1,4 @@
-const Util = require('geofiddle-util');
+import Util from 'geofiddle-util';
 
 test('clean a non trimmed string', () => {
     expect(Util.stringClean('    ab  ')).toBe('ab');

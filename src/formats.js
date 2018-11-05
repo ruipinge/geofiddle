@@ -1,239 +1,219 @@
-(function (root, factory) {
+import _ from 'underscore';
+import Wkt from 'wicket';
+import Util from 'geofiddle-util';
 
-    // istanbul ignore next line
-    if (typeof define === 'function' && define.amd) {
-        // AMD (+ global for extensions)
-        define(['underscore', 'wicket', 'geofiddle-util'], function (_, Wkt, Util) {
-            return factory(_, Wkt, Util);
-        });
-    } else if (typeof module !== 'undefined' && typeof exports === 'object') {
-        // CommonJS
-        var _ = require('underscore'),
-            Wicket = require('wicket'),
-            Util = require('geofiddle-util');
-        // eslint-disable-next-line no-undef
-        module.exports = factory(_, Wicket, Util);
-    } else {
-        // Browser
-        root.Formats = factory(root._, root.Wkt, root.Util);
+const F = {};
+
+F.AUTO_DETECT_LABEL = 'Auto detect';
+F.AUTO_DETECT = 'auto';
+F.GEOJSON = 'geojson';
+F.WKT = 'wkt';
+F.EWKT = 'ewkt';
+F.DSV = 'dsv';
+
+F.OPTIONS = [{
+    label: F.AUTO_DETECT_LABEL,
+    value: F.AUTO_DETECT
+}, {
+    label: 'GeoJSON',
+    description: 'GeoJSON',
+    value: F.GEOJSON
+}, {
+    label: 'WKT',
+    description: 'Well-Known text (WKT)',
+    value: F.WKT
+}, {
+    label: 'EWKT',
+    description: 'Extended Well-Known text (EWKT)',
+    value: F.EWKT
+}, {
+    label: 'DSV',
+    description: 'Delimiter-separated values (DSV)',
+    value: F.DSV
+}];
+
+F.findOption = function(code) {
+    return _.find(F.OPTIONS, function(obj) {
+        return obj.value === code;
+    });
+};
+
+F.getLabel = function(code) {
+    return F.findOption(code).label;
+};
+
+F.formatAutoDetectLabel = function(code) {
+    if (!code) {
+        return F.AUTO_DETECT_LABEL;
+    }
+    var obj = F.findOption(code);
+    return F.AUTO_DETECT_LABEL + ' (' + obj.label + ')';
+};
+
+F.autoDetect = function(s, format) {
+    if (format && format !== F.AUTO_DETECT) {
+        return format;
     }
 
-}(this, function (_, Wkt, Util) {
+    s = Util.stringClean(s);
 
-    var F = {};
+    if (s[0] === '{') {
+        return F.GEOJSON;
+    } else if (/^SRID=\d+;[A-Z]/i.test(s)) {
+        return F.EWKT;
+    } else if (/^[a-zA-Z]/.test(s)) {
+        return F.WKT;
+    } else if (/[,0-9.-]/.test(s.replace(/\s/g, ''))) {
+        return F.DSV;
+    }
+};
 
-    F.AUTO_DETECT_LABEL = 'Auto detect';
-    F.AUTO_DETECT = 'auto';
-    F.GEOJSON = 'geojson';
-    F.WKT = 'wkt';
-    F.EWKT = 'ewkt';
-    F.DSV = 'dsv';
+F.parseDsv = function(s) {
+    var vals;
+    try {
+        vals = Util.parseDsv(s);
+    } catch (e) {
+        return;
+    }
 
-    F.OPTIONS = [{
-        label: F.AUTO_DETECT_LABEL,
-        value: F.AUTO_DETECT
-    }, {
-        label: 'GeoJSON',
-        description: 'GeoJSON',
-        value: F.GEOJSON
-    }, {
-        label: 'WKT',
-        description: 'Well-Known text (WKT)',
-        value: F.WKT
-    }, {
-        label: 'EWKT',
-        description: 'Extended Well-Known text (EWKT)',
-        value: F.EWKT
-    }, {
-        label: 'DSV',
-        description: 'Delimiter-separated values (DSV)',
-        value: F.DSV
-    }];
+    // Validation: no ordinates, or odd number of ordinates
+    var len = vals.length;
+    if (!len || len % 2 === 1) {
+        return;
+    }
 
-    F.findOption = function(code) {
-        return _.find(F.OPTIONS, function(obj) {
-            return obj.value === code;
-        });
-    };
+    var ords = [];
+    for (var i = 0; i < len; i += 2) {
+        ords.push('' + vals[i] + ' ' + vals[i + 1]);
+    }
+    ords = ords.join(',');
 
-    F.getLabel = function(code) {
-        return F.findOption(code).label;
-    };
+    // At least 4 vertex (8 ordinates) and first point is the
+    // same as last: it's a Polygon
+    var wkt = new Wkt.Wkt();
+    if (len > 6 && vals[0] === vals[len - 2] && vals[1] === vals[len - 1]) {
+        wkt.read('POLYGON((' + ords + '))');
+    } else if (len > 2) {
+        wkt.read('LINESTRING(' + ords + ')');
+    } else {
+        wkt.read('POINT(' + ords + ')');
+    }
 
-    F.formatAutoDetectLabel = function(code) {
-        if (!code) {
-            return F.AUTO_DETECT_LABEL;
-        }
-        var obj = F.findOption(code);
-        return F.AUTO_DETECT_LABEL + ' (' + obj.label + ')';
-    };
+    return wkt;
+};
 
-    F.autoDetect = function(s, format) {
-        if (format && format !== F.AUTO_DETECT) {
-            return format;
-        }
+F.parseWkt = function(s) {
+    s = Util.stringClean(s);
+    var wkt = new Wkt.Wkt();
 
-        s = Util.stringClean(s);
+    // WKT or GeoJSON
+    try {
 
-        if (s[0] === '{') {
-            return F.GEOJSON;
-        } else if (/^SRID=\d+;[A-Z]/i.test(s)) {
-            return F.EWKT;
-        } else if (/^[a-zA-Z]/.test(s)) {
-            return F.WKT;
-        } else if (/[,0-9.-]/.test(s.replace(/\s/g, ''))) {
-            return F.DSV;
-        }
-    };
+        // Read in any kind of WKT or GeoJSON string
+        wkt.read(s);
 
-    F.parseDsv = function(s) {
-        var vals;
-        try {
-            vals = Util.parseDsv(s);
-        } catch (e) {
+        // Forces validation, throwing exception when invalid
+        // Eg. a 'POIT(1 2)' is valid WKT for parsing, but not its Geometry
+        wkt.toJson();
+
+        if (!wkt.components) {
             return;
-        }
-
-        // Validation: no ordinates, or odd number of ordinates
-        var len = vals.length;
-        if (!len || len % 2 === 1) {
-            return;
-        }
-
-        var ords = [];
-        for (var i = 0; i < len; i += 2) {
-            ords.push('' + vals[i] + ' ' + vals[i + 1]);
-        }
-        ords = ords.join(',');
-
-        // At least 4 vertex (8 ordinates) and first point is the
-        // same as last: it's a Polygon
-        var wkt = new Wkt.Wkt();
-        if (len > 6 && vals[0] === vals[len - 2] && vals[1] === vals[len - 1]) {
-            wkt.read('POLYGON((' + ords + '))');
-        } else if (len > 2) {
-            wkt.read('LINESTRING(' + ords + ')');
-        } else {
-            wkt.read('POINT(' + ords + ')');
         }
 
         return wkt;
-    };
 
-    F.parseWkt = function(s) {
-        s = Util.stringClean(s);
-        var wkt = new Wkt.Wkt();
+    } catch (e) {
+        return;
+    }
+};
 
-        // WKT or GeoJSON
-        try {
+F.parseEwkt = function (s) {
+    return F.parseWkt(s.split(';')[1]);
+};
 
-            // Read in any kind of WKT or GeoJSON string
-            wkt.read(s);
+F.parse = function(s, format) {
 
-            // Forces validation, throwing exception when invalid
-            // Eg. a 'POIT(1 2)' is valid WKT for parsing, but not its Geometry
-            wkt.toJson();
+    // DSV
+    if (format === F.DSV) {
+        return F.parseDsv(s);
+    }
 
-            if (!wkt.components) {
-                return;
-            }
+    // EWKT
+    if (format === F.EWKT) {
+        return F.parseEwkt(s);
+    }
 
-            return wkt;
+    // Try WKT or GeoJSON
+    return F.parseWkt(s);
 
-        } catch (e) {
-            return;
-        }
-    };
+};
 
-    F.parseEwkt = function (s) {
-        return F.parseWkt(s.split(';')[1]);
-    };
+/**
+ * Format the given list of ordinates using the given (or default) separators. The ordinates
+ * are paired in groups of two to form coordinates, making it mandatory for the list to have
+ * an even number of elements.
+ *
+ * Eg. [1, 2, 3, 4] will be formatted as '1 2, 3 4' using the default separators.
+ *
+ * @param {number[]} ordinates - Complete and flat list of ordinates.
+ * @param {Object} options - Holds optional parameters.
+ * @param {string} options.ordinateSep (optional) - Ordinate separator. Default is ' ' (space).
+ * @param {string} options.coordinateSep (optional) - Coordinate pair separator. Default is ', '.
+ * @returns {string}
+ */
+F.formatOrdinates = function(ordinates, options) {
+    options || (options = {});
 
-    F.parse = function(s, format) {
+    var ordinateSep = options.ordinateSep || ' ',
+        coordinateSep = options.coordinateSep || ', ',
+        ords = [];
 
-        // DSV
-        if (format === F.DSV) {
-            return F.parseDsv(s);
-        }
+    for (var i = 0; i < ordinates.length; i += 2) {
+        ords.push('' + ordinates[i] + ordinateSep + ordinates[i + 1]);
+    }
+    return ords.join(coordinateSep);
+};
 
-        // EWKT
-        if (format === F.EWKT) {
-            return F.parseEwkt(s);
-        }
+/**
+ * Format the given Wicket components.
+ *
+ * Eg. [{ x: 1, y: 2 }, { x: 3, y: 4 }] will be formatted as '1 2, 3 4' using the
+ * default separators.
+ *
+ * @param {Object[]} components - Wicket.components array.
+ * @param {Object} options - Holds optional parameters (see formatOrdinates()).
+ * @returns {string}
+ */
+F.formatComponents = function(components, options) {
+    return F.formatOrdinates(_.reduce(_.flattenDeep(components), function(memo, comp) {
+        memo.push(comp.x);
+        memo.push(comp.y);
+        return memo;
+    }, []), options);
+};
 
-        // Try WKT or GeoJSON
-        return F.parseWkt(s);
+/**
+ * Format the given Wicket object in the requested format.
+ *
+ * @param {Wicket} wkt - Wicket object.
+ * @param {string} format - Format to encode into.
+ * @param {Object} options - Holds optional parameters (see formatOrdinates()).
+ * @param {number} options.srid - SRID. Mandatory for EWKT format.
+ * @returns {string}
+ */
+F.format = function(wkt, format, options) {
+    options || (options = {});
 
-    };
+    if (format === F.WKT) {
+        return wkt.write();
+    } else if (format === F.EWKT) {
+        return 'SRID=' + (options.srid || '') + ';' + (wkt.write() || '');
+    } else if (format === F.GEOJSON) {
+        return JSON.stringify(wkt.toJson(), null, 4);
+    } else if (format === F.DSV) {
+        return F.formatComponents(wkt.components, options);
+    }
+    throw new Error('Format not supported: ' + format + '.');
+};
 
-    /**
-     * Format the given list of ordinates using the given (or default) separators. The ordinates
-     * are paired in groups of two to form coordinates, making it mandatory for the list to have
-     * an even number of elements.
-     *
-     * Eg. [1, 2, 3, 4] will be formatted as '1 2, 3 4' using the default separators.
-     *
-     * @param {number[]} ordinates - Complete and flat list of ordinates.
-     * @param {Object} options - Holds optional parameters.
-     * @param {string} options.ordinateSep (optional) - Ordinate separator. Default is ' ' (space).
-     * @param {string} options.coordinateSep (optional) - Coordinate pair separator. Default is ', '.
-     * @returns {string}
-     */
-    F.formatOrdinates = function(ordinates, options) {
-        options || (options = {});
-
-        var ordinateSep = options.ordinateSep || ' ',
-            coordinateSep = options.coordinateSep || ', ';
-
-        var ords = [];
-        for (var i = 0; i < ordinates.length; i += 2) {
-            ords.push('' + ordinates[i] + ordinateSep + ordinates[i + 1]);
-        }
-        return ords.join(coordinateSep);
-    };
-
-    /**
-     * Format the given Wicket components.
-     *
-     * Eg. [{ x: 1, y: 2 }, { x: 3, y: 4 }] will be formatted as '1 2, 3 4' using the
-     * default separators.
-     *
-     * @param {Object[]} components - Wicket.components array.
-     * @param {Object} options - Holds optional parameters (see formatOrdinates()).
-     * @returns {string}
-     */
-    F.formatComponents = function(components, options) {
-        return F.formatOrdinates(_.reduce(_.flattenDeep(components), function(memo, comp) {
-            memo.push(comp.x);
-            memo.push(comp.y);
-            return memo;
-        }, []), options);
-    };
-
-    /**
-     * Format the given Wicket object in the requested format.
-     *
-     * @param {Wicket} wkt - Wicket object.
-     * @param {string} format - Format to encode into.
-     * @param {Object} options - Holds optional parameters (see formatOrdinates()).
-     * @param {number} options.srid - SRID. Mandatory for EWKT format.
-     * @returns {string}
-     */
-    F.format = function(wkt, format, options) {
-        options || (options = {});
-
-        if (format === F.WKT) {
-            return wkt.write();
-        } else if (format === F.EWKT) {
-            return 'SRID=' + (options.srid || '') + ';' + (wkt.write() || '');
-        } else if (format === F.GEOJSON) {
-            return JSON.stringify(wkt.toJson(), null, 4);
-        } else if (format === F.DSV) {
-            return F.formatComponents(wkt.components, options);
-        }
-        throw new Error('Format not supported: ' + format + '.');
-    };
-
-    return F;
-
-}));
+export default F;

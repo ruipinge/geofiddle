@@ -1,37 +1,31 @@
-define([
+import Backbone from 'backbone';
 
-    'backbone'
+export default Backbone.Router.extend({
 
-], function(Backbone) {
+    routes: {
+        '(:format)/(:projection)/(:geom)': 'index'
+    },
 
-    return Backbone.Router.extend({
+    initialize: function(options) {
+        options || (options = {});
+        this.model = options.model;
+        this.listenTo(this.model, 'change', this.updateHash);
+    },
 
-        routes: {
-            '(:format)/(:projection)/(:geom)': 'index'
-        },
+    updateHash: function() {
+        this.navigate(
+            encodeURIComponent(this.model.getFormat()) + '/' +
+            encodeURIComponent(this.model.getProjection()) + '/' +
+            encodeURIComponent(this.model.get('text'))
+        );
+    },
 
-        initialize: function(options) {
-            options || (options = {});
-            this.model = options.model;
-            this.listenTo(this.model, 'change', this.updateHash);
-        },
-
-        updateHash: function() {
-            this.navigate(
-                encodeURIComponent(this.model.getFormat()) + '/' +
-                encodeURIComponent(this.model.getProjection()) + '/' +
-                encodeURIComponent(this.model.get('text'))
-            );
-        },
-
-        index: function(format, projection, geom) {
-            this.model.set({
-                format: format,
-                projection: projection,
-                text: geom || ''
-            });
-        }
-
-    });
+    index: function(format, projection, geom) {
+        this.model.set({
+            format: format,
+            projection: projection,
+            text: geom || ''
+        });
+    }
 
 });

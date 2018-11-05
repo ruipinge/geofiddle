@@ -21,16 +21,16 @@ module.exports = {
 
     ],
     optimization: {
-      runtimeChunk: 'single',
-      splitChunks: {
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all'
-          }
+        runtimeChunk: 'single',
+        splitChunks: {
+            cacheGroups: {
+                vendor: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'vendors',
+                    chunks: 'all'
+                }
+            }
         }
-      }
     },
     resolve: {
         modules: [basePath, 'node_modules'],
@@ -40,6 +40,12 @@ module.exports = {
     },
     module: {
         rules: [{
+            test: /\.js$/,
+            exclude: /node_modules/,
+            use: {
+                loader: 'babel-loader'
+            }
+        }, {
             test: /\.(html)$/,
             use: {
                 loader: 'html-loader'

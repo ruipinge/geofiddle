@@ -1,78 +1,72 @@
-define([
+import $ from 'jquery';
+import Backbone from 'backbone';
+import {MDCTextField} from '@material/textfield';
+import FormatSelectView from 'views/format-select';
+import ProjectionSelectView from 'views/projection-select';
+import tpl from 'templates/convert-form.html';
 
-    'jquery',
-    'backbone',
-    '@material/textfield',
-    'views/format-select',
-    'views/projection-select',
-    'templates/convert-form.html'
+export default Backbone.View.extend({
 
-], function ($, Backbone, textfield, FormatSelectView, ProjectionSelectView, tpl) {
+    options: {
+        label: 'Enter some WKT, or GeoJSON to be converted'
+    },
 
-    return Backbone.View.extend({
+    events: {
+        'keyup textarea': 'setValue'
+    },
 
-        options: {
-            label: 'Enter some WKT, or GeoJSON to be converted'
-        },
+    initialize: function() {
+        this.listenTo(this.model, 'change:text', this.renderValues);
+    },
 
-        events: {
-            'keyup textarea': 'setValue'
-        },
+    setValue: function(ev) {
+        var $i = $(ev.currentTarget);
+        this.model.set('text', $i.val());
+    },
 
-        initialize: function() {
-            this.listenTo(this.model, 'change:text', this.renderValues);
-        },
+    renderFormatSelect: function() {
+        this.formatSelectView = new FormatSelectView({
+            model: this.model
+        });
+        this.$el.find('.form-toolbar').append(this.formatSelectView.el);
+        this.formatSelectView.render();
+    },
 
-        setValue: function(ev) {
-            var $i = $(ev.currentTarget);
-            this.model.set('text', $i.val());
-        },
+    renderProjectionSelect: function() {
+        this.projectionSelectView = new ProjectionSelectView({
+            model: this.model
+        });
+        this.$el.find('.form-toolbar').append(this.projectionSelectView.el);
+        this.projectionSelectView.render();
+    },
 
-        renderFormatSelect: function() {
-            this.formatSelectView = new FormatSelectView({
-                model: this.model
-            });
-            this.$el.find('.form-toolbar').append(this.formatSelectView.el);
-            this.formatSelectView.render();
-        },
+    renderToolbar: function() {
+        this.renderFormatSelect();
+        this.renderProjectionSelect();
+    },
 
-        renderProjectionSelect: function() {
-            this.projectionSelectView = new ProjectionSelectView({
-                model: this.model
-            });
-            this.$el.find('.form-toolbar').append(this.projectionSelectView.el);
-            this.projectionSelectView.render();
-        },
+    renderTextArea: function() {
+        var $textarea = this.$el.find('textarea');
+        this.$el.find('.convert-input-label').text(this.options.label);
 
-        renderToolbar: function() {
-            this.renderFormatSelect();
-            this.renderProjectionSelect();
-        },
+        this.mdcTextField = MDCTextField.attachTo(this.$el.find('.mdc-text-field')[0]);
+        this.mdcTextField.disabled = !!this.options.disabled;
 
-        renderTextArea: function() {
-            var $textarea = this.$el.find('textarea');
-            this.$el.find('.convert-input-label').text(this.options.label);
+        $textarea.focus();
+    },
 
-            this.mdcTextField = textfield.MDCTextField.attachTo(this.$el.find('.mdc-text-field')[0]);
-            this.mdcTextField.disabled = !!this.options.disabled;
+    renderValues: function() {
+        this.mdcTextField.value = this.model.get('text');
+    },
 
-            $textarea.focus();
-        },
+    render: function() {
+        var html = _.template(tpl, {});
+        this.$el.html(html);
 
-        renderValues: function() {
-            this.mdcTextField.value = this.model.get('text');
-        },
+        this.renderToolbar();
+        this.renderTextArea();
 
-        render: function() {
-            var html = _.template(tpl, {});
-            this.$el.html(html);
-
-            this.renderToolbar();
-            this.renderTextArea();
-
-            return this;
-        }
-
-    });
+        return this;
+    }
 
 });

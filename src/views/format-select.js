@@ -1,33 +1,26 @@
-define([
+import SelectView from 'views/ui/select';
+import Formats from 'formats';
 
-    'views/ui/select',
-    'models/convert',
-    'formats'
+export default SelectView.extend({
 
-], function (SelectView, ConvertModel, Formats) {
+    options: {
+        label: 'Format',
+        attr: 'format',
+        options: Formats.OPTIONS
+    },
 
-    return SelectView.extend({
+    initialize: function(options) {
+        options || (options = {});
 
-        options: {
-            label: 'Format',
-            attr: 'format',
-            options: Formats.OPTIONS
-        },
+        this.listenTo(this.model, 'change:text', this.renderAutoDetect);
 
-        initialize: function(options) {
-            options || (options = {});
+        SelectView.prototype.initialize.apply(this, options);
+    },
 
-            this.listenTo(this.model, 'change:text', this.renderAutoDetect);
-
-            SelectView.prototype.initialize.apply(this, options);
-        },
-
-        renderAutoDetect: function() {
-            var format = Formats.autoDetect(this.model.get('text')),
-                label = Formats.formatAutoDetectLabel(format);
-            this.$el.find('option[value="auto"]').text(label);
-        }
-
-    });
+    renderAutoDetect: function() {
+        var format = Formats.autoDetect(this.model.get('text')),
+            label = Formats.formatAutoDetectLabel(format);
+        this.$el.find('option[value="auto"]').text(label);
+    }
 
 });

@@ -1,67 +1,60 @@
-define([
+import Backbone from 'backbone';
+import Formats from 'formats';
+import Projections from 'projections';
 
-    'backbone',
-    'wicket',
-    'formats',
-    'projections'
+export default Backbone.Model.extend({
 
-], function(Backbone, Wkt, Formats, Projections) {
+    defaults: {
+        text: null,
+        projection: Formats.AUTO_DETECT,
+        format: Formats.AUTO_DETECT
+    },
 
-    return Backbone.Model.extend({
+    buildWkt: function(projection) {
+        var format = this.getFormat(true),
+            wkt = Formats.parse(this.get('text'), format);
+        if (!wkt || !wkt.components) {
+            return;
+        }
+        if (!projection || projection === this.getProjection(true)) {
+            return wkt;
+        }
+        return Projections.convert(wkt, this.getProjection(true), projection);
+    },
 
-        defaults: {
-            text: null,
-            projection: Formats.AUTO_DETECT,
-            format: Formats.AUTO_DETECT
-        },
+    getFormat: function(autoDetect) {
+        var format = this.get('format');
+        if (autoDetect && format === Formats.AUTO_DETECT) {
+            return Formats.autoDetect(this.get('text')) || format;
+        }
+        return format;
+    },
 
-        buildWkt: function(projection) {
-            var format = this.getFormat(true),
-                wkt = Formats.parse(this.get('text'), format);
-            if (!wkt || !wkt.components) {
-                return;
-            }
-            if (!projection || projection === this.getProjection(true)) {
-                return wkt;
-            }
-            return Projections.convert(wkt, this.getProjection(true), projection);
-        },
+    getProjection: function(autoDetect) {
+        var projection = this.get('projection');
+        if (autoDetect && projection === Projections.AUTO_DETECT) {
+            return Projections.autoDetect(this.get('text')) || projection;
+        }
+        return projection;
+    },
 
-        getFormat: function(autoDetect) {
-            var format = this.get('format');
-            if (autoDetect && format === Formats.AUTO_DETECT) {
-                return Formats.autoDetect(this.get('text')) || format;
-            }
-            return format;
-        },
+    getConvertedText: function(toFormat, toProjection, wkt) {
+        var fromProjection = this.getProjection(true);
 
-        getProjection: function(autoDetect) {
-            var projection = this.get('projection');
-            if (autoDetect && projection === Projections.AUTO_DETECT) {
-                return Projections.autoDetect(this.get('text')) || projection;
-            }
-            return projection;
-        },
-
-        getConvertedText: function(toFormat, toProjection, wkt) {
-            var fromProjection = this.getProjection(true);
-
-            if (!fromProjection) {
-                return;
-            }
-
-            wkt || (wkt = this.buildWkt());
-            if (!wkt) {
-                return;
-            }
-
-            var converted = Projections.convert(wkt, fromProjection, toProjection);
-
-            return Formats.format(converted, toFormat, {
-                srid: Projections.getSrid(toProjection)
-            });
+        if (!fromProjection) {
+            return;
         }
 
-    });
+        wkt || (wkt = this.buildWkt());
+        if (!wkt) {
+            return;
+        }
+
+        var converted = Projections.convert(wkt, fromProjection, toProjection);
+
+        return Formats.format(converted, toFormat, {
+            srid: Projections.getSrid(toProjection)
+        });
+    }
 
 });

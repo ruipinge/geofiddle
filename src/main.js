@@ -11,10 +11,10 @@ import GoogleMapView from 'views/maps/google';
 
 $(function() {
 
-    var model = new ConvertModel();
+    const model = new ConvertModel();
 
     // App Top Bar view
-    var topBarView = new TopBarView();
+    const topBarView = new TopBarView();
     $('body').prepend(topBarView.el);
     topBarView.render();
 
