@@ -26,6 +26,7 @@
     P.MAX_LON = 180.0;
     P.AUTO_DETECT_LABEL = 'Auto detect';
     P.AUTO_DETECT = 'auto';
+
     P.WGS84 = 'wgs84';
     P.BNG = 'bng';
 
@@ -37,11 +38,13 @@
     }, {
         label: 'WGS84',
         description: 'World Geodetic System (WGS84)',
-        value: P.WGS84
+        value: P.WGS84,
+        srid: 4326
     }, {
         label: 'BNG',
         description: 'British National Grid (BNG)',
-        value: P.BNG
+        value: P.BNG,
+        srid: 27700
     }];
 
     P.findOption = function(code) {
@@ -52,6 +55,10 @@
 
     P.getLabel = function(code) {
         return P.findOption(code).label;
+    };
+
+    P.getSrid = function(code) {
+        return P.findOption(code).srid;
     };
 
     P.formatAutoDetectLabel = function(code) {
@@ -68,6 +75,16 @@
         }
 
         s = Util.stringClean(s);
+
+        var ewktRegex = /^SRID=(\d+);/i,
+            ewktMatch = ewktRegex.exec(s);
+        if (ewktMatch && ewktMatch[1]) {
+            var srid = +ewktMatch[1],
+                proj = _.find(P.OPTIONS, function (p) {
+                    return p.srid === srid;
+                });
+            return proj ? proj.value : undefined;
+        }
 
         var numbers = _.filter(_.split(s, /[^-.\d]/), function(n) {
             return !!_.trim(n);

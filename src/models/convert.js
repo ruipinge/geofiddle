@@ -57,7 +57,9 @@ define([
 
             var converted = Projections.convert(wkt, fromProjection, toProjection);
 
-            return Formats.format(converted, toFormat);
+            return Formats.format(converted, toFormat, {
+                srid: Projections.getSrid(toProjection)
+            });
         }
 
     });

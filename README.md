@@ -12,14 +12,21 @@ Some of the most notable features:
 Supported formats:
 
 - [GeoJSON](http://geojson.org/)
-- [Well-Known Text](https://en.wikipedia.org/wiki/Well-known_text) (WKT)
+- [Well-Known text](https://en.wikipedia.org/wiki/Well-known_text) (WKT)
+- [Extended Well-Known text](https://postgis.net/docs/using_postgis_dbmanagement.html#EWKB_EWKT) (EWKT)
 - [Polyline](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) (under development!)
 - [Delimiter-separated values](https://en.wikipedia.org/wiki/Delimiter-separated_values) (DSV)
 
 Supported projections:
 
 - [World Geodetic System 1984](https://en.wikipedia.org/wiki/World_Geodetic_System) (WGS84)
+  - Unit: degree
+  - Axes: latitude, longitude
+  - [EPSG:4326](https://epsg.io/4326)
 - [British National Grid](https://en.wikipedia.org/wiki/Ordnance_Survey_National_Grid) (BNG) aka Ordnance Survey National Grid
+  - Unit: metre
+  - Axes: easting, northing
+  - [EPSG:27700](https://epsg.io/27700)
 
 
 ## Demo and Examples
