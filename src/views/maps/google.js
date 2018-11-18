@@ -14,10 +14,10 @@ GoogleMapsLoader.VERSION = 'quarterly';
 
 const OPTIONS = {
     center: {
-        lat: -34.397,
-        lng: 150.644
+        lat: 51.51949,
+        lng: -0.10648
     },
-    zoom: 8,
+    zoom: 9,
     /**
      * From: https://mapstyle.withgoogle.com/ with the following options:
      * - Theme: Silver
