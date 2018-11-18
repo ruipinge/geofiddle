@@ -4,11 +4,11 @@ define([
     'backbone',
     'formats',
     'projections',
-    'views/maps/google-styles',
     'google-maps',
+    'views/maps/styles.json',
     'wicket/wicket-gmap3'
 
-], function($, Backbone, Formats, Projections, GoogleMapStyles, GoogleMapsLoader) {
+], function($, Backbone, Formats, Projections, GoogleMapsLoader, styles) {
 
     GoogleMapsLoader.KEY = 'AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ';
     GoogleMapsLoader.LIBRARIES = ['geometry', 'drawing'];
@@ -22,7 +22,14 @@ define([
             lng: 150.644
         },
         zoom: 8,
-        styles: GoogleMapStyles,
+        /**
+         * From: https://mapstyle.withgoogle.com/ with the following options:
+         * - Theme: Silver
+         * - Roads: Full
+         * - Landmarks: Full
+         * - Labels: Full
+         */
+        styles: styles,
         disableDefaultUI: true
     };
 
@@ -194,7 +201,7 @@ define([
 
         renderDrawing: function() {
             this.drawingManager = new google.maps.drawing.DrawingManager({
-                drawingMode: google.maps.drawing.OverlayType.MARKER,
+                drawingMode: null,
                 drawingControl: true,
                 drawingControlOptions: {
                     position: google.maps.ControlPosition.TOP_CENTER,
