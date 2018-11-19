@@ -62,11 +62,14 @@ POINT(-9.129814 38.736847)
 - [Geodesy](https://github.com/chrisveness/geodesy) for projection conversions
 - [Webpack](https://webpack.js.org/), [Backbone](http://backbonejs.org/), [jQuery](https://jquery.com/), [Lodash](https://lodash.com/), [Jest](https://jestjs.io/)
 - [HTML5 Boilerplate](https://html5boilerplate.com/), [Material Components](https://github.com/material-components/material-components-web)
+- [Google Maps Platform](https://cloud.google.com/maps-platform/maps/)
 
 
 ## Development Environment
 
-Using [nvm](https://github.com/creationix/nvm), GeoFiddle can be served locally by running:
+### Dev Server
+
+Using ```nvmw```, a simple [nvm](https://github.com/creationix/nvm) wrapper, GeoFiddle can be served locally by running:
 
 ```
 geofiddle > ./nvmw npm install
@@ -74,12 +77,27 @@ geofiddle > ./nvmw npm test
 geofiddle > ./nvmw npm start
 ```
 
+### Unit Tests
+
 Code can be tested by running:
 ```
 geofiddle > ./nvmw npm install
 geofiddle > ./nvmw npm test
 ```
 
-Note: ```nvmw``` it's just a *nvm wrapper* that automatically *installs* and/or *uses* the configured node.js version.
+### Clean
 
-Run ```./nvmw npm run clean``` to remove all downloaded, generated and/or temporary files including node.js modules, nvm node.js versions, coverage reports, etc.
+Downloaded, generated and/or temporary files including node.js modules, nvm node.js versions, coverage reports, etc. can be removed by running:
+```
+geofiddle > ./nvmw npm run clean
+```
+
+### Google Maps JavaScript API
+
+So that the Google Map can be loaded without warnings and full featured, there's the need to create a file named ```GOOGLE_MAPS_API_KEY.json``` with your Google Maps JavaScript API key. Without any costs (but requiring a credit card) it can be created [here](https://developers.google.com/maps/documentation/javascript/get-api-key).
+
+The key file contents should look like this (although this key will not work):
+
+```
+"AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ"
+```

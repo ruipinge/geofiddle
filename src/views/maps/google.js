@@ -6,7 +6,10 @@ import styles from 'views/maps/styles.json';
 import GoogleMapsLoader from 'google-maps';
 require('wicket/wicket-gmap3');
 
-GoogleMapsLoader.KEY = 'AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ';
+// API key will be replaced with webpack DefinePlugin
+// eslint-disable-next-line no-undef
+GoogleMapsLoader.KEY = GOOGLE_MAPS_API_KEY;
+
 GoogleMapsLoader.LIBRARIES = ['geometry', 'drawing'];
 GoogleMapsLoader.LANGUAGE = 'en';
 GoogleMapsLoader.REGION = 'GB';
