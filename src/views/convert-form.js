@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import _ from 'underscore';
 import Backbone from 'backbone';
 import {MDCTextField} from '@material/textfield';
 import FormatSelectView from 'views/format-select';

@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import _ from 'underscore';
 import Backbone from 'backbone';
 import {MDCSelect} from '@material/select';
 import tpl from 'templates/ui/select.html';

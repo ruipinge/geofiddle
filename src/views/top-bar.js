@@ -1,3 +1,4 @@
+import _ from 'underscore';
 import Backbone from 'backbone';
 import {MDCTopAppBar} from '@material/top-app-bar';
 import tpl from 'templates/top-bar.html';

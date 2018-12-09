@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import _ from 'underscore';
 import Backbone from 'backbone';
 import Formats from 'formats';
 import Projections from 'projections';

@@ -29,13 +29,6 @@
         "no-multiple-empty-lines": 2
     },
     "globals": {
-        "define": true,
-        "_": true,
-        "jQuery": true,
-        "$": true,
-        "require": true,
-        "moment": true,
-        "Backbone": true,
         "google": true
     }
 }
