@@ -44,3 +44,4 @@ README.md
 webpack.*.js
 src
 gae-service-account.json*
+./index.html

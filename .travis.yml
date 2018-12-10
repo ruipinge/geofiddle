@@ -12,6 +12,7 @@ after_success:
   - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
 before_deploy:
   - npm run build
+  - cp dist/index.html .
 deploy:
   - provider: gae
     skip-cleanup: true
@@ -22,7 +23,6 @@ deploy:
     verbosity: info
   - provider: pages
     skip-cleanup: true
-    local-dir: ./dist
     target-branch: gh-pages
     github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
     keep-history: false
