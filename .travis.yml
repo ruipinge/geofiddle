@@ -14,6 +14,7 @@ before_deploy:
   - npm run build
 deploy:
   - provider: gae
+    skip-cleanup: true
     keyfile: gae-service-account.json
     project: geofiddle-224910
     default: true
