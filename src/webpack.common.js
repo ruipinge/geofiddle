@@ -2,7 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
-const basePath = path.resolve(__dirname, 'src');
+const basePath = path.resolve(__dirname, '.');
 
 module.exports = {
     context: basePath,
@@ -33,7 +33,7 @@ module.exports = {
         }
     },
     resolve: {
-        modules: [basePath, 'node_modules'],
+        modules: [basePath, '../node_modules'],
         alias: {
             'underscore': 'lodash'
         }

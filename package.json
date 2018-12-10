@@ -62,8 +62,8 @@
   "scripts": {
     "test": "jest",
     "eslint": "eslint ./src",
-    "build": "webpack --config webpack.prd.js",
-    "start": "webpack-dev-server --progress --config webpack.dev.js",
+    "build": "webpack --config ./src/webpack.prd.js",
+    "start": "webpack-dev-server --progress --config ./src/webpack.dev.js",
     "clean": "rm -rf ./node_modules ./coverage ./npm-debug.log .nvm/.cache .nvm/alias .nvm/versions ./dist"
   }
 }

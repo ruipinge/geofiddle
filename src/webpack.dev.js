@@ -9,7 +9,7 @@ const webpack = require('webpack');
 const keyFilename = 'GOOGLE_MAPS_API_KEY.json';
 var GOOGLE_MAPS_API_KEY;
 try {
-    GOOGLE_MAPS_API_KEY = require('./' + keyFilename);
+    GOOGLE_MAPS_API_KEY = require('../' + keyFilename);
 } catch (e) {
     console.log('\x1b[33mWARNING: Google Maps API key File not found. Google Map will be loaded ' +
         'with a warning in development mode. Please create a file named "' + keyFilename +
@@ -30,7 +30,7 @@ module.exports = merge(common, {
         })
     ],
     devServer: {
-        contentBase: path.join(__dirname, 'src/www'),
+        contentBase: path.join(__dirname, '../static'),
         hot: true
     }
 });

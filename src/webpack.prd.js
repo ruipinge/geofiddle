@@ -5,7 +5,8 @@ const webpack = require('webpack');
 module.exports = merge(common, {
     mode: 'production',
     output: {
-        filename: '[name].[contenthash].js'
+        filename: '[name].[contenthash].js',
+        publicPath: '/dist/'
     },
     plugins: [
 
