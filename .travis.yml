@@ -13,6 +13,12 @@ after_success:
 before_deploy:
   - npm run build
 deploy:
+  - provider: gae
+    keyfile: gae-service-account.json
+    project: geofiddle-224910
+    default: true
+    no_promote: false
+    verbosity: info
   - provider: pages
     skip-cleanup: true
     local-dir: ./dist
@@ -21,12 +27,6 @@ deploy:
     keep-history: false
     on:
       branch: master
-  - provider: gae
-    keyfile: gae-service-account.json
-    project: geofiddle-224910
-    default: true
-    no_promote: false
-    verbosity: info
 before_install:
   - openssl aes-256-cbc -K $encrypted_cb57a5ee4bf1_key -iv $encrypted_cb57a5ee4bf1_iv
     -in gae-service-account.json.enc -out gae-service-account.json -d
