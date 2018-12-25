@@ -33,8 +33,9 @@ module.exports = merge(common, {
         // Maps API key. This key is currently whitelisted to the following domains:
         // - ruipinge.google.io
         // - geofiddle.com
+        // - geofiddle-224910.appspot.com
         new webpack.DefinePlugin({
-            GOOGLE_MAPS_API_KEY: JSON.stringify('AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ')
+            GOOGLE_MAPS_API_KEY: JSON.stringify('AIzaSyDZ0hpsGleiocx8fidvrLY8o9GlrjyY7j0')
         })
 
     ]
