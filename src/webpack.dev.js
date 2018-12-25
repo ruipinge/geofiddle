@@ -2,6 +2,7 @@ const path = require('path');
 const merge = require('webpack-merge');
 const common = require('./webpack.common.js');
 const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 
 // When a GOOGLE_MAPS_API_KEY.json file exists on the project root
@@ -22,6 +23,16 @@ module.exports = merge(common, {
         filename: '[name].js'
     },
     plugins: [
+
+        // Simplifies creation of HTML files to serve the bundles
+        new HtmlWebpackPlugin({
+            // Uses existing HTML file instead of creating one from scratch
+            template: './index.ejs',
+            templateParameters: {
+                includeAnalytics: false
+            }
+        }),
+
         new webpack.HotModuleReplacementPlugin(),
 
         // Replaces GOOGLE_MAPS_API_KEY variable on the code with the loaded key (see above)

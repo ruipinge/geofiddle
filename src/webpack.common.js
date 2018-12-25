@@ -1,19 +1,14 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
+
 const basePath = path.resolve(__dirname, '.');
+
 
 module.exports = {
     context: basePath,
     entry: './main.js',
     plugins: [
-
-        // Simplifies creation of HTML files to serve the bundles
-        new HtmlWebpackPlugin({
-            // Uses existing HTML file instead of creating one from scratch
-            template: './index.html'
-        }),
 
         // Fixes module order, since the hash ids are based on the relative path
         // https://webpack.js.org/guides/caching/#module-identifiers
