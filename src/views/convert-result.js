@@ -33,13 +33,19 @@ export default Backbone.View.extend({
             return;
         }
 
-        _.each(Formats.OPTIONS, function(format) {
-            _.each(Projections.OPTIONS, function(projection) {
-                if (format.value === this.model.getFormat(true) &&
-                    projection.value === this.model.getProjection(true)) {
+        var format = this.model.getFormat(true),
+            proj = this.model.getProjection(true);
+
+        _.each(Formats.OPTIONS, function(f) {
+            _.each(Projections.OPTIONS, function(p) {
+                if (f.value === format &&
+                    p.value === proj) {
                     return;
                 }
-                this.renderConversion(format.value, projection.value, wkt);
+                if (_.includes(p.unsupportedFormats, f.value)) {
+                    return;
+                }
+                this.renderConversion(f.value, p.value, wkt);
             }.bind(this));
         }.bind(this));
     },

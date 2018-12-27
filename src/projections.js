@@ -26,8 +26,14 @@ P.OPTIONS = [{
     label: 'BNG',
     description: 'British National Grid (BNG)',
     value: P.BNG,
-    srid: 27700
+    srid: 27700,
+    unsupportedFormats: ['polyline5', 'polyline6']
 }];
+
+const FORMAT_PROJECTIONS = {
+    'polyline5': P.WGS84,
+    'polyline6': P.WGS84
+};
 
 P.findOption = function(code) {
     return _.find(P.OPTIONS, function(obj) {
@@ -51,9 +57,13 @@ P.formatAutoDetectLabel = function(code) {
     return P.AUTO_DETECT_LABEL + ' (' + obj.label + ')';
 };
 
-P.autoDetect = function(s, projection) {
+P.autoDetect = function(s, format, projection) {
     if (projection && projection !== P.AUTO_DETECT) {
         return projection;
+    }
+
+    if (FORMAT_PROJECTIONS[format]) {
+        return FORMAT_PROJECTIONS[format];
     }
 
     s = Util.stringClean(s);

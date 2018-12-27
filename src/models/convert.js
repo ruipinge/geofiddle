@@ -33,7 +33,8 @@ export default Backbone.Model.extend({
     getProjection: function(autoDetect) {
         var projection = this.get('projection');
         if (autoDetect && projection === Projections.AUTO_DETECT) {
-            return Projections.autoDetect(this.get('text')) || projection;
+            var format = this.getFormat(true);
+            return Projections.autoDetect(this.get('text'), format) || projection;
         }
         return projection;
     },

@@ -2,6 +2,10 @@ import _ from 'underscore';
 import Wkt from 'wicket';
 import Util from 'geofiddle-util';
 
+// TODO: Using custom polyline lib. Change it to '@mapbox/polyline' when (and if)
+// https://github.com/mapbox/polyline/pull/41 gets merged.
+import polyline from 'lib/polyline';
+
 const F = {};
 
 F.AUTO_DETECT_LABEL = 'Auto detect';
@@ -10,6 +14,8 @@ F.GEOJSON = 'geojson';
 F.WKT = 'wkt';
 F.EWKT = 'ewkt';
 F.DSV = 'dsv';
+F.POLYLINE5 = 'polyline5';
+F.POLYLINE6 = 'polyline6';
 
 F.OPTIONS = [{
     label: F.AUTO_DETECT_LABEL,
@@ -30,6 +36,16 @@ F.OPTIONS = [{
     label: 'DSV',
     description: 'Delimiter-separated values (DSV)',
     value: F.DSV
+}, {
+    label: 'Polyline (5)',
+    description: 'Polyline with 5 decimal precision',
+    value: F.POLYLINE5,
+    projection: 'wgs84'
+}, {
+    label: 'Polyline (6)',
+    description: 'Polyline with 6 decimal precision',
+    value: F.POLYLINE6,
+    projection: 'wgs84'
 }];
 
 F.findOption = function(code) {
@@ -61,10 +77,17 @@ F.autoDetect = function(s, format) {
         return F.GEOJSON;
     } else if (/^SRID=\d+;[A-Z]/i.test(s)) {
         return F.EWKT;
-    } else if (/^[a-zA-Z]/.test(s)) {
+    } else if (/^[a-zA-Z]+\s*\(/.test(s)) {
         return F.WKT;
     } else if (/[,0-9.-]/.test(s.replace(/\s/g, ''))) {
         return F.DSV;
+    } else if (s && s.indexOf(' ') === -1) {
+        var coords = F.parsePolylineCoordinates(s, 5),
+            wgs84overflow = _.some(coords, function (coord) {
+                return Math.abs(coord[0]) > 90 || Math.abs(coord[1]) > 180;
+            });
+
+        return wgs84overflow ? F.POLYLINE6 : F.POLYLINE5;
     }
 };
 
@@ -102,6 +125,37 @@ F.parseDsv = function(s) {
     return wkt;
 };
 
+F.parsePolylineCoordinates = function(s, precision) {
+    s = Util.stringClean(s);
+    return polyline.decode(s, precision);
+};
+
+F.parsePolyline = function(s, precision) {
+    var coords = F.parsePolylineCoordinates(s, precision);
+
+    if (!coords || !coords.length) {
+        return;
+    }
+
+    var ords = [];
+    for (var i = 0; i < coords.length; i += 1) {
+        ords.push('' + coords[i][1] + ' ' + coords[i][0]);
+    }
+    ords = ords.join(',');
+
+    var wkt = new Wkt.Wkt();
+    if (coords.length === 1) {
+        wkt.read('POINT(' + ords + ')');
+    } else if (coords.length > 3 && coords[0][0] === coords[coords.length - 1][0] &&
+        coords[0][1] === coords[coords.length - 1][1]) {
+        wkt.read('POLYGON((' + ords + '))');
+    } else {
+        wkt.read('LINESTRING(' + ords + ')');
+    }
+
+    return wkt;
+};
+
 F.parseWkt = function(s) {
     s = Util.stringClean(s);
     var wkt = new Wkt.Wkt();
@@ -131,6 +185,13 @@ F.parseEwkt = function (s) {
     return F.parseWkt(s.split(';')[1]);
 };
 
+/**
+ * Parses the given string with the given format.
+ *
+ * @param {string} s - The string to be parsed.
+ * @param {string} format - The parsing format.
+ * @returns {Wicket}
+ */
 F.parse = function(s, format) {
 
     // DSV
@@ -141,6 +202,14 @@ F.parse = function(s, format) {
     // EWKT
     if (format === F.EWKT) {
         return F.parseEwkt(s);
+    }
+
+    // Polyline
+    if (format === F.POLYLINE5) {
+        return F.parsePolyline(s, 5);
+    }
+    if (format === F.POLYLINE6) {
+        return F.parsePolyline(s, 6);
     }
 
     // Try WKT or GeoJSON
@@ -212,6 +281,10 @@ F.format = function(wkt, format, options) {
         return JSON.stringify(wkt.toJson(), null, 4);
     } else if (format === F.DSV) {
         return F.formatComponents(wkt.components, options);
+    } else if (format === F.POLYLINE5) {
+        return polyline.fromGeoJSON(wkt.toJson(), 5);
+    } else if (format === F.POLYLINE6) {
+        return polyline.fromGeoJSON(wkt.toJson(), 6);
     }
     throw new Error('Format not supported: ' + format + '.');
 };

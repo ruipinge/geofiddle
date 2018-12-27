@@ -14,7 +14,7 @@ Supported formats:
 - [GeoJSON](http://geojson.org/)
 - [Well-Known text](https://en.wikipedia.org/wiki/Well-known_text) (WKT)
 - [Extended Well-Known text](https://postgis.net/docs/using_postgis_dbmanagement.html#EWKB_EWKT) (EWKT)
-- [Polyline](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) (under development!)
+- [Polyline](https://developers.google.com/maps/documentation/utilities/polylinealgorithm)
 - [Delimiter-separated values](https://en.wikipedia.org/wiki/Delimiter-separated_values) (DSV)
 
 Supported projections:
@@ -59,6 +59,7 @@ POINT(-9.129814 38.736847)
 ## Dependencies and Inspiration
 
 - [Wicket](https://github.com/arthur-e/Wicket) for WKT and GeoJSON parsing and formatting
+- [Mapbox Polyline](https://github.com/mapbox/polyline) for Polyline encoding and decoding
 - [Geodesy](https://github.com/chrisveness/geodesy) for projection conversions
 - [Webpack](https://webpack.js.org/), [Backbone](http://backbonejs.org/), [jQuery](https://jquery.com/), [Lodash](https://lodash.com/), [Jest](https://jestjs.io/)
 - [HTML5 Boilerplate](https://html5boilerplate.com/), [Material Components](https://github.com/material-components/material-components-web)

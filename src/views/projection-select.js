@@ -18,8 +18,8 @@ export default SelectView.extend({
     },
 
     renderAutoDetect: function() {
-        var format = Projections.autoDetect(this.model.get('text')),
-            label = Projections.formatAutoDetectLabel(format);
+        var proj = Projections.autoDetect(this.model.get('text'), this.model.getFormat(true)),
+            label = Projections.formatAutoDetectLabel(proj);
         this.$el.find('option[value="auto"]').text(label);
     }
 
