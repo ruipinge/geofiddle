@@ -9,7 +9,7 @@ import tpl from 'templates/convert-form.html';
 export default Backbone.View.extend({
 
     options: {
-        label: 'Enter some WKT, or GeoJSON to be converted'
+        label: 'Enter GeoJSON, WKT, Polyline, or some coordinates to be converted'
     },
 
     events: {
