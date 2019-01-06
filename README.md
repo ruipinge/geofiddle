@@ -4,7 +4,7 @@ Plot, share, and convert geometries using different formats and projections. Try
 
 Some of the most notable features:
 
-- Format and Projection auto detection
+- Format and Projection auto-detection
 - Direct links for easy sharing of geometries and conversions
 - Area and distance measurements (under development!)
 - Command line utility (node.js) for scripting and batch processing (under development!)

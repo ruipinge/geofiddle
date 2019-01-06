@@ -30,7 +30,7 @@ module.exports = merge(common, {
         }),
 
         // Replaces GOOGLE_MAPS_API_KEY variable on the code with a functional Google
-        // Maps API key. This key is currently whitelisted to the following domains:
+        // Maps API key. This key is currently whitelisted for the following domains:
         // - ruipinge.google.io
         // - geofiddle.com
         // - geofiddle-224910.appspot.com
