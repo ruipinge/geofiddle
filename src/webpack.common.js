@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 
-const basePath = path.resolve(__dirname, '.');
+const basePath = path.resolve(__dirname, '.'); /* eslint-disable-line no-undef */
 
 
 module.exports = {

@@ -6,7 +6,8 @@
     "env": {
         "browser": true,
         "es6": true,
-        "jest": true
+        "jest": true,
+        "commonjs": true
     },
     "extends": "eslint:recommended",
     "rules": {

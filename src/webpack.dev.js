@@ -12,6 +12,7 @@ var GOOGLE_MAPS_API_KEY;
 try {
     GOOGLE_MAPS_API_KEY = require('../' + keyFilename);
 } catch (e) {
+    // eslint-disable-next-line no-console
     console.log('\x1b[33mWARNING: Google Maps API key File not found. Google Map will be loaded ' +
         'with a warning in development mode. Please create a file named "' + keyFilename +
         '" in the project root with your API key between double quotes.\x1b[0m\n');
@@ -41,7 +42,7 @@ module.exports = merge(common, {
         })
     ],
     devServer: {
-        contentBase: path.join(__dirname, '../static'),
+        contentBase: path.join(__dirname, '../static'), /* eslint-disable-line no-undef */
         hot: true
     }
 });
