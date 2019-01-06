@@ -7,8 +7,11 @@ branches:
 cache:
   directories:
     - node_modules
+# install: npm install (AUTO)
+before_script:
+  - npm run lint
+# script: npm test (AUTO)
 after_success:
-  - npm run eslint
   - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
 before_deploy:
   - npm run build
