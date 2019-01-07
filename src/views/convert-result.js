@@ -11,30 +11,35 @@ export default Backbone.View.extend({
         this.listenTo(this.model, 'change', this.renderConversions);
     },
 
-    renderConversion: function(format, projection) {
+    renderConversion: function(format, projection, wkts, fromProjection) {
         if (format === Formats.AUTO_DETECT || projection === Projections.AUTO_DETECT) {
             return;
         }
 
         var projLabel = Projections.getLabel(projection),
             formatLabel = Formats.getLabel(format),
-            $header = $('<h4></h4>').text(formatLabel + '/' + projLabel + ':'),
-            $pre = $('<pre></pre>').text(this.model.getConvertedText(format, projection));
+            $header = $('<h4></h4>').text(formatLabel + '/' + projLabel + ':');
 
         this.$el.append($header);
-        this.$el.append($pre);
+
+        _.each(wkts, function(wkt) {
+
+            var $pre = $('<pre></pre>').text(this.model.getConvertedText(format, projection, wkt, fromProjection));
+            this.$el.append($pre);
+
+        }.bind(this));
     },
 
     renderConversions: function() {
         this.$el.empty();
 
-        var wkt = this.model.buildWkt();
-        if (!wkt) {
-            return;
-        }
-
         var format = this.model.getFormat(true),
             proj = this.model.getProjection(true);
+
+        var wkts = this.model.buildWkts(proj);
+        if (!wkts || !wkts.length) {
+            return;
+        }
 
         _.each(Formats.OPTIONS, function(f) {
             _.each(Projections.OPTIONS, function(p) {
@@ -45,7 +50,7 @@ export default Backbone.View.extend({
                 if (_.includes(p.unsupportedFormats, f.value)) {
                     return;
                 }
-                this.renderConversion(f.value, p.value, wkt);
+                this.renderConversion(f.value, p.value, wkts, proj);
             }.bind(this));
         }.bind(this));
     },

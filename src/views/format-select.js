@@ -18,7 +18,7 @@ export default SelectView.extend({
     },
 
     renderAutoDetect: function() {
-        var format = Formats.autoDetect(this.model.get('text')),
+        var format = Formats.autoDetect(this.model.getFirstText()),
             label = Formats.formatAutoDetectLabel(format);
         this.$el.find('option[value="auto"]').text(label);
     }
