@@ -91,30 +91,32 @@ F.autoDetect = function(s, format) {
     }
 };
 
-F.parseDsv = function(s) {
-    var vals;
-    try {
-        vals = Util.parseDsv(s);
-    } catch (e) {
-        return;
-    }
+/**
+ * Build a Wicket object given the list of ordinates. The resulting geometry type
+ * will take the ordinate length and first/last value pairs into account.
+ *
+ * @param {number[]} ordinates - Complete and flat list of ordinates.
+ * @returns {Wicket}
+ */
+F.buildWkt = function(ordinates) {
+    ordinates || (ordinates = []);
 
     // Validation: no ordinates, or odd number of ordinates
-    var len = vals.length;
+    var len = ordinates.length;
     if (!len || len % 2 === 1) {
         return;
     }
 
     var ords = [];
     for (var i = 0; i < len; i += 2) {
-        ords.push('' + vals[i] + ' ' + vals[i + 1]);
+        ords.push('' + ordinates[i] + ' ' + ordinates[i + 1]);
     }
     ords = ords.join(',');
 
     // At least 4 vertex (8 ordinates) and first point is the
     // same as last: it's a Polygon
     var wkt = new Wkt.Wkt();
-    if (len > 6 && vals[0] === vals[len - 2] && vals[1] === vals[len - 1]) {
+    if (len > 6 && ordinates[0] === ordinates[len - 2] && ordinates[1] === ordinates[len - 1]) {
         wkt.read('POLYGON((' + ords + '))');
     } else if (len > 2) {
         wkt.read('LINESTRING(' + ords + ')');
@@ -123,6 +125,17 @@ F.parseDsv = function(s) {
     }
 
     return wkt;
+};
+
+F.parseDsv = function(s) {
+    var ords;
+    try {
+        ords = Util.parseDsv(s);
+    } catch (e) {
+        return;
+    }
+
+    return F.buildWkt(ords);
 };
 
 F.parsePolylineCoordinates = function(s, precision) {
@@ -139,21 +152,11 @@ F.parsePolyline = function(s, precision) {
 
     var ords = [];
     for (var i = 0; i < coords.length; i += 1) {
-        ords.push('' + coords[i][1] + ' ' + coords[i][0]);
-    }
-    ords = ords.join(',');
-
-    var wkt = new Wkt.Wkt();
-    if (coords.length === 1) {
-        wkt.read('POINT(' + ords + ')');
-    } else if (coords.length > 3 && coords[0][0] === coords[coords.length - 1][0] &&
-        coords[0][1] === coords[coords.length - 1][1]) {
-        wkt.read('POLYGON((' + ords + '))');
-    } else {
-        wkt.read('LINESTRING(' + ords + ')');
+        ords.push(coords[i][1]);
+        ords.push(coords[i][0]);
     }
 
-    return wkt;
+    return F.buildWkt(ords);
 };
 
 F.parseWkt = function(s) {
