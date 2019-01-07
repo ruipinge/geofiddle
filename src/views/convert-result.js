@@ -24,8 +24,13 @@ export default Backbone.View.extend({
 
         _.each(wkts, function(wkt) {
 
-            var $pre = $('<pre></pre>').text(this.model.getConvertedText(format, projection, wkt, fromProjection));
-            this.$el.append($pre);
+            var converted;
+            try {
+                converted = this.model.getConvertedText(format, projection, wkt, fromProjection);
+            } catch(error) {
+                converted = 'Conversion not supported.';
+            }
+            this.$el.append($('<pre></pre>').text(converted));
 
         }.bind(this));
     },

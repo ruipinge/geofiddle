@@ -4,6 +4,9 @@ import Formats from 'formats';
 import Projections from 'projections';
 import Util from 'geofiddle-util';
 
+const GEOM_TEXT_SEPARATOR = '\n\n',
+    GEOM_REGEX_SEPARATOR = /\n\s*\n/;
+
 export default Backbone.Model.extend({
 
     defaults: {
@@ -20,7 +23,7 @@ export default Backbone.Model.extend({
      * @returns {string[]}
      */
     getTexts: function(sep) {
-        sep || (sep = /\n\s*\n/);
+        sep || (sep = GEOM_REGEX_SEPARATOR);
         var text = this.get('text') || '';
         return _.filter(text.split(sep), function(t) {
             return !!Util.stringClean(t);
@@ -107,6 +110,20 @@ export default Backbone.Model.extend({
 
         return Formats.format(converted, toFormat, {
             srid: Projections.getSrid(toProjection)
+        });
+    },
+
+    addGeomFromOrdinates: function(ordinates, fromProjection) {
+        fromProjection || (fromProjection = Projections.WGS84);
+
+        var wkt = Formats.buildWkt(ordinates),
+            toProjection = this.getProjection(true) || fromProjection,
+            toFormat = this.getFormat(true) || Formats.DSV;
+
+        wkt = Projections.convert(wkt, fromProjection, toProjection);
+
+        this.set({
+            text: (Formats.format(wkt, toFormat) || '') + GEOM_TEXT_SEPARATOR + (this.get('text') || '')
         });
     }
 

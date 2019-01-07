@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import _ from 'underscore';
 import Backbone from 'backbone';
-import Formats from 'formats';
 import Projections from 'projections';
 import styles from 'views/maps/styles.json';
 import GoogleMapsLoader from 'google-maps';
@@ -299,11 +298,7 @@ export default Backbone.View.extend({
 
     processFeature: function(feature, ordinates) {
         this.features.push(feature);
-        this.model.set({
-            text: Formats.formatOrdinates(ordinates) + '\n\n' + this.model.get('text'),
-            format: Formats.DSV,
-            projection: Projections.WGS84
-        });
+        this.model.addGeomFromOrdinates(ordinates, Projections.WGS84);
     },
 
     remove: function() {
