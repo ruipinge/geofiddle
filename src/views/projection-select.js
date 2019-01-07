@@ -18,7 +18,7 @@ export default SelectView.extend({
     },
 
     renderAutoDetect: function() {
-        var proj = Projections.autoDetect(this.model.get('text'), this.model.getFormat(true)),
+        var proj = Projections.autoDetect(this.model.getFirstText(), this.model.getFormat(true)),
             label = Projections.formatAutoDetectLabel(proj);
         this.$el.find('option[value="auto"]').text(label);
     }
