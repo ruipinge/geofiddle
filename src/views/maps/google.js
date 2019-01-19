@@ -1,7 +1,6 @@
 import $ from 'jquery';
 import _ from 'underscore';
 import Backbone from 'backbone';
-import Formats from 'formats';
 import Projections from 'projections';
 import styles from 'views/maps/styles.json';
 import GoogleMapsLoader from 'google-maps';
@@ -170,24 +169,30 @@ export default Backbone.View.extend({
 
         this.clearMap();
 
-        var wkt = this.model.buildWkt(Projections.WGS84);
-        if (!wkt) {
+        var wkts = this.model.buildWkts(Projections.WGS84);
+        if (!wkts.length) {
             return;
         }
 
-        var gFeature = wkt.toObject();
-        if (_.isArray(gFeature)) {
-            _.each(gFeature, function(gf) {
-                this.features.push(gf);
-                gf.setMap(this.map);
-            }.bind(this));
-        } else {
-            this.features.push(gFeature);
-            gFeature.setMap(this.map);
+        var components = _.reduce(wkts, function(memo, wkt) {
 
-        }
+            var gFeature = wkt.toObject();
+            if (_.isArray(gFeature)) {
+                _.each(gFeature, function(gf) {
+                    this.features.push(gf);
+                    gf.setMap(this.map);
+                }.bind(this));
+            } else {
+                this.features.push(gFeature);
+                gFeature.setMap(this.map);
+            }
 
-        var bounds = _.map(_.flatMapDeep(wkt.components), function(a) {
+            memo.push(wkt.components);
+            return memo;
+
+        }.bind(this), []);
+
+        var bounds = _.map(_.flatMapDeep(components), function(a) {
             return {
                 lon: a.x,
                 lat: a.y
@@ -293,11 +298,7 @@ export default Backbone.View.extend({
 
     processFeature: function(feature, ordinates) {
         this.features.push(feature);
-        this.model.set({
-            text: Formats.formatOrdinates(ordinates),
-            format: Formats.DSV,
-            projection: Projections.WGS84
-        });
+        this.model.addGeomFromOrdinates(ordinates, Projections.WGS84);
     },
 
     remove: function() {

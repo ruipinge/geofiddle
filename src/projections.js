@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import Wkt from 'wicket';
 import OsGridRef from 'geodesy/osgridref';
 import LatLon from 'geodesy/latlon-ellipsoidal';
 import Util from 'geofiddle-util';
@@ -160,8 +161,12 @@ P.convertWktComponents = function(components, from, to) {
 };
 
 P.convert = function(wkt, from, to) {
-    wkt.components = P.convertWktComponents(wkt.components, from, to);
-    return wkt;
+
+    // Clone wkt so that the input keeps untouched
+    var converted = new Wkt.Wkt(wkt.write());
+    converted.components = P.convertWktComponents(converted.components, from, to);
+    return converted;
+
 };
 
 export default P;
