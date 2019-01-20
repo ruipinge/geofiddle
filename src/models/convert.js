@@ -120,6 +120,14 @@ export default Backbone.Model.extend({
             toProjection = this.getProjection(true) || fromProjection,
             toFormat = this.getFormat(true) || Formats.DSV;
 
+        if (toProjection === Projections.AUTO_DETECT) {
+            toProjection = fromProjection;
+        }
+
+        if (toFormat === Formats.AUTO_DETECT) {
+            toFormat = Formats.DSV;
+        }
+
         wkt = Projections.convert(wkt, fromProjection, toProjection);
 
         this.set({
