@@ -59,7 +59,7 @@ F.getLabel = function(code) {
 };
 
 F.formatAutoDetectLabel = function(code) {
-    if (!code) {
+    if (!code || code === F.AUTO_DETECT) {
         return F.AUTO_DETECT_LABEL;
     }
     var obj = F.findOption(code);
@@ -99,23 +99,25 @@ F.autoDetect = function(s, format) {
  * @returns {Wicket}
  */
 F.buildWkt = function(ordinates) {
-    ordinates || (ordinates = []);
-
-    // Validation: no ordinates, or odd number of ordinates
-    var len = ordinates.length;
-    if (!len || len % 2 === 1) {
+    var ords;
+    try {
+        ords = F.formatOrdinates(ordinates, {
+            ordinateSep: ' ',
+            coordinateSep: ',',
+        });
+    } catch(e) {
         return;
     }
 
-    var ords = [];
-    for (var i = 0; i < len; i += 2) {
-        ords.push('' + ordinates[i] + ' ' + ordinates[i + 1]);
+    if (!ords) {
+        return;
     }
-    ords = ords.join(',');
+
+    const len = ordinates.length,
+        wkt = new Wkt.Wkt();
 
     // At least 4 vertex (8 ordinates) and first point is the
     // same as last: it's a Polygon
-    var wkt = new Wkt.Wkt();
     if (len > 6 && ordinates[0] === ordinates[len - 2] && ordinates[1] === ordinates[len - 1]) {
         wkt.read('POLYGON((' + ords + '))');
     } else if (len > 2) {
@@ -173,7 +175,12 @@ F.parseWkt = function(s) {
         // Eg. a 'POIT(1 2)' is valid WKT for parsing, but not its Geometry
         wkt.toJson();
 
-        if (!wkt.components) {
+        if (!wkt.components || !wkt.components.length) {
+            return;
+        }
+
+        if (wkt.components.length === 1 && wkt.components[0] instanceof Array &&
+            !wkt.components[0].length) {
             return;
         }
 
@@ -185,6 +192,7 @@ F.parseWkt = function(s) {
 };
 
 F.parseEwkt = function (s) {
+    s = Util.stringClean(s);
     return F.parseWkt(s.split(';')[1]);
 };
 
@@ -234,14 +242,28 @@ F.parse = function(s, format) {
  * @returns {string}
  */
 F.formatOrdinates = function(ordinates, options) {
+    ordinates || (ordinates = []);
     options || (options = {});
 
-    var ordinateSep = options.ordinateSep || ' ',
+    if (ordinates.length % 2 !== 0) {
+        throw new Error(`Odd number of ordinates: ${ordinates.length}.`);
+    }
+
+    const ordinateSep = options.ordinateSep || ' ',
         coordinateSep = options.coordinateSep || ', ',
         ords = [];
 
     for (var i = 0; i < ordinates.length; i += 2) {
-        ords.push('' + ordinates[i] + ordinateSep + ordinates[i + 1]);
+        const x = ordinates[i],
+            y = ordinates[i + 1];
+
+        if (typeof x !== 'number' || isNaN(x)) {
+            throw new Error(`Ordinate ${i}/x with wrong type: ${x} (${typeof x}).`);
+        }
+        if (typeof y !== 'number' || isNaN(y)) {
+            throw new Error(`Ordinate ${i + 1}/y with wrong type: ${y} (${typeof y}).`);
+        }
+        ords.push('' + x + ordinateSep + y);
     }
     return ords.join(coordinateSep);
 };
