@@ -113,31 +113,29 @@ F.buildWkt = function(ordinates) {
         return;
     }
 
-    const len = ordinates.length,
-        wkt = new Wkt.Wkt();
+    const len = ordinates.length;
 
     // At least 4 vertex (8 ordinates) and first point is the
     // same as last: it's a Polygon
+    var s;
     if (len > 6 && ordinates[0] === ordinates[len - 2] && ordinates[1] === ordinates[len - 1]) {
-        wkt.read('POLYGON((' + ords + '))');
+        s = 'POLYGON((' + ords + '))';
     } else if (len > 2) {
-        wkt.read('LINESTRING(' + ords + ')');
+        s = 'LINESTRING(' + ords + ')';
     } else {
-        wkt.read('POINT(' + ords + ')');
+        s = 'POINT(' + ords + ')';
     }
 
-    return wkt;
+    return F.parseWkt(s);
 };
 
 F.parseDsv = function(s) {
-    var ords;
     try {
-        ords = Util.parseDsv(s);
+        const ords = Util.parseDsv(s);
+        return F.buildWkt(ords);
     } catch (e) {
         return;
     }
-
-    return F.buildWkt(ords);
 };
 
 F.parsePolylineCoordinates = function(s, precision) {
