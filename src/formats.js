@@ -8,7 +8,7 @@ import polyline from 'lib/polyline';
 
 const F = {};
 
-F.AUTO_DETECT_LABEL = 'Auto detect';
+F.AUTO_DETECT_LABEL = 'Auto-detect';
 F.AUTO_DETECT = 'auto';
 F.GEOJSON = 'geojson';
 F.WKT = 'wkt';

@@ -6,7 +6,7 @@ import Util from 'geofiddle-util';
 const P = {};
 
 P.MAX_LON = 180.0;
-P.AUTO_DETECT_LABEL = 'Auto detect';
+P.AUTO_DETECT_LABEL = 'Auto-detect';
 P.AUTO_DETECT = 'auto';
 
 P.WGS84 = 'wgs84';
