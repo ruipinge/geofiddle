@@ -3,6 +3,7 @@ import _ from 'underscore';
 import Backbone from 'backbone';
 import Formats from 'formats';
 import Projections from 'projections';
+import ConvertModel from 'models/convert';
 import tpl from 'templates/convert-result.html';
 
 export default Backbone.View.extend({
@@ -26,7 +27,7 @@ export default Backbone.View.extend({
 
             var converted;
             try {
-                converted = this.model.getConvertedText(format, projection, wkt, fromProjection);
+                converted = ConvertModel.convert(format, projection, wkt, fromProjection);
             } catch(error) {
                 converted = 'Conversion not supported.';
             }

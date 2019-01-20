@@ -61,9 +61,9 @@ export default Backbone.Model.extend({
 
         return _.filter(_.map(this.getTexts(), function(text) {
 
-            var wkt = Formats.parse(text, format);
+            const wkt = Formats.parse(text, format);
 
-            if (!wkt || !wkt.components) {
+            if (!wkt) {
                 return;
             }
 
@@ -95,8 +95,42 @@ export default Backbone.Model.extend({
         return projection;
     },
 
-    getConvertedText: function(toFormat, toProjection, wkt, fromProjection) {
-        fromProjection || (this.getProjection(true));
+    addGeomFromOrdinates: function(ordinates, fromProjection) {
+        fromProjection || (fromProjection = Projections.WGS84);
+
+        var wkt = Formats.buildWkt(ordinates),
+            toProjection = this.getProjection(true) || fromProjection,
+            toFormat = this.getFormat(true) || Formats.DSV;
+
+        if (!wkt) {
+            return;
+        }
+
+        if (toProjection === Projections.AUTO_DETECT) {
+            toProjection = fromProjection;
+        }
+
+        if (toFormat === Formats.AUTO_DETECT) {
+            toFormat = Formats.DSV;
+        }
+
+        wkt = Projections.convert(wkt, fromProjection, toProjection);
+
+        const text = this.get('text') || '',
+            ss = [Formats.format(wkt, toFormat)];
+
+        if (Util.stringClean(text)) {
+            ss.push(text);
+        }
+
+        this.set({
+            text: ss.join(GEOM_TEXT_SEPARATOR)
+        });
+    }
+
+}, {
+
+    convert: function(toFormat, toProjection, wkt, fromProjection) {
 
         if (!fromProjection) {
             return;
@@ -111,28 +145,7 @@ export default Backbone.Model.extend({
         return Formats.format(converted, toFormat, {
             srid: Projections.getSrid(toProjection)
         });
-    },
 
-    addGeomFromOrdinates: function(ordinates, fromProjection) {
-        fromProjection || (fromProjection = Projections.WGS84);
-
-        var wkt = Formats.buildWkt(ordinates),
-            toProjection = this.getProjection(true) || fromProjection,
-            toFormat = this.getFormat(true) || Formats.DSV;
-
-        if (toProjection === Projections.AUTO_DETECT) {
-            toProjection = fromProjection;
-        }
-
-        if (toFormat === Formats.AUTO_DETECT) {
-            toFormat = Formats.DSV;
-        }
-
-        wkt = Projections.convert(wkt, fromProjection, toProjection);
-
-        this.set({
-            text: (Formats.format(wkt, toFormat) || '') + GEOM_TEXT_SEPARATOR + (this.get('text') || '')
-        });
     }
 
 });
