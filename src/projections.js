@@ -51,7 +51,7 @@ P.getSrid = function(code) {
 };
 
 P.formatAutoDetectLabel = function(code) {
-    if (!code) {
+    if (!code || code === P.AUTO_DETECT) {
         return P.AUTO_DETECT_LABEL;
     }
     var obj = P.findOption(code);
@@ -124,7 +124,7 @@ P.convertLatLonToBng = function(lat, lon) {
      */
 P.convertWktComponents = function(components, from, to) {
     if (!from || !to) {
-        throw new Error('Projection to convert from or to not provided.');
+        throw new Error('Projection to convert from and/or to not provided.');
     }
 
     if (!_.includes(P.SUPPORTED_PROJECTIONS, from)) {
@@ -149,7 +149,8 @@ P.convertWktComponents = function(components, from, to) {
         throw new TypeError('Provided coordinate doesn\'t include x/y attributes.');
     }
 
-    if (!_.isNumber(components.x) || !_.isNumber(components.y)) {
+    if (!_.isNumber(components.x) || !_.isNumber(components.y) ||
+        _.isNaN(components.x) || _.isNaN(components.y)) {
         throw new TypeError('Provided coordinate x/y attributes are not numbers.');
     }
 
