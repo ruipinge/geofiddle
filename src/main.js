@@ -1,5 +1,14 @@
 import './main.scss';
 
+import * as Sentry from '@sentry/browser';
+
+// Sentry DSN will be replaced with webpack DefinePlugin
+// eslint-disable-next-line no-undef
+const dsn = SENTRY_DSN;
+if (dsn) {
+    Sentry.init({ dsn: dsn });
+}
+
 import $ from 'jquery';
 import Backbone from 'backbone';
 import Router from 'router';

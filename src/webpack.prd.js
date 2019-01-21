@@ -29,13 +29,17 @@ module.exports = merge(common, {
             }
         }),
 
-        // Replaces GOOGLE_MAPS_API_KEY variable on the code with a functional Google
-        // Maps API key. This key is currently whitelisted for the following domains:
-        // - ruipinge.google.io
-        // - geofiddle.com
-        // - geofiddle-224910.appspot.com
         new webpack.DefinePlugin({
-            GOOGLE_MAPS_API_KEY: JSON.stringify('AIzaSyDZ0hpsGleiocx8fidvrLY8o9GlrjyY7j0')
+
+            // Replaces GOOGLE_MAPS_API_KEY variable on source files with a functional Google
+            // Maps API key. This key is currently whitelisted for the following domains:
+            // - ruipinge.google.io
+            // - geofiddle.com
+            // - geofiddle-224910.appspot.com
+            GOOGLE_MAPS_API_KEY: JSON.stringify('AIzaSyDZ0hpsGleiocx8fidvrLY8o9GlrjyY7j0'),
+
+            // Replaces SENTRY_DSN variable on source files with the Sentry client key
+            SENTRY_DSN: JSON.stringify('https://6730670a85d149f3963943b54f4474ff@sentry.io/1376245')
         })
 
     ]

@@ -36,9 +36,13 @@ module.exports = merge(common, {
 
         new webpack.HotModuleReplacementPlugin(),
 
-        // Replaces GOOGLE_MAPS_API_KEY variable on the code with the loaded key (see above)
         new webpack.DefinePlugin({
-            GOOGLE_MAPS_API_KEY: JSON.stringify(GOOGLE_MAPS_API_KEY)
+
+            // Replaces GOOGLE_MAPS_API_KEY variable on the code with the loaded key (see above)
+            GOOGLE_MAPS_API_KEY: JSON.stringify(GOOGLE_MAPS_API_KEY),
+
+            // Disables Sentry error reporting on non-production environments
+            SENTRY_DSN: false
         })
     ],
     devServer: {

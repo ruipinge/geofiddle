@@ -13,6 +13,7 @@
     "@material/textfield": "^0.40.1",
     "@material/top-app-bar": "^0.40.1",
     "@material/typography": "^0.40.1",
+    "@sentry/browser": "^4.5.2",
     "backbone": "^1.3.3",
     "geodesy": "^1.1.3",
     "google-maps": "^3.3.0",
