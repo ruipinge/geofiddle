@@ -2,18 +2,16 @@ import $ from 'jquery';
 import _ from 'underscore';
 import Backbone from 'backbone';
 import Projections from 'projections';
-import styles from 'views/maps/styles.json';
 import GoogleMapsLoader from 'google-maps';
 require('wicket/wicket-gmap3');
 
 // API key will be replaced with webpack DefinePlugin
-// eslint-disable-next-line no-undef
-GoogleMapsLoader.KEY = GOOGLE_MAPS_API_KEY;
+GoogleMapsLoader.KEY = GOOGLE_MAPS_API_KEY; // eslint-disable-line no-undef
 
 GoogleMapsLoader.LIBRARIES = ['geometry', 'drawing'];
 GoogleMapsLoader.LANGUAGE = 'en';
 GoogleMapsLoader.REGION = 'GB';
-GoogleMapsLoader.VERSION = 'quarterly';
+GoogleMapsLoader.VERSION = 'beta&map_ids=' + GOOGLE_MAPS_MAP_ID; // eslint-disable-line no-undef
 
 const OPTIONS = {
     center: {
@@ -21,15 +19,8 @@ const OPTIONS = {
         lng: -0.10648
     },
     zoom: 9,
-    /**
-     * From: https://mapstyle.withgoogle.com/ with the following options:
-     * - Theme: Silver
-     * - Roads: Full
-     * - Landmarks: Full
-     * - Labels: Full
-     */
-    styles: styles,
-    disableDefaultUI: true
+    mapId: GOOGLE_MAPS_MAP_ID, // eslint-disable-line no-undef
+    useStaticMap: false
 };
 
 /**

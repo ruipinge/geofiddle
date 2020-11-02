@@ -38,6 +38,11 @@ module.exports = merge(common, {
             // - geofiddle-224910.appspot.com
             GOOGLE_MAPS_API_KEY: JSON.stringify('AIzaSyDZ0hpsGleiocx8fidvrLY8o9GlrjyY7j0'),
 
+            // Replaces GOOGLE_MAPS_MAP_ID variable on the source files with the Cloud-based
+            // Map ID so that the remote custom Style can be used in the rendered map.
+            // https://developers.google.com/maps/documentation/javascript/cloud-based-map-styling#cloud_tooling
+            GOOGLE_MAPS_MAP_ID: JSON.stringify('aba6edf2003b097f'),
+
             // Replaces SENTRY_DSN variable on source files with the Sentry client key
             SENTRY_DSN: JSON.stringify('https://6730670a85d149f3963943b54f4474ff@sentry.io/1376245')
         })

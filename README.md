@@ -96,10 +96,13 @@ geofiddle > ./nvmw npm run clean
 
 ### Google Maps JavaScript API
 
-So that the Google Map can be loaded without warnings and full featured, there's the need to create a file named ```GOOGLE_MAPS_API_KEY.json``` with your Google Maps JavaScript API key. Without any costs (but requiring a credit card) it can be created [here](https://developers.google.com/maps/documentation/javascript/get-api-key).
+So that the Google Map can be loaded without warnings and full featured, there's the need to create a file named ```PRIVATE.json``` with your Google Maps JavaScript API key and any existing [Map ID for custom map styling](https://developers.google.com/maps/documentation/javascript/cloud-based-map-styling#cloud_tooling). Without any costs (but requiring a credit card), an API key can be created [here](https://developers.google.com/maps/documentation/javascript/get-api-key).
 
-The key file contents should look like this (although this key will not work):
+The file contents should look like this (although both values are dummy and will not work):
 
 ```
-"AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ"
+{
+  "apiKey": "AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ",
+  "mapId": "aba6eaf2002b017f"
+}
 ```

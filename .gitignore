@@ -5,4 +5,4 @@ Thumbs.db
 npm-debug.log
 coverage
 dist
-GOOGLE_MAPS_API_KEY.json
+PRIVATE.json
