@@ -1,11 +1,11 @@
 @import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700");
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 
-@import "@material/typography/mdc-typography";
-@import "@material/textfield/mdc-text-field";
-@import "@material/select/mdc-select";
-@import "@material/top-app-bar/mdc-top-app-bar";
-@import "@material/layout-grid/mdc-layout-grid";
+@import "~@material/typography/mdc-typography";
+@import "~@material/textfield/mdc-text-field";
+@import "~@material/select/mdc-select";
+@import "~@material/top-app-bar/mdc-top-app-bar";
+@import "~@material/layout-grid/mdc-layout-grid";
 
 html, body {
     margin: 0;

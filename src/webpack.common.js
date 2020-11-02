@@ -55,10 +55,7 @@ module.exports = {
                 // Fixes Material Design missing browser CSS rules vendor prefixes (-moz-, -webkit-)
                 loader: 'postcss-loader'
             }, {
-                loader: 'sass-loader',
-                options: {
-                    includePaths: ['./node_modules']
-                }
+                loader: 'sass-loader'
             }]
         }]
     }
