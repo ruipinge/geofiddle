@@ -2,7 +2,7 @@
 
 DIR="$(command cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-export NVM_DIR="$DIR/.nvm"
+export NVM_DIR="$HOME/.nvm"
 
 \. "$DIR/.nvm/nvm.sh" --no-use
 
@@ -27,4 +27,3 @@ else
 fi
 
 exec "$@"
-
