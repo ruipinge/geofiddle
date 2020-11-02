@@ -34,7 +34,7 @@ coverage/
 .gitattributes
 .nvmrc
 .travis.yml
-GOOGLE_MAPS_API_KEY.json
+PRIVATE.json
 LICENSE
 nvmw
 package-lock.json
