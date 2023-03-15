@@ -6,8 +6,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 export default merge(common, {
     mode: 'production',
     output: {
-        filename: '[name].[contenthash].js',
-        publicPath: 'dist/'
+        filename: '[name].[contenthash].js'
     },
     plugins: [
 
