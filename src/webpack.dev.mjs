@@ -1,4 +1,5 @@
 import {fileURLToPath} from 'url';
+import fs from 'fs';
 import {merge} from 'webpack-merge';
 import common from './webpack.common.mjs';
 import webpack from 'webpack';
@@ -9,7 +10,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 const keyFilename = 'PRIVATE.json';
 var privateConfig;
 try {
-    privateConfig = require('../' + keyFilename);
+    privateConfig = JSON.parse(fs.readFileSync(`./${keyFilename}`, 'utf8'));
 } catch (e) {
     privateConfig = {
         apiKey: '',
