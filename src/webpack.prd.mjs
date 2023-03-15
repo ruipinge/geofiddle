@@ -1,10 +1,9 @@
-const merge = require('webpack-merge');
-const common = require('./webpack.common.js');
-const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+import { merge } from 'webpack-merge';
+import common from './webpack.common.mjs';
+import webpack from 'webpack';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
-
-module.exports = merge(common, {
+export default merge(common, {
     mode: 'production',
     output: {
         filename: '[name].[contenthash].js',

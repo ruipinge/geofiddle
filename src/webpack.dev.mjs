@@ -1,9 +1,8 @@
-const path = require('path');
-const merge = require('webpack-merge');
-const common = require('./webpack.common.js');
-const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-
+import {fileURLToPath} from 'url';
+import {merge} from 'webpack-merge';
+import common from './webpack.common.mjs';
+import webpack from 'webpack';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 // When a PRIVATE.json file exists on the project root
 // it should contain the Google Maps API key and Map ID.
@@ -22,8 +21,9 @@ try {
         '" in the project root with the Google Maps API key (see README.md).\x1b[0m\n');
 }
 
-module.exports = merge(common, {
+export default merge(common, {
     mode: 'development',
+    devtool: 'inline-cheap-source-map',
     output: {
         filename: '[name].js'
     },
@@ -38,8 +38,6 @@ module.exports = merge(common, {
             }
         }),
 
-        new webpack.HotModuleReplacementPlugin(),
-
         new webpack.DefinePlugin({
 
             // Replaces GOOGLE_MAPS_API_KEY variable on the code with the loaded key (see above)
@@ -53,7 +51,9 @@ module.exports = merge(common, {
         })
     ],
     devServer: {
-        contentBase: path.join(__dirname, '../static'), /* eslint-disable-line no-undef */
+        static: {
+            directory: fileURLToPath(new URL('../static', import.meta.url)),
+        },
         hot: true
     }
 });

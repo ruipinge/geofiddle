@@ -1,13 +1,13 @@
 {
+    "parser": "@babel/eslint-parser",
     "parserOptions": {
-        "ecmaVersion": 6,
-        "sourceType": "module"
     },
     "env": {
         "browser": true,
         "es6": true,
         "jest": true,
-        "commonjs": true
+        "commonjs": true,
+        "node": true
     },
     "extends": "eslint:recommended",
     "rules": {
