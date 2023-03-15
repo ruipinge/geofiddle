@@ -1,0 +1,15 @@
+# humanstxt.org/
+# The humans responsible & technology colophon
+
+# TEAM
+
+    Rui Pinge -- Software Engineer -- https://github.com/ruipinge
+
+# THANKS
+
+    Elgin dev team -- https://elgin.org.uk
+
+# TECHNOLOGY COLOPHON
+
+    CSS3, HTML5
+    Google App Engine, Go, node.js, jQuery, Lodash (Underscore), Backbone, Material Design
