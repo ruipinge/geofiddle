@@ -73,7 +73,7 @@ POINT(-9.129814 38.736847)
 - [HTML5 Boilerplate](https://html5boilerplate.com/), [Material
   Components](https://github.com/material-components/material-components-web)
 - [Google Maps Platform](https://cloud.google.com/maps-platform/maps/)
-- [Google App Engine](https://cloud.google.com/appengine/)
+- [GitHub Pages](https://pages.github.com)
 
 ## Development Environment
 
