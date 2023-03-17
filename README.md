@@ -1,7 +1,7 @@
-# GeoFiddle [![Build Status](https://travis-ci.org/ruipinge/geofiddle.svg?branch=master)](https://travis-ci.org/ruipinge/geofiddle) [![Coverage Status](https://coveralls.io/repos/github/ruipinge/geofiddle/badge.svg?branch=master)](https://coveralls.io/github/ruipinge/geofiddle?branch=master)
+# GeoFiddle [![Build Status](https://github.com/ruipinge/geofiddle/actions/workflows/build-deploy.yml/badge.svg)](https://github.com/ruipinge/geofiddle/actions/workflows/build-deploy.yml) [![Coverage Status](https://coveralls.io/repos/github/ruipinge/geofiddle/badge.svg?branch=master)](https://coveralls.io/github/ruipinge/geofiddle?branch=master)
 
 Plot, share, and convert geometries using different formats and projections.
-Try it [here](https://geofiddle.com).
+Try it at [geofiddle.com](https://geofiddle.com).
 
 Some of the most notable features:
 
