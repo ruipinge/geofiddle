@@ -1,0 +1,31 @@
+# Inspiration: https://www.viget.com/articles/automating-build-deploy-ci-cd-with-github-actions/
+
+name: Build and Deploy
+
+on:
+  push:
+    branches: master
+
+permissions:
+  contents: write
+
+jobs:
+  use-build:
+    uses: ruipinge/geofiddle/.github/workflows/build.yml@master
+
+  deploy:
+    needs: use-build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: static-files
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist

@@ -1,4 +1,4 @@
-name: Test and Build
+name: Build
 
 on:
   workflow_call:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up node env
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: lts/hydrogen
@@ -29,11 +29,11 @@ jobs:
         run: npm test
 
       - name: Build
-        run: npm run predeploy
+        run: npm run package
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: build-artifact
+          name: static-files
           path: dist
           retention-days: 1
