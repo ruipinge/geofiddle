@@ -31,7 +31,6 @@
     "babel-core": "^6.26.3",
     "babel-jest": "^29.5.0",
     "babel-loader": "^9.1.2",
-    "coveralls": "^3.1.0",
     "css-loader": "^6.7.3",
     "cssnano": "^5.1.15",
     "eslint": "^8.36.0",
