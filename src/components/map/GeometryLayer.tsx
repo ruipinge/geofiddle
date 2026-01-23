@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { Source, Layer, type FillLayer, type LineLayer, type CircleLayer } from 'react-map-gl/maplibre';
 import type { FilterSpecification } from 'maplibre-gl';
 import { useGeometryStore } from '@/stores/geometryStore';
-import type { FeatureCollection } from 'geojson';
+import { transformGeometry, detectProjectionFromCoordinates, type SupportedProjection } from '@/lib/projections';
+import type { FeatureCollection, Position } from 'geojson';
 
 // Base layers for non-selected features
 const fillLayer: FillLayer = {
@@ -73,8 +74,49 @@ const highlightPointLayer: CircleLayer = {
     },
 };
 
+// Extract all coordinates from features for projection detection
+function extractAllCoordinates(features: { geometry: { coordinates: unknown } | null }[]): Position[] {
+    const coords: Position[] = [];
+    for (const feature of features) {
+        if (!feature.geometry) {
+            continue;
+        }
+        const extractFromCoords = (c: unknown): void => {
+            if (Array.isArray(c)) {
+                if (typeof c[0] === 'number' && typeof c[1] === 'number') {
+                    coords.push(c as Position);
+                } else {
+                    for (const item of c) {
+                        extractFromCoords(item);
+                    }
+                }
+            }
+        };
+        extractFromCoords(feature.geometry.coordinates);
+    }
+    return coords;
+}
+
 export function GeometryLayer() {
-    const { features, selectedFeatureId } = useGeometryStore();
+    const { features, selectedFeatureId, inputProjection, detectedProjection, coordinateError } = useGeometryStore();
+
+    // Determine the effective source projection
+    const sourceProjection = useMemo((): SupportedProjection => {
+        // If user explicitly selected a projection, use it
+        if (inputProjection !== 'auto') {
+            return inputProjection as SupportedProjection;
+        }
+        // If parser detected a projection (e.g., from EWKT SRID), use it
+        if (detectedProjection) {
+            return detectedProjection as SupportedProjection;
+        }
+        // Auto-detect from coordinates
+        if (features.length > 0) {
+            const coords = extractAllCoordinates(features);
+            return detectProjectionFromCoordinates(coords);
+        }
+        return 'EPSG:4326';
+    }, [inputProjection, detectedProjection, features]);
 
     // Create filters for highlighted and non-highlighted features
     const { highlightFilter, nonHighlightFilter } = useMemo(() => {
@@ -91,14 +133,26 @@ export function GeometryLayer() {
         };
     }, [selectedFeatureId]);
 
-    if (features.length === 0) {
+    // Transform features to WGS84 for map display
+    const transformedFeatures = useMemo(() => {
+        if (sourceProjection === 'EPSG:4326') {
+            return features;
+        }
+        return features.map((f) => ({
+            ...f,
+            geometry: transformGeometry(f.geometry, sourceProjection, 'EPSG:4326'),
+        }));
+    }, [features, sourceProjection]);
+
+    // Don't render if there's a coordinate error or no features
+    if (coordinateError || transformedFeatures.length === 0) {
         return null;
     }
 
     // Add id property to features for filtering
     const geojson: FeatureCollection = {
         type: 'FeatureCollection',
-        features: features.map((f) => ({
+        features: transformedFeatures.map((f) => ({
             ...f,
             properties: {
                 ...f.properties,

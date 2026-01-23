@@ -4,7 +4,7 @@ import { useConversionStore } from '@/stores/conversionStore';
 import { format } from '@/lib/parsers';
 
 export function ConversionResult() {
-    const { features, parseError } = useGeometryStore();
+    const { features, parseError, coordinateError } = useGeometryStore();
     const { outputFormat } = useConversionStore();
 
     const { convertedOutput, conversionError } = useMemo(() => {
@@ -27,6 +27,14 @@ export function ConversionResult() {
         return (
             <div className="mb-3 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
                 {parseError}
+            </div>
+        );
+    }
+
+    if (coordinateError) {
+        return (
+            <div className="mb-3 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+                {coordinateError}
             </div>
         );
     }
