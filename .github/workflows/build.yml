@@ -11,12 +11,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: lts/hydrogen
+          node-version: 20
           cache: npm
 
       - name: Install dependencies
@@ -25,17 +25,25 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Type check
+        run: npm run typecheck
+
       - name: Test
-        run: npm test
+        run: npm run test:unit
 
       - name: Build
-        run: npm run package
+        run: npm run build
+
+      - name: Copy static files
+        run: cp -r static/* dist/
 
       - name: Coveralls
         uses: coverallsapp/github-action@v2
+        with:
+          file: coverage/lcov.info
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: static-files
           path: dist

@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --color-background: 255 255 255;
+        --color-foreground: 10 10 10;
+        --color-muted: 115 115 115;
+        --color-border: 229 229 229;
+    }
+
+    .dark {
+        --color-background: 10 10 10;
+        --color-foreground: 250 250 250;
+        --color-muted: 163 163 163;
+        --color-border: 38 38 38;
+    }
+
+    html {
+        @apply h-full antialiased;
+    }
+
+    body {
+        @apply h-full bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-50;
+    }
+
+    #root {
+        @apply h-full;
+    }
+}
+
+@layer components {
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    }
+
+    .btn-primary {
+        @apply btn bg-primary-600 text-white hover:bg-primary-700;
+    }
+
+    .btn-secondary {
+        @apply btn border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800;
+    }
+
+    .input {
+        @apply w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm placeholder:text-neutral-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500;
+    }
+
+    .label {
+        @apply mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300;
+    }
+}
+
+/* MapLibre GL overrides */
+.maplibregl-map {
+    font-family: inherit;
+}
+
+.maplibregl-ctrl-group {
+    @apply shadow-md;
+}

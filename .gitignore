@@ -6,3 +6,20 @@ npm-debug.log
 coverage
 dist
 PRIVATE.json
+
+# Vite
+.vite
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# IDE
+.idea
+.vscode
+*.code-workspace
+
+# Logs
+*.log
