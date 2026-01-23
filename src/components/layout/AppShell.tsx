@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { TopBar } from './TopBar';
 import { SplitPane } from './SplitPane';
 import { LeftPanel } from './LeftPanel';
 import { MapContainer } from '@/components/map/MapContainer';
-import type { Theme } from '@/types';
+import { useUIStore } from '@/stores/uiStore';
 
 export function AppShell() {
-    const [theme, setTheme] = useState<Theme>('system');
+    const { theme, setTheme } = useUIStore();
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -22,6 +22,23 @@ export function AppShell() {
         } else {
             root.classList.add(theme);
         }
+    }, [theme]);
+
+    // Listen for system theme changes when using 'system' theme
+    useEffect(() => {
+        if (theme !== 'system') {
+            return;
+        }
+
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleChange = (e: MediaQueryListEvent) => {
+            const root = window.document.documentElement;
+            root.classList.remove('light', 'dark');
+            root.classList.add(e.matches ? 'dark' : 'light');
+        };
+
+        mediaQuery.addEventListener('change', handleChange);
+        return () => { mediaQuery.removeEventListener('change', handleChange); };
     }, [theme]);
 
     return (
