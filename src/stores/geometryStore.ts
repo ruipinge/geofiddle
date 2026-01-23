@@ -16,6 +16,7 @@ interface GeometryState {
     features: ParsedFeature[];
     parseError: string | null;
     coordinateError: string | null;
+    isParsing: boolean;
 
     // Selection
     selectedFeatureId: string | null;
@@ -27,6 +28,7 @@ interface GeometryState {
     setFeatures: (features: ParsedFeature[]) => void;
     setParseError: (error: string | null) => void;
     setCoordinateError: (error: string | null) => void;
+    setIsParsing: (isParsing: boolean) => void;
     setSelectedFeatureId: (id: string | null) => void;
     setDetectedFormat: (format: FormatType | null) => void;
     setDetectedProjection: (projection: ProjectionType | null) => void;
@@ -42,6 +44,7 @@ const initialState = {
     features: [],
     parseError: null,
     coordinateError: null,
+    isParsing: false,
     selectedFeatureId: null,
 };
 
@@ -71,6 +74,10 @@ export const useGeometryStore = create<GeometryState>((set) => ({
 
     setCoordinateError: (coordinateError) => {
         set({ coordinateError });
+    },
+
+    setIsParsing: (isParsing) => {
+        set({ isParsing });
     },
 
     setSelectedFeatureId: (selectedFeatureId) => {

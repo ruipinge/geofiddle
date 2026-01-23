@@ -33,7 +33,7 @@ function extractAllCoordinates(features: { geometry: { coordinates: unknown } | 
 }
 
 export function ConversionResult() {
-    const { features, parseError, coordinateError, inputProjection, detectedProjection } = useGeometryStore();
+    const { features, parseError, coordinateError, isParsing, inputProjection, detectedProjection } = useGeometryStore();
     const { outputFormat, outputProjection } = useConversionStore();
 
     // Determine the effective source projection
@@ -74,6 +74,18 @@ export function ConversionResult() {
             };
         }
     }, [features, outputFormat, sourceProjection, outputProjection]);
+
+    if (isParsing) {
+        return (
+            <div className="mb-3 flex items-center gap-2 rounded-md border border-neutral-200 bg-neutral-100 p-3 text-sm text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400">
+                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Parsing...
+            </div>
+        );
+    }
 
     if (parseError) {
         return (
