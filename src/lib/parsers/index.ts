@@ -1,17 +1,24 @@
 import { geojsonParser } from './geojson';
+import { wktParser, ewktParser } from './wkt';
+import { csvParser } from './csv';
+import { polyline5Parser, polyline6Parser } from './polyline';
+import { kmlParser } from './kml';
+import { gpxParser } from './gpx';
+import { shapefileParser } from './shapefile';
 import type { FormatType, ParseResult, FormatParser } from '@/types';
 
 // Parser registry - maps format names to parser implementations
+// Order matters for detection - more specific formats first
 const parsers: Partial<Record<FormatType, FormatParser>> = {
     geojson: geojsonParser,
-    // Additional parsers will be added here:
-    // wkt: wktParser,
-    // ewkt: ewktParser,
-    // csv: csvParser,
-    // kml: kmlParser,
-    // gpx: gpxParser,
-    // polyline5: polyline5Parser,
-    // polyline6: polyline6Parser,
+    ewkt: ewktParser, // Check EWKT before WKT (more specific)
+    wkt: wktParser,
+    kml: kmlParser,
+    gpx: gpxParser,
+    shapefile: shapefileParser,
+    polyline5: polyline5Parser,
+    polyline6: polyline6Parser,
+    csv: csvParser, // CSV last as it's the most generic
 };
 
 /**
@@ -66,4 +73,14 @@ export function detectFormat(input: string): FormatType | null {
     return null;
 }
 
-export { geojsonParser };
+export {
+    geojsonParser,
+    wktParser,
+    ewktParser,
+    csvParser,
+    polyline5Parser,
+    polyline6Parser,
+    kmlParser,
+    gpxParser,
+    shapefileParser,
+};

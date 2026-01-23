@@ -1,36 +1,40 @@
 import { useMemo } from 'react';
 import { useGeometryStore } from '@/stores/geometryStore';
 import { useConversionStore } from '@/stores/conversionStore';
+import { format } from '@/lib/parsers';
 
 export function ConversionResult() {
     const { features, parseError } = useGeometryStore();
     const { outputFormat } = useConversionStore();
 
-    const convertedOutput = useMemo(() => {
+    const { convertedOutput, conversionError } = useMemo(() => {
         if (features.length === 0) {
-            return '';
+            return { convertedOutput: '', conversionError: null };
         }
 
-        // For now, just output GeoJSON
-        // TODO: Implement format conversion
-        if (outputFormat === 'geojson') {
-            return JSON.stringify(
-                {
-                    type: 'FeatureCollection',
-                    features,
-                },
-                null,
-                2
-            );
+        try {
+            const output = format(features, outputFormat);
+            return { convertedOutput: output, conversionError: null };
+        } catch (e) {
+            return {
+                convertedOutput: '',
+                conversionError: e instanceof Error ? e.message : 'Conversion failed',
+            };
         }
-
-        return `// ${outputFormat.toUpperCase()} conversion not yet implemented`;
     }, [features, outputFormat]);
 
     if (parseError) {
         return (
             <div className="mb-3 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
                 {parseError}
+            </div>
+        );
+    }
+
+    if (conversionError) {
+        return (
+            <div className="mb-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                {conversionError}
             </div>
         );
     }
