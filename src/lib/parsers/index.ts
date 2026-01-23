@@ -42,7 +42,8 @@ export function parse(input: string, format: FormatType): ParseResult {
  */
 export function format(
     features: Parameters<typeof geojsonParser.format>[0],
-    formatType: FormatType
+    formatType: FormatType,
+    options?: { projection?: string }
 ): string {
     const parser = parsers[formatType];
 
@@ -50,7 +51,7 @@ export function format(
         throw new Error(`Unsupported format: ${formatType}`);
     }
 
-    return parser.format(features);
+    return parser.format(features, options);
 }
 
 /**

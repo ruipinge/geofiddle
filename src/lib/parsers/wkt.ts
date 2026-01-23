@@ -163,6 +163,15 @@ export const wktParser = {
 export const ewktParser = {
     name: 'ewkt' as FormatType,
     parse: parseEwkt,
-    format: (features: Feature[]) => formatEwkt(features, 4326),
+    format: (features: Feature[], options?: { projection?: string }) => {
+        // Map projection to SRID
+        const sridMap: Record<string, number> = {
+            'EPSG:4326': 4326,
+            'EPSG:3857': 3857,
+            'EPSG:27700': 27700,
+        };
+        const srid = options?.projection ? (sridMap[options.projection] ?? 4326) : 4326;
+        return formatEwkt(features, srid);
+    },
     detect: detectEwkt,
 };

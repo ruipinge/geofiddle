@@ -2,10 +2,54 @@ import { useMemo } from 'react';
 import { useGeometryStore } from '@/stores/geometryStore';
 import { useConversionStore } from '@/stores/conversionStore';
 import { format } from '@/lib/parsers';
+import {
+    transformGeometry,
+    detectProjectionFromCoordinates,
+    type SupportedProjection,
+} from '@/lib/projections';
+import type { Position } from 'geojson';
+
+// Extract all coordinates from features for projection detection
+function extractAllCoordinates(features: { geometry: { coordinates: unknown } | null }[]): Position[] {
+    const coords: Position[] = [];
+    for (const feature of features) {
+        if (!feature.geometry) {
+            continue;
+        }
+        const extractFromCoords = (c: unknown): void => {
+            if (Array.isArray(c)) {
+                if (typeof c[0] === 'number' && typeof c[1] === 'number') {
+                    coords.push(c as Position);
+                } else {
+                    for (const item of c) {
+                        extractFromCoords(item);
+                    }
+                }
+            }
+        };
+        extractFromCoords(feature.geometry.coordinates);
+    }
+    return coords;
+}
 
 export function ConversionResult() {
-    const { features, parseError, coordinateError } = useGeometryStore();
-    const { outputFormat } = useConversionStore();
+    const { features, parseError, coordinateError, inputProjection, detectedProjection } = useGeometryStore();
+    const { outputFormat, outputProjection } = useConversionStore();
+
+    // Determine the effective source projection
+    const sourceProjection = useMemo((): SupportedProjection => {
+        if (inputProjection !== 'auto') {
+            return inputProjection as SupportedProjection;
+        }
+        if (detectedProjection) {
+            return detectedProjection as SupportedProjection;
+        }
+        if (features.length > 0) {
+            const coords = extractAllCoordinates(features);
+            return detectProjectionFromCoordinates(coords);
+        }
+        return 'EPSG:4326';
+    }, [inputProjection, detectedProjection, features]);
 
     const { convertedOutput, conversionError } = useMemo(() => {
         if (features.length === 0) {
@@ -13,7 +57,15 @@ export function ConversionResult() {
         }
 
         try {
-            const output = format(features, outputFormat);
+            // Transform features from source projection to output projection
+            const transformedFeatures = sourceProjection === outputProjection
+                ? features
+                : features.map((f) => ({
+                    ...f,
+                    geometry: transformGeometry(f.geometry, sourceProjection, outputProjection as SupportedProjection),
+                }));
+
+            const output = format(transformedFeatures, outputFormat, { projection: outputProjection });
             return { convertedOutput: output, conversionError: null };
         } catch (e) {
             return {
@@ -21,7 +73,7 @@ export function ConversionResult() {
                 conversionError: e instanceof Error ? e.message : 'Conversion failed',
             };
         }
-    }, [features, outputFormat]);
+    }, [features, outputFormat, sourceProjection, outputProjection]);
 
     if (parseError) {
         return (

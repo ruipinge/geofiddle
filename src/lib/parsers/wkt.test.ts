@@ -6,6 +6,7 @@ import {
     formatEwkt,
     detectWkt,
     detectEwkt,
+    ewktParser,
 } from './wkt';
 
 describe('parseWkt', () => {
@@ -125,6 +126,56 @@ describe('formatEwkt', () => {
         ];
         const result = formatEwkt(features, 4326);
         expect(result).toBe('SRID=4326;POINT (0 1)');
+    });
+
+    it('should format features as EWKT with BNG SRID', () => {
+        const features = [
+            {
+                type: 'Feature' as const,
+                geometry: { type: 'Point' as const, coordinates: [500000, 200000] },
+                properties: {},
+            },
+        ];
+        const result = formatEwkt(features, 27700);
+        expect(result).toBe('SRID=27700;POINT (500000 200000)');
+    });
+
+    it('should format features as EWKT with Web Mercator SRID', () => {
+        const features = [
+            {
+                type: 'Feature' as const,
+                geometry: { type: 'Point' as const, coordinates: [0, 0] },
+                properties: {},
+            },
+        ];
+        const result = formatEwkt(features, 3857);
+        expect(result).toBe('SRID=3857;POINT (0 0)');
+    });
+});
+
+describe('ewktParser.format', () => {
+    const features = [
+        {
+            type: 'Feature' as const,
+            geometry: { type: 'Point' as const, coordinates: [0, 0] },
+            properties: {},
+        },
+    ];
+
+    it('should use SRID=4326 by default', () => {
+        const result = ewktParser.format(features);
+        expect(result).toBe('SRID=4326;POINT (0 0)');
+    });
+
+    it('should use SRID based on projection option', () => {
+        expect(ewktParser.format(features, { projection: 'EPSG:4326' })).toBe('SRID=4326;POINT (0 0)');
+        expect(ewktParser.format(features, { projection: 'EPSG:3857' })).toBe('SRID=3857;POINT (0 0)');
+        expect(ewktParser.format(features, { projection: 'EPSG:27700' })).toBe('SRID=27700;POINT (0 0)');
+    });
+
+    it('should fallback to 4326 for unknown projection', () => {
+        const result = ewktParser.format(features, { projection: 'EPSG:9999' });
+        expect(result).toBe('SRID=4326;POINT (0 0)');
     });
 });
 

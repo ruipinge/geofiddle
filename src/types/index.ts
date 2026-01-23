@@ -43,11 +43,16 @@ export interface ParseError {
     column?: number;
 }
 
+// Format options for formatters
+export interface FormatOptions {
+    projection?: string;
+}
+
 // Format parser interface
 export interface FormatParser {
     name: FormatType;
     parse(input: string): ParseResult;
-    format(features: Feature[]): string;
+    format(features: Feature[], options?: FormatOptions): string;
     detect(input: string): boolean;
 }
 
