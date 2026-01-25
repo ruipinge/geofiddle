@@ -13,8 +13,10 @@ export function transformCoordinate(
         return coord;
     }
 
-    const [x, y, z] = coord;
-    const transformed = proj4(from, to, [x, y]) as [number, number];
+    const x = coord[0] ?? 0;
+    const y = coord[1] ?? 0;
+    const z = coord[2];
+    const transformed = proj4(from, to, [x, y]);
 
     if (z !== undefined) {
         return [transformed[0], transformed[1], z];
@@ -92,7 +94,11 @@ export function transformGeometry(
  * Check if a coordinate is valid for WGS84 (lon: -180 to 180, lat: -90 to 90)
  */
 export function isValidWGS84Coordinate(coord: Position): boolean {
-    const [lon, lat] = coord;
+    const lon = coord[0];
+    const lat = coord[1];
+    if (lon === undefined || lat === undefined) {
+        return false;
+    }
     return lon >= -180 && lon <= 180 && lat >= -90 && lat <= 90;
 }
 
@@ -123,7 +129,9 @@ export function detectProjectionFromCoordinates(coords: Position[]): SupportedPr
     let looksLikeWGS84 = true;
 
     for (let i = 0; i < samplesToCheck; i++) {
-        const [x, y] = coords[i] ?? [0, 0];
+        const coord = coords[i];
+        const x = coord?.[0] ?? 0;
+        const y = coord?.[1] ?? 0;
 
         // BNG coordinates are typically:
         // Easting: 0 to 700000

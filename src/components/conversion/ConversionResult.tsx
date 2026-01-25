@@ -7,14 +7,21 @@ import {
     detectProjectionFromCoordinates,
     type SupportedProjection,
 } from '@/lib/projections';
-import type { Position } from 'geojson';
+import type { Geometry, Position } from 'geojson';
 
 // Extract all coordinates from features for projection detection
-function extractAllCoordinates(features: { geometry: { coordinates: unknown } | null }[]): Position[] {
+function extractAllCoordinates(features: { geometry: Geometry | null }[]): Position[] {
     const coords: Position[] = [];
-    for (const feature of features) {
-        if (!feature.geometry) {
-            continue;
+
+    const extractFromGeometry = (geometry: Geometry | null): void => {
+        if (!geometry) {
+            return;
+        }
+        if (geometry.type === 'GeometryCollection') {
+            for (const g of geometry.geometries) {
+                extractFromGeometry(g);
+            }
+            return;
         }
         const extractFromCoords = (c: unknown): void => {
             if (Array.isArray(c)) {
@@ -27,7 +34,11 @@ function extractAllCoordinates(features: { geometry: { coordinates: unknown } | 
                 }
             }
         };
-        extractFromCoords(feature.geometry.coordinates);
+        extractFromCoords((geometry as { coordinates: unknown }).coordinates);
+    };
+
+    for (const feature of features) {
+        extractFromGeometry(feature.geometry);
     }
     return coords;
 }

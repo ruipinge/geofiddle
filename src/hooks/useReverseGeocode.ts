@@ -167,11 +167,29 @@ export function useReverseGeocode(lat: number | null, lon: number | null): {
 /**
  * Get the centroid of a geometry for reverse geocoding
  */
-export function getGeometryCentroid(geometry: { type: string; coordinates: unknown } | null): {
+export function getGeometryCentroid(geometry: unknown): {
     lat: number;
     lon: number;
 } | null {
-    if (!geometry?.coordinates) {
+    if (!geometry || typeof geometry !== 'object') {
+        return null;
+    }
+
+    const geom = geometry as { type?: string; coordinates?: unknown; geometries?: unknown[] };
+
+    // Handle GeometryCollection
+    if (geom.type === 'GeometryCollection' && Array.isArray(geom.geometries)) {
+        // Use the first geometry's centroid
+        for (const g of geom.geometries) {
+            const centroid = getGeometryCentroid(g);
+            if (centroid) {
+                return centroid;
+            }
+        }
+        return null;
+    }
+
+    if (!geom.coordinates) {
         return null;
     }
 
@@ -189,7 +207,7 @@ export function getGeometryCentroid(geometry: { type: string; coordinates: unkno
         }
     };
 
-    extractCoords(geometry.coordinates);
+    extractCoords(geom.coordinates);
 
     if (coords.length === 0) {
         return null;

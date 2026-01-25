@@ -62,7 +62,7 @@ describe('transformGeometry', () => {
         expect(result.type).toBe('LineString');
         if (result.type === 'LineString') {
             expect(result.coordinates).toHaveLength(2);
-            expect(result.coordinates[0][0]).toBeCloseTo(-0.128, 1);
+            expect(result.coordinates[0]?.[0]).toBeCloseTo(-0.128, 1);
         }
     });
 
