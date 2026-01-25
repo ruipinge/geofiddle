@@ -47,10 +47,21 @@ export function GeometryRow({ feature, index, isSelected, onSelect }: GeometryRo
     const featureName = properties.name;
     const name = typeof featureName === 'string' ? featureName : `Feature ${String(index + 1)}`;
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect();
+        }
+    };
+
     return (
         <tr
             onClick={onSelect}
-            className={`cursor-pointer border-b border-neutral-200 transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800 ${
+            onKeyDown={handleKeyDown}
+            tabIndex={0}
+            role="row"
+            aria-selected={isSelected}
+            className={`cursor-pointer border-b border-neutral-200 transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary-500 dark:border-neutral-700 dark:hover:bg-neutral-800 ${
                 isSelected
                     ? 'bg-blue-50 hover:bg-blue-100 dark:bg-blue-950 dark:hover:bg-blue-900'
                     : ''

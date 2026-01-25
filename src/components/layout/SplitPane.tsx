@@ -52,20 +52,39 @@ export function SplitPane({
     }, [isDragging, minLeftWidth, maxLeftWidth]);
 
     return (
-        <div ref={containerRef} className="flex flex-1 overflow-hidden">
-            <div
+        <main
+            id="main-content"
+            ref={containerRef}
+            className="flex flex-1 overflow-hidden"
+            role="main"
+        >
+            <section
                 style={{ width: leftWidth }}
                 className="shrink-0 overflow-hidden"
+                aria-label="Input and conversion panel"
             >
                 {left}
-            </div>
+            </section>
             <div
                 onMouseDown={handleMouseDown}
-                className={`w-1 shrink-0 cursor-col-resize bg-neutral-200 transition-colors hover:bg-primary-400 dark:bg-neutral-700 dark:hover:bg-primary-500 ${
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Resize panels"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                    if (e.key === 'ArrowLeft') {
+                        setLeftWidth((w) => Math.max(minLeftWidth, w - 20));
+                    } else if (e.key === 'ArrowRight') {
+                        setLeftWidth((w) => Math.min(maxLeftWidth, w + 20));
+                    }
+                }}
+                className={`w-1 shrink-0 cursor-col-resize bg-neutral-200 transition-colors hover:bg-primary-400 focus-visible:bg-primary-500 focus-visible:outline-none dark:bg-neutral-700 dark:hover:bg-primary-500 ${
                     isDragging ? 'bg-primary-500 dark:bg-primary-500' : ''
                 }`}
             />
-            <div className="flex-1 overflow-hidden">{right}</div>
-        </div>
+            <section className="flex-1 overflow-hidden" aria-label="Map view">
+                {right}
+            </section>
+        </main>
     );
 }

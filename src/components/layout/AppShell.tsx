@@ -43,6 +43,9 @@ export function AppShell() {
 
     return (
         <div className="flex h-full flex-col">
+            <a href="#main-content" className="skip-link">
+                Skip to main content
+            </a>
             <TopBar theme={theme} onThemeChange={setTheme} />
             <SplitPane
                 left={<LeftPanel />}
