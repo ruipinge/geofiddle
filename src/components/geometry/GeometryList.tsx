@@ -8,7 +8,7 @@ import {
     countCoordinates,
 } from '@/lib/geometry/calculations';
 
-type SortField = 'index' | 'name' | 'type' | 'points' | 'area' | 'length';
+type SortField = 'index' | 'name' | 'type' | 'location' | 'points' | 'area' | 'length';
 type SortDirection = 'asc' | 'desc';
 
 interface SortConfig {
@@ -16,10 +16,11 @@ interface SortConfig {
     direction: SortDirection;
 }
 
-const COLUMN_HEADERS: { field: SortField; label: string; align?: 'right' }[] = [
+const COLUMN_HEADERS: { field: SortField; label: string; align?: 'right'; sortable?: boolean }[] = [
     { field: 'index', label: '#' },
     { field: 'name', label: 'Name' },
     { field: 'type', label: 'Type' },
+    { field: 'location', label: 'Location', sortable: false },
     { field: 'points', label: 'Points', align: 'right' },
     { field: 'area', label: 'Area', align: 'right' },
     { field: 'length', label: 'Length', align: 'right' },
@@ -120,32 +121,35 @@ export function GeometryList() {
                 <table className="w-full min-w-full table-fixed">
                     <thead className="sticky top-0 bg-neutral-100 dark:bg-neutral-800">
                         <tr>
-                            {COLUMN_HEADERS.map(({ field, label, align }) => (
-                                <th
-                                    key={field}
-                                    onClick={() => { handleSort(field); }}
-                                    className={`cursor-pointer select-none px-3 py-2 text-xs font-semibold uppercase tracking-wider text-neutral-600 hover:bg-neutral-200 dark:text-neutral-400 dark:hover:bg-neutral-700 ${
-                                        align === 'right' ? 'text-right' : 'text-left'
-                                    } ${field === 'index' ? 'w-12' : ''} ${
-                                        field === 'name' ? 'w-auto' : ''
-                                    } ${field === 'type' ? 'w-28' : ''} ${
-                                        ['points', 'area', 'length'].includes(field)
-                                            ? 'w-24'
-                                            : ''
-                                    }`}
-                                >
-                                    <span className="inline-flex items-center gap-1">
-                                        {label}
-                                        {sortConfig.field === field && (
-                                            sortConfig.direction === 'asc' ? (
-                                                <ChevronUp className="h-3 w-3" />
-                                            ) : (
-                                                <ChevronDown className="h-3 w-3" />
-                                            )
-                                        )}
-                                    </span>
-                                </th>
-                            ))}
+                            {COLUMN_HEADERS.map(({ field, label, align, sortable }) => {
+                                const isSortable = sortable !== false;
+                                return (
+                                    <th
+                                        key={field}
+                                        onClick={isSortable ? () => { handleSort(field); } : undefined}
+                                        className={`select-none px-3 py-2 text-xs font-semibold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 ${
+                                            isSortable ? 'cursor-pointer hover:bg-neutral-200 dark:hover:bg-neutral-700' : ''
+                                        } ${align === 'right' ? 'text-right' : 'text-left'} ${
+                                            field === 'index' ? 'w-12' : ''
+                                        } ${field === 'name' ? 'w-auto' : ''} ${
+                                            field === 'type' ? 'w-24' : ''
+                                        } ${field === 'location' ? 'w-32' : ''} ${
+                                            ['points', 'area', 'length'].includes(field) ? 'w-20' : ''
+                                        }`}
+                                    >
+                                        <span className="inline-flex items-center gap-1">
+                                            {label}
+                                            {isSortable && sortConfig.field === field && (
+                                                sortConfig.direction === 'asc' ? (
+                                                    <ChevronUp className="h-3 w-3" />
+                                                ) : (
+                                                    <ChevronDown className="h-3 w-3" />
+                                                )
+                                            )}
+                                        </span>
+                                    </th>
+                                );
+                            })}
                         </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-neutral-900">
