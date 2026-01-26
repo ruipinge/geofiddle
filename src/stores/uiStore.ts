@@ -5,10 +5,13 @@ import type { Theme } from '@/types';
 interface UIState {
     theme: Theme;
     leftPanelWidth: number;
+    autoPanToGeometry: boolean;
 
     // Actions
     setTheme: (theme: Theme) => void;
     setLeftPanelWidth: (width: number) => void;
+    setAutoPanToGeometry: (enabled: boolean) => void;
+    toggleAutoPanToGeometry: () => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -16,6 +19,7 @@ export const useUIStore = create<UIState>()(
         (set) => ({
             theme: 'system',
             leftPanelWidth: 400,
+            autoPanToGeometry: true,
 
             setTheme: (theme) => {
                 set({ theme });
@@ -23,6 +27,14 @@ export const useUIStore = create<UIState>()(
 
             setLeftPanelWidth: (leftPanelWidth) => {
                 set({ leftPanelWidth });
+            },
+
+            setAutoPanToGeometry: (autoPanToGeometry) => {
+                set({ autoPanToGeometry });
+            },
+
+            toggleAutoPanToGeometry: () => {
+                set((state) => ({ autoPanToGeometry: !state.autoPanToGeometry }));
             },
         }),
         {

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useMemo } from 'react';
 import Map, { NavigationControl, Source, Layer, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre';
-import { Maximize2 } from 'lucide-react';
+import { Maximize2, LocateFixed, LocateOff } from 'lucide-react';
 import { GeometryLayer } from './GeometryLayer';
 import { DrawingTools } from './DrawingTools';
 import { useMapStore } from '@/stores/mapStore';
 import { useGeometryStore, addFeatureIds } from '@/stores/geometryStore';
 import { useDrawingStore } from '@/stores/drawingStore';
+import { useUIStore } from '@/stores/uiStore';
 import {
     transformGeometry,
     detectProjectionFromCoordinates,
@@ -55,6 +56,7 @@ export function MapContainer() {
     const { viewState, setViewState, basemap } = useMapStore();
     const { features, inputProjection, detectedProjection, setCoordinateError, setFeatures } = useGeometryStore();
     const { mode: drawingMode, currentPoints, addPoint, reset: resetDrawing } = useDrawingStore();
+    const { autoPanToGeometry, toggleAutoPanToGeometry } = useUIStore();
 
     // Determine the effective source projection
     const sourceProjection = useMemo((): SupportedProjection => {
@@ -153,10 +155,12 @@ export function MapContainer() {
         }
     }, [calculateFitBounds, setViewState]);
 
-    // Fit bounds when features change
+    // Fit bounds when features change (if auto-pan is enabled)
     useEffect(() => {
-        fitBounds();
-    }, [fitBounds]);
+        if (autoPanToGeometry) {
+            fitBounds();
+        }
+    }, [autoPanToGeometry, fitBounds]);
 
     const handleMove = useCallback(
         (evt: { viewState: { longitude: number; latitude: number; zoom: number } }) => {
@@ -259,8 +263,25 @@ export function MapContainer() {
         >
             <NavigationControl position="top-right" />
             <DrawingTools />
-            {hasFeatures && (
-                <div className="absolute right-2 top-24">
+            <div className="absolute right-2 top-24 flex flex-col gap-1">
+                <button
+                    onClick={toggleAutoPanToGeometry}
+                    className={`flex h-[29px] w-[29px] items-center justify-center rounded shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+                        autoPanToGeometry
+                            ? 'bg-primary-500 text-white hover:bg-primary-600'
+                            : 'bg-white text-neutral-700 hover:bg-neutral-100'
+                    }`}
+                    title={autoPanToGeometry ? 'Auto-pan enabled (click to disable)' : 'Auto-pan disabled (click to enable)'}
+                    aria-label={autoPanToGeometry ? 'Disable auto-pan to geometry' : 'Enable auto-pan to geometry'}
+                    aria-pressed={autoPanToGeometry}
+                >
+                    {autoPanToGeometry ? (
+                        <LocateFixed className="h-4 w-4" />
+                    ) : (
+                        <LocateOff className="h-4 w-4" />
+                    )}
+                </button>
+                {hasFeatures && (
                     <button
                         onClick={fitBounds}
                         className="flex h-[29px] w-[29px] items-center justify-center rounded bg-white shadow-md hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -269,8 +290,8 @@ export function MapContainer() {
                     >
                         <Maximize2 className="h-4 w-4 text-neutral-700" />
                     </button>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* Drawing preview layer */}
             {drawingPreview && (

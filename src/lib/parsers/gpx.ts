@@ -3,7 +3,88 @@ import type { Feature } from 'geojson';
 import type { ParseResult, ParsedFeature, FormatType } from '@/types';
 
 /**
- * Parses GPX string into GeoJSON features
+ * Splits input into multiple GPX documents.
+ * Handles concatenated GPX like: <gpx>...</gpx><gpx>...</gpx>
+ */
+function splitGpxDocuments(input: string): string[] {
+    const results: string[] = [];
+
+    // Split on </gpx> and reconstruct
+    const parts = input.split(/<\/gpx>/i);
+
+    for (const part of parts) {
+        const trimmedPart = part.trim();
+        if (!trimmedPart) {
+            continue;
+        }
+
+        // Find the start of a GPX document
+        const xmlDeclMatch = trimmedPart.match(/<\?xml[^?]*\?>/i);
+        const gpxStartMatch = trimmedPart.match(/<gpx[^>]*>/i);
+
+        if (gpxStartMatch) {
+            // Reconstruct the complete GPX document
+            const gpxStart = gpxStartMatch.index ?? 0;
+            let doc = trimmedPart.slice(gpxStart) + '</gpx>';
+
+            // Prepend XML declaration if present
+            if (xmlDeclMatch && (xmlDeclMatch.index ?? 0) < gpxStart) {
+                doc = xmlDeclMatch[0] + '\n' + doc;
+            }
+
+            results.push(doc);
+        }
+    }
+
+    return results;
+}
+
+/**
+ * Parses a single GPX document and returns features or errors
+ */
+function parseSingleGpx(gpxStr: string, featureOffset: number): { features: ParsedFeature[]; errors: Array<{ message: string }> } {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(gpxStr, 'text/xml');
+
+    const parseError = doc.querySelector('parsererror');
+    if (parseError) {
+        return {
+            features: [],
+            errors: [{ message: 'Invalid XML: ' + parseError.textContent }],
+        };
+    }
+
+    const geojson = gpxToGeoJSON(doc);
+
+    if (geojson.features.length === 0) {
+        return {
+            features: [],
+            errors: [],
+        };
+    }
+
+    const features: ParsedFeature[] = geojson.features.map((feature, index) => {
+        const props = feature.properties ?? {};
+        const name = typeof props['name'] === 'string' ? props['name'] : undefined;
+        const description = typeof props['desc'] === 'string' ? props['desc'] : undefined;
+        return {
+            type: 'Feature' as const,
+            id: feature.id?.toString() ?? `feature-${String(featureOffset + index)}`,
+            geometry: feature.geometry,
+            properties: {
+                ...props,
+                name,
+                description,
+            },
+        };
+    });
+
+    return { features, errors: [] };
+}
+
+/**
+ * Parses GPX string into GeoJSON features.
+ * Supports multiple concatenated GPX documents.
  */
 export function parseGpx(input: string): ParseResult {
     const trimmed = input.trim();
@@ -17,51 +98,45 @@ export function parseGpx(input: string): ParseResult {
     }
 
     try {
-        // Parse XML string into DOM
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(trimmed, 'text/xml');
+        // Split into multiple GPX documents
+        const gpxDocs = splitGpxDocuments(trimmed);
 
-        // Check for parse errors
-        const parseError = doc.querySelector('parsererror');
-        if (parseError) {
-            return {
-                features: [],
-                errors: [{ message: 'Invalid XML: ' + parseError.textContent }],
-            };
+        // If no GPX documents found, try parsing as single document
+        if (gpxDocs.length === 0) {
+            gpxDocs.push(trimmed);
         }
 
-        // Convert GPX to GeoJSON
-        const geojson = gpxToGeoJSON(doc);
+        const allFeatures: ParsedFeature[] = [];
+        const allErrors: Array<{ message: string }> = [];
 
-        if (geojson.features.length === 0) {
-            return {
-                features: [],
-                errors: [{ message: 'No features found in GPX' }],
-            };
+        for (let i = 0; i < gpxDocs.length; i++) {
+            const gpxStr = gpxDocs[i];
+            if (!gpxStr) {
+                continue;
+            }
+
+            const result = parseSingleGpx(gpxStr, allFeatures.length);
+
+            if (result.errors.length > 0) {
+                const prefix = gpxDocs.length > 1 ? `Document ${String(i + 1)}: ` : '';
+                allErrors.push(...result.errors.map(e => ({ message: prefix + e.message })));
+            } else {
+                allFeatures.push(...result.features);
+            }
         }
 
-        // Add IDs to features
-        const features: ParsedFeature[] = geojson.features.map((feature, index) => {
-            const props = feature.properties ?? {};
-            const name = typeof props['name'] === 'string' ? props['name'] : undefined;
-            const description = typeof props['desc'] === 'string' ? props['desc'] : undefined;
+        if (allFeatures.length > 0) {
             return {
-                type: 'Feature' as const,
-                id: feature.id?.toString() ?? `feature-${String(index)}`,
-                geometry: feature.geometry,
-                properties: {
-                    ...props,
-                    name,
-                    description,
-                },
+                features: allFeatures,
+                errors: allErrors,
+                detectedFormat: 'gpx',
+                detectedProjection: 'EPSG:4326',
             };
-        });
+        }
 
         return {
-            features,
-            errors: [],
-            detectedFormat: 'gpx',
-            detectedProjection: 'EPSG:4326', // GPX is always WGS84
+            features: [],
+            errors: allErrors.length > 0 ? allErrors : [{ message: 'No features found in GPX' }],
         };
     } catch (e) {
         return {

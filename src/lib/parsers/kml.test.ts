@@ -94,6 +94,25 @@ describe('parseKml', () => {
         expect(result.errors).toHaveLength(1);
         expect(result.features).toEqual([]);
     });
+
+    it('should parse multiple concatenated KML documents', () => {
+        const input = sampleKmlPoint + sampleKmlLine;
+        const result = parseKml(input);
+
+        expect(result.errors).toEqual([]);
+        expect(result.features).toHaveLength(2);
+        expect(result.features[0]?.geometry.type).toBe('Point');
+        expect(result.features[1]?.geometry.type).toBe('LineString');
+    });
+
+    it('should parse multiple KML without XML declarations', () => {
+        const kml1 = '<kml xmlns="http://www.opengis.net/kml/2.2"><Placemark><Point><coordinates>0,0</coordinates></Point></Placemark></kml>';
+        const kml2 = '<kml xmlns="http://www.opengis.net/kml/2.2"><Placemark><Point><coordinates>1,1</coordinates></Point></Placemark></kml>';
+        const result = parseKml(kml1 + kml2);
+
+        expect(result.errors).toEqual([]);
+        expect(result.features).toHaveLength(2);
+    });
 });
 
 describe('formatKml', () => {

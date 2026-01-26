@@ -127,6 +127,43 @@ describe('parseGeoJSON', () => {
 
         expect(result.detectedFormat).toBe('geojson');
     });
+
+    it('should parse multiple concatenated JSON objects', () => {
+        const input = '{"type": "Point", "coordinates": [0, 0]}{"type": "Point", "coordinates": [1, 1]}';
+        const result = parseGeoJSON(input);
+
+        expect(result.errors).toEqual([]);
+        expect(result.features).toHaveLength(2);
+        expect(result.features[0]?.geometry.type).toBe('Point');
+        expect(result.features[1]?.geometry.type).toBe('Point');
+    });
+
+    it('should parse multiple JSON objects with whitespace between them', () => {
+        const input = '{"type": "Point", "coordinates": [0, 0]}  \n  {"type": "Point", "coordinates": [1, 1]}';
+        const result = parseGeoJSON(input);
+
+        expect(result.errors).toEqual([]);
+        expect(result.features).toHaveLength(2);
+    });
+
+    it('should parse mixed geometry types in multiple objects', () => {
+        const input = '{"type": "Point", "coordinates": [0, 0]}{"type": "LineString", "coordinates": [[0, 0], [1, 1]]}';
+        const result = parseGeoJSON(input);
+
+        expect(result.errors).toEqual([]);
+        expect(result.features).toHaveLength(2);
+        expect(result.features[0]?.geometry.type).toBe('Point');
+        expect(result.features[1]?.geometry.type).toBe('LineString');
+    });
+
+    it('should continue parsing valid objects if one has error', () => {
+        const input = '{"type": "Point", "coordinates": [0, 0]}{"type": "Invalid"}{"type": "Point", "coordinates": [1, 1]}';
+        const result = parseGeoJSON(input);
+
+        // Should get 2 valid features and 1 error
+        expect(result.features).toHaveLength(2);
+        expect(result.errors.length).toBeGreaterThan(0);
+    });
 });
 
 describe('formatGeoJSON', () => {
@@ -178,5 +215,9 @@ describe('detectGeoJSON', () => {
 
     it('should handle whitespace', () => {
         expect(detectGeoJSON('  {"type": "Point", "coordinates": [0, 0]}  ')).toBe(true);
+    });
+
+    it('should detect multiple concatenated GeoJSON objects', () => {
+        expect(detectGeoJSON('{"type": "Point", "coordinates": [0, 0]}{"type": "Point", "coordinates": [1, 1]}')).toBe(true);
     });
 });

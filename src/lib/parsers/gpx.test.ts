@@ -88,6 +88,25 @@ describe('parseGpx', () => {
         expect(result.errors).toHaveLength(1);
         expect(result.features).toEqual([]);
     });
+
+    it('should parse multiple concatenated GPX documents', () => {
+        const input = sampleGpxWaypoint + sampleGpxTrack;
+        const result = parseGpx(input);
+
+        expect(result.errors).toEqual([]);
+        expect(result.features).toHaveLength(2);
+        expect(result.features[0]?.geometry.type).toBe('Point');
+        expect(result.features[1]?.geometry.type).toBe('LineString');
+    });
+
+    it('should parse multiple GPX without XML declarations', () => {
+        const gpx1 = '<gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1"><wpt lat="0" lon="0"><name>P1</name></wpt></gpx>';
+        const gpx2 = '<gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1"><wpt lat="1" lon="1"><name>P2</name></wpt></gpx>';
+        const result = parseGpx(gpx1 + gpx2);
+
+        expect(result.errors).toEqual([]);
+        expect(result.features).toHaveLength(2);
+    });
 });
 
 describe('formatGpx', () => {
