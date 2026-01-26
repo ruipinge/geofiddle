@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useMemo } from 'react';
-import Map, { NavigationControl, type MapRef } from 'react-map-gl/maplibre';
+import Map, { NavigationControl, Source, Layer, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre';
 import { Maximize2 } from 'lucide-react';
 import { GeometryLayer } from './GeometryLayer';
+import { DrawingTools } from './DrawingTools';
 import { useMapStore } from '@/stores/mapStore';
-import { useGeometryStore } from '@/stores/geometryStore';
+import { useGeometryStore, addFeatureIds } from '@/stores/geometryStore';
+import { useDrawingStore } from '@/stores/drawingStore';
 import {
     transformGeometry,
     detectProjectionFromCoordinates,
@@ -51,7 +53,8 @@ function extractAllCoordinates(features: { geometry: Geometry | null }[]): Posit
 export function MapContainer() {
     const mapRef = useRef<MapRef>(null);
     const { viewState, setViewState, basemap } = useMapStore();
-    const { features, inputProjection, detectedProjection, setCoordinateError } = useGeometryStore();
+    const { features, inputProjection, detectedProjection, setCoordinateError, setFeatures } = useGeometryStore();
+    const { mode: drawingMode, currentPoints, addPoint, reset: resetDrawing } = useDrawingStore();
 
     // Determine the effective source projection
     const sourceProjection = useMemo((): SupportedProjection => {
@@ -166,22 +169,95 @@ export function MapContainer() {
         [setViewState]
     );
 
+    // Handle map click for drawing
+    const handleClick = useCallback(
+        (evt: MapLayerMouseEvent) => {
+            if (drawingMode === 'none') {
+                return;
+            }
+
+            const { lng, lat } = evt.lngLat;
+            const point: Position = [lng, lat];
+
+            if (drawingMode === 'point') {
+                // For points, create feature immediately
+                const newFeature = {
+                    type: 'Feature' as const,
+                    geometry: {
+                        type: 'Point' as const,
+                        coordinates: point,
+                    },
+                    properties: {
+                        name: 'Drawn point',
+                    },
+                };
+                const updatedFeatures = addFeatureIds([...features, newFeature]);
+                setFeatures(updatedFeatures);
+                resetDrawing();
+            } else {
+                // For lines and polygons, add point to current drawing
+                addPoint(point);
+            }
+        },
+        [drawingMode, features, setFeatures, addPoint, resetDrawing]
+    );
+
+    // Create drawing preview GeoJSON
+    const drawingPreview = useMemo(() => {
+        if (drawingMode === 'none' || currentPoints.length === 0) {
+            return null;
+        }
+
+        const features: GeoJSON.Feature[] = [];
+
+        // Add points
+        currentPoints.forEach((point, index) => {
+            features.push({
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: point },
+                properties: { index },
+            });
+        });
+
+        // Add line connecting points
+        if (currentPoints.length >= 2) {
+            const lineCoords = drawingMode === 'polygon' && currentPoints.length >= 3
+                ? [...currentPoints, currentPoints[0]] // Close polygon preview
+                : currentPoints;
+
+            features.push({
+                type: 'Feature',
+                geometry: { type: 'LineString', coordinates: lineCoords },
+                properties: {},
+            });
+        }
+
+        return {
+            type: 'FeatureCollection' as const,
+            features,
+        };
+    }, [drawingMode, currentPoints]);
+
     const mapStyle =
         basemap === 'satellite'
             ? 'https://api.maptiler.com/maps/hybrid/style.json?key=get_your_own_key'
             : 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 
     const hasFeatures = transformedFeatures.length > 0;
+    const isDrawing = drawingMode !== 'none';
 
     return (
         <Map
             ref={mapRef}
             {...viewState}
             onMove={handleMove}
+            onClick={handleClick}
             mapStyle={mapStyle}
             style={{ width: '100%', height: '100%' }}
+            cursor={isDrawing ? 'crosshair' : undefined}
         >
             <NavigationControl position="top-right" />
+            <DrawingTools />
             {hasFeatures && (
                 <div className="absolute right-2 top-24">
                     <button
@@ -193,6 +269,33 @@ export function MapContainer() {
                         <Maximize2 className="h-4 w-4 text-neutral-700" />
                     </button>
                 </div>
+            )}
+
+            {/* Drawing preview layer */}
+            {drawingPreview && (
+                <Source id="drawing-preview" type="geojson" data={drawingPreview}>
+                    <Layer
+                        id="drawing-preview-line"
+                        type="line"
+                        paint={{
+                            'line-color': '#f97316',
+                            'line-width': 2,
+                            'line-dasharray': [2, 2],
+                        }}
+                        filter={['==', '$type', 'LineString']}
+                    />
+                    <Layer
+                        id="drawing-preview-points"
+                        type="circle"
+                        paint={{
+                            'circle-radius': 6,
+                            'circle-color': '#f97316',
+                            'circle-stroke-color': '#ffffff',
+                            'circle-stroke-width': 2,
+                        }}
+                        filter={['==', '$type', 'Point']}
+                    />
+                </Source>
             )}
             <GeometryLayer />
         </Map>
