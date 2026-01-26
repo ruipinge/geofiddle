@@ -15,6 +15,7 @@ PRIVATE.json
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+e2e/*.png
 
 # IDE
 .idea
