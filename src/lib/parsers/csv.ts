@@ -39,13 +39,20 @@ export function parseCsv(input: string): ParseResult {
             };
         }
 
-        // Determine if it's lat,lon or lon,lat order
-        // Default to lon,lat (GeoJSON standard)
-        // Only use lat,lon if second value is clearly out of latitude range
-        // but first value is within latitude range
+        // Determine coordinate order:
+        // - For WGS84-like values, try to detect lat,lon vs lon,lat
+        // - For projected coordinates (like BNG), use x,y order (first=x/easting, second=y/northing)
         const first = numbers[0] ?? 0;
         const second = numbers[1] ?? 0;
-        const isLatLon = !isValidLatitude(second) && isValidLatitude(first) && isValidLongitude(second);
+
+        // Check if values look like WGS84
+        const firstLooksLikeWGS84 = Math.abs(first) <= 180;
+        const secondLooksLikeWGS84 = Math.abs(second) <= 180;
+        const looksLikeWGS84 = firstLooksLikeWGS84 && secondLooksLikeWGS84;
+
+        // For WGS84-like values, try to determine lat,lon vs lon,lat
+        // Only swap if second value is clearly out of latitude range but first is valid latitude
+        const isLatLon = looksLikeWGS84 && !isValidLatitude(second) && isValidLatitude(first) && isValidLongitude(second);
 
         const features: ParsedFeature[] = [];
 
@@ -53,23 +60,13 @@ export function parseCsv(input: string): ParseResult {
             const a = numbers[i] ?? 0;
             const b = numbers[i + 1] ?? 0;
 
+            // For WGS84-like coords, potentially swap lat/lon
+            // For projected coords (like BNG), keep as x,y (which maps to lon,lat in GeoJSON)
             const lon = isLatLon ? b : a;
             const lat = isLatLon ? a : b;
 
-            // Validate coordinates
-            if (!isValidLatitude(lat)) {
-                return {
-                    features: [],
-                    errors: [{ message: `Invalid latitude: ${String(lat)} (must be between -90 and 90)` }],
-                };
-            }
-
-            if (!isValidLongitude(lon)) {
-                return {
-                    features: [],
-                    errors: [{ message: `Invalid longitude: ${String(lon)} (must be between -180 and 180)` }],
-                };
-            }
+            // Don't validate here - projection detection and validation happens later
+            // This allows BNG and other projected coordinates to pass through
 
             features.push({
                 type: 'Feature',

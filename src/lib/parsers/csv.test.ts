@@ -63,11 +63,12 @@ describe('parseCsv', () => {
         expect(result.features).toEqual([]);
     });
 
-    it('should error on invalid latitude', () => {
-        // 0,200 - interpreted as lon,lat where lat=200 is invalid
+    it('should allow coordinates outside WGS84 range (for projected CRS like BNG)', () => {
+        // 0,200 could be valid projected coordinates
+        // Validation happens later after projection detection
         const result = parseCsv('0,200');
-        expect(result.errors).toHaveLength(1);
-        expect(result.errors[0]?.message).toContain('latitude');
+        expect(result.errors).toHaveLength(0);
+        expect(result.features).toHaveLength(1);
     });
 
     it('should error on non-numeric values', () => {
