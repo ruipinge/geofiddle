@@ -3,6 +3,7 @@ import { DropZone } from './DropZone';
 import { TextEditor } from './TextEditor';
 import { FormatSelect } from './FormatSelect';
 import { ProjectionSelect } from './ProjectionSelect';
+import { StatusIndicator } from './StatusIndicator';
 import { useGeometryStore } from '@/stores/geometryStore';
 
 const ACCEPTED_EXTENSIONS = ['.json', '.geojson', '.wkt', '.csv', '.kml', '.gpx', '.txt'];
@@ -52,6 +53,7 @@ export function InputArea() {
                     placeholder="Paste or drop GeoJSON, WKT, CSV, KML, GPX..."
                 />
             </DropZone>
+            <StatusIndicator />
         </div>
     );
 }
