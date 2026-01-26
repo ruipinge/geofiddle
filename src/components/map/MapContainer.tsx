@@ -221,8 +221,9 @@ export function MapContainer() {
 
         // Add line connecting points
         if (currentPoints.length >= 2) {
-            const lineCoords = drawingMode === 'polygon' && currentPoints.length >= 3
-                ? [...currentPoints, currentPoints[0]] // Close polygon preview
+            const firstPoint = currentPoints[0];
+            const lineCoords = drawingMode === 'polygon' && currentPoints.length >= 3 && firstPoint
+                ? [...currentPoints, firstPoint] // Close polygon preview
                 : currentPoints;
 
             features.push({
