@@ -29,9 +29,12 @@ export function InputArea() {
 
     return (
         <div className="border-b border-neutral-200 p-4 dark:border-neutral-700">
-            <h2 className="mb-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                Input Geometry
-            </h2>
+            <div className="mb-3 flex items-center gap-2">
+                <h2 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    Input Geometry
+                </h2>
+                <StatusIndicator />
+            </div>
             <div className="mb-3 flex gap-2">
                 <FormatSelect
                     value={inputFormat}
@@ -53,7 +56,6 @@ export function InputArea() {
                     placeholder="Paste or drop GeoJSON, WKT, CSV, KML, GPX..."
                 />
             </DropZone>
-            <StatusIndicator />
         </div>
     );
 }
