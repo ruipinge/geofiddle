@@ -1,6 +1,46 @@
 import { parse } from '@/lib/parsers';
 import { detectFormat, detectProjection } from '@/lib/utils/format-detection';
+import { detectProjectionFromCoordinates } from '@/lib/projections';
 import type { FormatType, ParsedFeature, ProjectionType } from '@/types';
+import type { Geometry, Position } from 'geojson';
+
+// Helper to extract coordinates from features for projection detection
+function extractCoordsFromFeatures(features: ParsedFeature[]): Position[] {
+    const coords: Position[] = [];
+
+    const extractFromGeometry = (geometry: Geometry | null): void => {
+        if (!geometry) {return;}
+
+        if (geometry.type === 'GeometryCollection') {
+            for (const g of geometry.geometries) {
+                extractFromGeometry(g);
+            }
+            return;
+        }
+
+        const extractFromCoords = (c: unknown): void => {
+            if (Array.isArray(c)) {
+                if (typeof c[0] === 'number' && typeof c[1] === 'number') {
+                    coords.push(c as Position);
+                } else {
+                    for (const item of c) {
+                        extractFromCoords(item);
+                    }
+                }
+            }
+        };
+
+        if ('coordinates' in geometry) {
+            extractFromCoords(geometry.coordinates);
+        }
+    };
+
+    for (const feature of features) {
+        extractFromGeometry(feature.geometry);
+    }
+
+    return coords;
+}
 
 export interface ParserRequest {
     id: number;
@@ -65,6 +105,15 @@ self.onmessage = (e: MessageEvent<ParserRequest>) => {
     try {
         const result = parse(rawText, formatToUse);
 
+        // If no projection detected from format, detect from coordinates
+        let finalProjection = detectedProjection ?? result.detectedProjection ?? null;
+        if (inputProjection === 'auto' && !finalProjection && result.features.length > 0) {
+            const coords = extractCoordsFromFeatures(result.features);
+            if (coords.length > 0) {
+                finalProjection = detectProjectionFromCoordinates(coords);
+            }
+        }
+
         const response: ParserResponse = {
             id,
             features: result.features,
@@ -72,7 +121,7 @@ self.onmessage = (e: MessageEvent<ParserRequest>) => {
                 ? result.errors.map((err) => err.message).join('\n')
                 : null,
             detectedFormat,
-            detectedProjection: detectedProjection ?? result.detectedProjection ?? null,
+            detectedProjection: finalProjection,
         };
         self.postMessage(response);
     } catch (err) {

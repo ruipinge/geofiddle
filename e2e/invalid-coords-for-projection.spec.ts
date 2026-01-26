@@ -36,10 +36,10 @@ test('should show error instead of crashing when WGS84 selected with BNG coordin
     const lngLatErrors = errors.filter((e) => e.includes('LngLat') || e.includes('latitude'));
     expect(lngLatErrors, `App crashed with: ${lngLatErrors.join(', ')}`).toHaveLength(0);
 
-    // Instead, it should show a user-friendly error in the UI
-    // Either a parse error or a validation error
-    const errorBox = page.locator('.bg-red-50, .bg-red-950, .bg-amber-50, .bg-amber-950');
-    await expect(errorBox, 'Should display an error message to the user').toBeVisible();
+    // Instead, it should show a user-friendly error in the status indicator
+    // The error badge uses bg-red-100 (light) or bg-red-900/50 (dark)
+    const errorBadge = page.locator('.bg-red-100, [class*="bg-red-900"]');
+    await expect(errorBadge, 'Should display an error message to the user').toBeVisible();
 
     // The map canvas should still be present (app didn't crash)
     const mapCanvas = page.locator('canvas');

@@ -1,6 +1,46 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useGeometryStore } from '@/stores/geometryStore';
 import type { ParserRequest, ParserResponse } from '@/workers/parser.worker';
+import type { Geometry, Position } from 'geojson';
+import type { ParsedFeature } from '@/types';
+
+// Helper to extract coordinates from features for projection detection
+function extractCoordsFromFeatures(features: ParsedFeature[]): Position[] {
+    const coords: Position[] = [];
+
+    const extractFromGeometry = (geometry: Geometry | null): void => {
+        if (!geometry) {return;}
+
+        if (geometry.type === 'GeometryCollection') {
+            for (const g of geometry.geometries) {
+                extractFromGeometry(g);
+            }
+            return;
+        }
+
+        const extractFromCoords = (c: unknown): void => {
+            if (Array.isArray(c)) {
+                if (typeof c[0] === 'number' && typeof c[1] === 'number') {
+                    coords.push(c as Position);
+                } else {
+                    for (const item of c) {
+                        extractFromCoords(item);
+                    }
+                }
+            }
+        };
+
+        if ('coordinates' in geometry) {
+            extractFromCoords(geometry.coordinates);
+        }
+    };
+
+    for (const feature of features) {
+        extractFromGeometry(feature.geometry);
+    }
+
+    return coords;
+}
 
 // Size threshold for using Web Worker (100KB)
 const WORKER_THRESHOLD = 100 * 1024;
@@ -110,6 +150,7 @@ export function useGeometryParsing(): void {
             // Dynamic import to avoid bundling in main thread when using worker
             const { parse } = await import('@/lib/parsers');
             const { detectFormat, detectProjection } = await import('@/lib/utils/format-detection');
+            const { detectProjectionFromCoordinates } = await import('@/lib/projections');
 
             if (!text.trim()) {
                 setFeatures([]);
@@ -126,7 +167,8 @@ export function useGeometryParsing(): void {
                 return;
             }
 
-            const detectedProjection = inputProjection === 'auto'
+            // First try to detect projection from format (e.g., EWKT SRID)
+            let detectedProjection = inputProjection === 'auto'
                 ? detectProjection(text, formatToUse)
                 : null;
 
@@ -137,6 +179,14 @@ export function useGeometryParsing(): void {
                     setParseError(result.errors.map((e) => e.message).join('\n'));
                 } else {
                     setFeatures(result.features);
+
+                    // If no projection detected from format, detect from coordinates
+                    if (inputProjection === 'auto' && !detectedProjection && !result.detectedProjection && result.features.length > 0) {
+                        const coords = extractCoordsFromFeatures(result.features);
+                        if (coords.length > 0) {
+                            detectedProjection = detectProjectionFromCoordinates(coords);
+                        }
+                    }
                 }
                 setDetectedFormat(detectedFormat);
                 setDetectedProjection(detectedProjection ?? result.detectedProjection ?? null);
