@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useMemo } from 'react';
 import Map, { NavigationControl, type MapRef } from 'react-map-gl/maplibre';
+import { Maximize2 } from 'lucide-react';
 import { GeometryLayer } from './GeometryLayer';
 import { useMapStore } from '@/stores/mapStore';
 import { useGeometryStore } from '@/stores/geometryStore';
@@ -102,8 +103,8 @@ export function MapContainer() {
         setCoordinateError(coordinateError);
     }, [coordinateError, setCoordinateError]);
 
-    // Fit bounds when features change - use transformed coordinates
-    useEffect(() => {
+    // Fit bounds function - can be called manually or automatically
+    const fitBounds = useCallback(() => {
         if (transformedFeatures.length === 0 || !mapRef.current) {
             return;
         }
@@ -122,6 +123,11 @@ export function MapContainer() {
         }
     }, [transformedFeatures]);
 
+    // Fit bounds when features change
+    useEffect(() => {
+        fitBounds();
+    }, [fitBounds]);
+
     const handleMove = useCallback(
         (evt: { viewState: { longitude: number; latitude: number; zoom: number } }) => {
             setViewState({
@@ -138,6 +144,8 @@ export function MapContainer() {
             ? 'https://api.maptiler.com/maps/hybrid/style.json?key=get_your_own_key'
             : 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 
+    const hasFeatures = transformedFeatures.length > 0;
+
     return (
         <Map
             ref={mapRef}
@@ -147,6 +155,18 @@ export function MapContainer() {
             style={{ width: '100%', height: '100%' }}
         >
             <NavigationControl position="top-right" />
+            {hasFeatures && (
+                <div className="absolute right-2 top-24">
+                    <button
+                        onClick={fitBounds}
+                        className="flex h-[29px] w-[29px] items-center justify-center rounded bg-white shadow-md hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        title="Fit map to geometry"
+                        aria-label="Fit map to geometry"
+                    >
+                        <Maximize2 className="h-4 w-4 text-neutral-700" />
+                    </button>
+                </div>
+            )}
             <GeometryLayer />
         </Map>
     );
