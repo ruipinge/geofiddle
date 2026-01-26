@@ -168,8 +168,18 @@ function createPolylineParser(precision: number) {
     function detect(input: string): boolean {
         const trimmed = input.trim();
 
-        // Polylines don't contain spaces, commas, or common punctuation
-        if (/[\s,;:{}[\]<>]/.test(trimmed)) {
+        // Exclude JSON (starts with { or [)
+        if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+            return false;
+        }
+
+        // Exclude XML (starts with <)
+        if (trimmed.startsWith('<')) {
+            return false;
+        }
+
+        // Polylines don't contain spaces, commas, semicolons, or colons
+        if (/[\s,;:]/.test(trimmed)) {
             return false;
         }
 

@@ -140,4 +140,49 @@ describe('polyline6Parser', () => {
             expect(geom.coordinates[0]?.[0]).toBeCloseTo(-120.2, 5);
         }
     });
+
+    it('should detect polyline6 encoded string', () => {
+        // Encode with precision 6
+        const coords: [number, number][] = [
+            [-120.2, 38.5],
+            [-120.95, 40.7],
+        ];
+        const encoded = encodePolyline(coords, 6);
+
+        // Should be detected as polyline6
+        expect(polyline6Parser.detect(encoded)).toBe(true);
+
+        // When decoded as polyline5, coords would be 10x larger and out of range
+        // So polyline5 should NOT detect this
+        expect(polyline5Parser.detect(encoded)).toBe(false);
+    });
+});
+
+describe('polyline detection precedence', () => {
+    it('should detect polyline6 string as polyline6 (coords out of range when decoded as polyline5)', () => {
+        // A polyline6 string, when decoded as polyline5, gives 10x larger values
+        // E.g., lat 38.5 encoded as polyline6 → decoded as polyline5 → 385 (invalid!)
+        const coords: [number, number][] = [
+            [-120.2, 38.5],
+            [-120.95, 40.7],
+        ];
+        const encoded = encodePolyline(coords, 6);
+
+        expect(polyline6Parser.detect(encoded)).toBe(true);
+        expect(polyline5Parser.detect(encoded)).toBe(false);
+    });
+
+    it('should not detect invalid strings as polyline', () => {
+        // String with characters outside polyline range
+        expect(polyline5Parser.detect('hello world')).toBe(false);
+        expect(polyline6Parser.detect('hello world')).toBe(false);
+
+        // JSON
+        expect(polyline5Parser.detect('{"type":"Point"}')).toBe(false);
+        expect(polyline6Parser.detect('{"type":"Point"}')).toBe(false);
+
+        // CSV
+        expect(polyline5Parser.detect('1,2,3,4')).toBe(false);
+        expect(polyline6Parser.detect('1,2,3,4')).toBe(false);
+    });
 });

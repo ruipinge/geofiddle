@@ -16,8 +16,8 @@ const parsers: Partial<Record<FormatType, FormatParser>> = {
     kml: kmlParser,
     gpx: gpxParser,
     shapefile: shapefileParser,
+    polyline6: polyline6Parser, // Check polyline6 before polyline5
     polyline5: polyline5Parser,
-    polyline6: polyline6Parser,
     csv: csvParser, // CSV last as it's the most generic
 };
 
