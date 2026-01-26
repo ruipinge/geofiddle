@@ -13,7 +13,7 @@ proj4.defs('EPSG:27700', '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=4
 export type SupportedProjection = 'EPSG:4326' | 'EPSG:3857' | 'EPSG:27700';
 
 export const projectionLabels: Record<SupportedProjection, string> = {
-    'EPSG:4326': 'WGS84 (lat/lon)',
+    'EPSG:4326': 'WGS84 (lon/lat)',
     'EPSG:3857': 'Web Mercator',
     'EPSG:27700': 'British National Grid',
 };
