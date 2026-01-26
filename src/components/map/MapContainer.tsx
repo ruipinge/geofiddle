@@ -103,25 +103,52 @@ export function MapContainer() {
         setCoordinateError(coordinateError);
     }, [coordinateError, setCoordinateError]);
 
-    // Fit bounds function - can be called manually or automatically
-    const fitBounds = useCallback(() => {
-        if (transformedFeatures.length === 0 || !mapRef.current) {
-            return;
+    // Calculate view state to fit bounds
+    const calculateFitBounds = useCallback(() => {
+        if (transformedFeatures.length === 0) {
+            return null;
         }
 
         const featureCollection = turf.featureCollection(transformedFeatures);
         const bbox = turf.bbox(featureCollection);
 
-        if (bbox.every((v) => isFinite(v))) {
-            mapRef.current.fitBounds(
-                [
-                    [bbox[0], bbox[1]],
-                    [bbox[2], bbox[3]],
-                ],
-                { padding: 50, duration: 500 }
-            );
+        if (!bbox.every((v) => isFinite(v))) {
+            return null;
         }
+
+        const [minLon, minLat, maxLon, maxLat] = bbox;
+
+        // Calculate center
+        const centerLon = (minLon + maxLon) / 2;
+        const centerLat = (minLat + maxLat) / 2;
+
+        // Calculate zoom level to fit bounds
+        // This is a simplified calculation - adjust padding as needed
+        const latDiff = maxLat - minLat;
+        const lonDiff = maxLon - minLon;
+        const maxDiff = Math.max(latDiff, lonDiff);
+
+        // Rough zoom calculation (adjust multiplier as needed)
+        let zoom = 10;
+        if (maxDiff > 0) {
+            zoom = Math.floor(Math.log2(360 / maxDiff)) - 1;
+            zoom = Math.max(1, Math.min(zoom, 18)); // Clamp between 1 and 18
+        }
+
+        return {
+            longitude: centerLon,
+            latitude: centerLat,
+            zoom,
+        };
     }, [transformedFeatures]);
+
+    // Fit bounds function - can be called manually or automatically
+    const fitBounds = useCallback(() => {
+        const newViewState = calculateFitBounds();
+        if (newViewState) {
+            setViewState(newViewState);
+        }
+    }, [calculateFitBounds, setViewState]);
 
     // Fit bounds when features change
     useEffect(() => {
