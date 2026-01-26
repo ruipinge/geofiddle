@@ -20,16 +20,16 @@ describe('parseCsv', () => {
         }
     });
 
-    it('should parse values where second is out of lat range as lat,lon', () => {
-        // When second value (120) is outside latitude range but valid as longitude,
-        // and first value (45) is valid as latitude, treat as lat,lon
+    it('should always parse as lon,lat (x,y) order', () => {
+        // Coordinate order is always: first value = lon (x), second value = lat (y)
+        // No automatic swapping based on value ranges
         const result = parseCsv('45,120');
         expect(result.errors).toEqual([]);
         expect(result.features).toHaveLength(1);
         const geom = result.features[0]?.geometry;
         if (geom?.type === 'Point') {
-            expect(geom.coordinates[0]).toBeCloseTo(120); // lon
-            expect(geom.coordinates[1]).toBeCloseTo(45);  // lat
+            expect(geom.coordinates[0]).toBeCloseTo(45);  // lon (x)
+            expect(geom.coordinates[1]).toBeCloseTo(120); // lat (y)
         }
     });
 
