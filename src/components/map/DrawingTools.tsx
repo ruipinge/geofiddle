@@ -1,12 +1,19 @@
 import { useCallback } from 'react';
-import { MapPin, Minus, Pentagon, X, Check } from 'lucide-react';
+import { MapPin, Minus, Pentagon, X, Check, LocateFixed, LocateOff, Maximize2 } from 'lucide-react';
 import { useDrawingStore, type DrawingMode } from '@/stores/drawingStore';
 import { useGeometryStore, addFeatureIds } from '@/stores/geometryStore';
+import { useUIStore } from '@/stores/uiStore';
 import type { Feature, Point, LineString, Polygon } from 'geojson';
 
-export function DrawingTools() {
+interface DrawingToolsProps {
+    onFitBounds?: () => void;
+    hasFeatures?: boolean;
+}
+
+export function DrawingTools({ onFitBounds, hasFeatures = false }: DrawingToolsProps) {
     const { mode, setMode, currentPoints, reset } = useDrawingStore();
     const { features, setFeatures } = useGeometryStore();
+    const { autoPanToGeometry, toggleAutoPanToGeometry } = useUIStore();
 
     const handleSelectTool = useCallback((newMode: DrawingMode) => {
         if (mode === newMode) {
@@ -115,6 +122,38 @@ export function DrawingTools() {
                 >
                     <Pentagon className="h-4 w-4" />
                 </button>
+
+                {/* Separator */}
+                <div className="mx-0.5 w-px self-stretch bg-neutral-200" />
+
+                {/* View controls */}
+                <button
+                    onClick={toggleAutoPanToGeometry}
+                    className={`flex h-8 w-8 items-center justify-center rounded transition-colors ${
+                        autoPanToGeometry
+                            ? 'bg-primary-500 text-white'
+                            : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}
+                    title={autoPanToGeometry ? 'Auto-pan enabled (click to disable)' : 'Auto-pan disabled (click to enable)'}
+                    aria-label={autoPanToGeometry ? 'Disable auto-pan to geometry' : 'Enable auto-pan to geometry'}
+                    aria-pressed={autoPanToGeometry}
+                >
+                    {autoPanToGeometry ? (
+                        <LocateFixed className="h-4 w-4" />
+                    ) : (
+                        <LocateOff className="h-4 w-4" />
+                    )}
+                </button>
+                {hasFeatures && onFitBounds && (
+                    <button
+                        onClick={onFitBounds}
+                        className="flex h-8 w-8 items-center justify-center rounded text-neutral-700 transition-colors hover:bg-neutral-100"
+                        title="Fit map to geometry"
+                        aria-label="Fit map to geometry"
+                    >
+                        <Maximize2 className="h-4 w-4" />
+                    </button>
+                )}
             </div>
 
             {/* Drawing status and actions */}

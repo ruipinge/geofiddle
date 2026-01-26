@@ -18,8 +18,9 @@ interface GeometryState {
     coordinateError: string | null;
     isParsing: boolean;
 
-    // Selection
+    // Selection and hover
     selectedFeatureId: string | null;
+    hoveredFeatureId: string | null;
 
     // Actions
     setRawText: (text: string) => void;
@@ -30,6 +31,7 @@ interface GeometryState {
     setCoordinateError: (error: string | null) => void;
     setIsParsing: (isParsing: boolean) => void;
     setSelectedFeatureId: (id: string | null) => void;
+    setHoveredFeatureId: (id: string | null) => void;
     setDetectedFormat: (format: FormatType | null) => void;
     setDetectedProjection: (projection: ProjectionType | null) => void;
     reset: () => void;
@@ -46,6 +48,7 @@ const initialState = {
     coordinateError: null,
     isParsing: false,
     selectedFeatureId: null,
+    hoveredFeatureId: null,
 };
 
 export const useGeometryStore = create<GeometryState>((set) => ({
@@ -82,6 +85,10 @@ export const useGeometryStore = create<GeometryState>((set) => ({
 
     setSelectedFeatureId: (selectedFeatureId) => {
         set({ selectedFeatureId });
+    },
+
+    setHoveredFeatureId: (hoveredFeatureId) => {
+        set({ hoveredFeatureId });
     },
 
     setDetectedFormat: (detectedFormat) => {

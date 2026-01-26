@@ -41,9 +41,42 @@ const pointLayer: CircleLayer = {
     filter: ['==', '$type', 'Point'],
 };
 
-// Highlight layers for selected feature
-const highlightFillLayer: FillLayer = {
-    id: 'geometry-fill-highlight',
+// Hover layers (lighter highlight)
+const hoverFillLayer: FillLayer = {
+    id: 'geometry-fill-hover',
+    type: 'fill',
+    source: 'geometry-source',
+    paint: {
+        'fill-color': '#8b5cf6', // violet-500
+        'fill-opacity': 0.3,
+    },
+};
+
+const hoverLineLayer: LineLayer = {
+    id: 'geometry-line-hover',
+    type: 'line',
+    source: 'geometry-source',
+    paint: {
+        'line-color': '#7c3aed', // violet-600
+        'line-width': 3,
+    },
+};
+
+const hoverPointLayer: CircleLayer = {
+    id: 'geometry-point-hover',
+    type: 'circle',
+    source: 'geometry-source',
+    paint: {
+        'circle-radius': 8,
+        'circle-color': '#8b5cf6', // violet-500
+        'circle-stroke-color': '#ffffff',
+        'circle-stroke-width': 2,
+    },
+};
+
+// Selected layers (stronger highlight)
+const selectedFillLayer: FillLayer = {
+    id: 'geometry-fill-selected',
     type: 'fill',
     source: 'geometry-source',
     paint: {
@@ -52,8 +85,8 @@ const highlightFillLayer: FillLayer = {
     },
 };
 
-const highlightLineLayer: LineLayer = {
-    id: 'geometry-line-highlight',
+const selectedLineLayer: LineLayer = {
+    id: 'geometry-line-selected',
     type: 'line',
     source: 'geometry-source',
     paint: {
@@ -62,8 +95,8 @@ const highlightLineLayer: LineLayer = {
     },
 };
 
-const highlightPointLayer: CircleLayer = {
-    id: 'geometry-point-highlight',
+const selectedPointLayer: CircleLayer = {
+    id: 'geometry-point-selected',
     type: 'circle',
     source: 'geometry-source',
     paint: {
@@ -109,7 +142,7 @@ function extractAllCoordinates(features: { geometry: Geometry | null }[]): Posit
 }
 
 export function GeometryLayer() {
-    const { features, selectedFeatureId, inputProjection, detectedProjection, coordinateError } = useGeometryStore();
+    const { features, selectedFeatureId, hoveredFeatureId, inputProjection, detectedProjection, coordinateError } = useGeometryStore();
 
     // Determine the effective source projection
     const sourceProjection = useMemo((): SupportedProjection => {
@@ -129,20 +162,33 @@ export function GeometryLayer() {
         return 'EPSG:4326';
     }, [inputProjection, detectedProjection, features]);
 
-    // Create filters for highlighted and non-highlighted features
-    const { highlightFilter, nonHighlightFilter } = useMemo(() => {
-        if (!selectedFeatureId) {
-            return {
-                highlightFilter: ['==', 'id', ''] as unknown as FilterSpecification,
-                nonHighlightFilter: undefined,
-            };
+    // Create filters for hover, selected, and base features
+    // Using legacy filter format: ['==', 'property', value]
+    const filters = useMemo(() => {
+        const selectedFilter = selectedFeatureId
+            ? (['==', 'id', selectedFeatureId] as unknown as FilterSpecification)
+            : null;
+
+        // Hover filter: only if hovered and not the same as selected
+        const hoverFilter = hoveredFeatureId && hoveredFeatureId !== selectedFeatureId
+            ? (['==', 'id', hoveredFeatureId] as unknown as FilterSpecification)
+            : null;
+
+        // Base filter: exclude both selected and hovered
+        let baseExcludeFilter: FilterSpecification | undefined;
+        if (selectedFeatureId && hoveredFeatureId && hoveredFeatureId !== selectedFeatureId) {
+            baseExcludeFilter = ['all',
+                ['!=', 'id', selectedFeatureId],
+                ['!=', 'id', hoveredFeatureId],
+            ] as unknown as FilterSpecification;
+        } else if (selectedFeatureId) {
+            baseExcludeFilter = ['!=', 'id', selectedFeatureId] as unknown as FilterSpecification;
+        } else if (hoveredFeatureId) {
+            baseExcludeFilter = ['!=', 'id', hoveredFeatureId] as unknown as FilterSpecification;
         }
 
-        return {
-            highlightFilter: ['==', ['get', 'id'], selectedFeatureId] as unknown as FilterSpecification,
-            nonHighlightFilter: ['!=', ['get', 'id'], selectedFeatureId] as unknown as FilterSpecification,
-        };
-    }, [selectedFeatureId]);
+        return { selectedFilter, hoverFilter, baseExcludeFilter };
+    }, [selectedFeatureId, hoveredFeatureId]);
 
     // Transform features to WGS84 for map display
     const transformedFeatures = useMemo(() => {
@@ -172,38 +218,58 @@ export function GeometryLayer() {
         })),
     };
 
-    // Build filters with proper casting to avoid complex type issues
-    const fillFilter = nonHighlightFilter
-        ? (['all', ['==', '$type', 'Polygon'], nonHighlightFilter] as FilterSpecification)
+    // Build filters for base layers (exclude selected and hovered)
+    const { selectedFilter, hoverFilter, baseExcludeFilter } = filters;
+
+    const baseFillFilter = baseExcludeFilter
+        ? (['all', ['==', '$type', 'Polygon'], baseExcludeFilter] as FilterSpecification)
         : (['==', '$type', 'Polygon'] as FilterSpecification);
-    const lineFilter = nonHighlightFilter
-        ? (['all', ['in', '$type', 'LineString', 'Polygon'], nonHighlightFilter] as FilterSpecification)
+    const baseLineFilter = baseExcludeFilter
+        ? (['all', ['in', '$type', 'LineString', 'Polygon'], baseExcludeFilter] as FilterSpecification)
         : (['in', '$type', 'LineString', 'Polygon'] as FilterSpecification);
-    const pointFilter = nonHighlightFilter
-        ? (['all', ['==', '$type', 'Point'], nonHighlightFilter] as FilterSpecification)
+    const basePointFilter = baseExcludeFilter
+        ? (['all', ['==', '$type', 'Point'], baseExcludeFilter] as FilterSpecification)
         : (['==', '$type', 'Point'] as FilterSpecification);
 
     return (
         <Source id="geometry-source" type="geojson" data={geojson}>
-            {/* Base layers - show non-selected features (or all if none selected) */}
-            <Layer {...fillLayer} filter={fillFilter} />
-            <Layer {...lineLayer} filter={lineFilter} />
-            <Layer {...pointLayer} filter={pointFilter} />
+            {/* Base layers - show non-selected/non-hovered features */}
+            <Layer {...fillLayer} filter={baseFillFilter} />
+            <Layer {...lineLayer} filter={baseLineFilter} />
+            <Layer {...pointLayer} filter={basePointFilter} />
 
-            {/* Highlight layers - only show selected feature */}
-            {selectedFeatureId && (
+            {/* Hover layers - show hovered feature (if not selected) */}
+            {hoverFilter && (
                 <>
                     <Layer
-                        {...highlightFillLayer}
-                        filter={['all', ['==', '$type', 'Polygon'], highlightFilter] as FilterSpecification}
+                        {...hoverFillLayer}
+                        filter={['all', ['==', '$type', 'Polygon'], hoverFilter] as FilterSpecification}
                     />
                     <Layer
-                        {...highlightLineLayer}
-                        filter={['all', ['in', '$type', 'LineString', 'Polygon'], highlightFilter] as FilterSpecification}
+                        {...hoverLineLayer}
+                        filter={['all', ['in', '$type', 'LineString', 'Polygon'], hoverFilter] as FilterSpecification}
                     />
                     <Layer
-                        {...highlightPointLayer}
-                        filter={['all', ['==', '$type', 'Point'], highlightFilter] as FilterSpecification}
+                        {...hoverPointLayer}
+                        filter={['all', ['==', '$type', 'Point'], hoverFilter] as FilterSpecification}
+                    />
+                </>
+            )}
+
+            {/* Selected layers - show selected feature */}
+            {selectedFilter && (
+                <>
+                    <Layer
+                        {...selectedFillLayer}
+                        filter={['all', ['==', '$type', 'Polygon'], selectedFilter] as FilterSpecification}
+                    />
+                    <Layer
+                        {...selectedLineLayer}
+                        filter={['all', ['in', '$type', 'LineString', 'Polygon'], selectedFilter] as FilterSpecification}
+                    />
+                    <Layer
+                        {...selectedPointLayer}
+                        filter={['all', ['==', '$type', 'Point'], selectedFilter] as FilterSpecification}
                     />
                 </>
             )}

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useMemo } from 'react';
 import Map, { NavigationControl, Source, Layer, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre';
-import { Maximize2, LocateFixed, LocateOff } from 'lucide-react';
 import { GeometryLayer } from './GeometryLayer';
 import { DrawingTools } from './DrawingTools';
 import { useMapStore } from '@/stores/mapStore';
@@ -53,10 +52,10 @@ function extractAllCoordinates(features: { geometry: Geometry | null }[]): Posit
 
 export function MapContainer() {
     const mapRef = useRef<MapRef>(null);
-    const { viewState, setViewState, basemap } = useMapStore();
+    const { viewState, setViewState, basemap, panToFeatureId, clearPanToFeature } = useMapStore();
     const { features, inputProjection, detectedProjection, setCoordinateError, setFeatures } = useGeometryStore();
     const { mode: drawingMode, currentPoints, addPoint, reset: resetDrawing } = useDrawingStore();
-    const { autoPanToGeometry, toggleAutoPanToGeometry } = useUIStore();
+    const { autoPanToGeometry } = useUIStore();
 
     // Determine the effective source projection
     const sourceProjection = useMemo((): SupportedProjection => {
@@ -162,6 +161,50 @@ export function MapContainer() {
         }
     }, [autoPanToGeometry, fitBounds]);
 
+    // Pan to specific feature when requested
+    useEffect(() => {
+        if (!panToFeatureId) {
+            return;
+        }
+
+        const feature = transformedFeatures.find((f) => f.id === panToFeatureId);
+        if (!feature) {
+            clearPanToFeature();
+            return;
+        }
+
+        try {
+            const bbox = turf.bbox(feature);
+            if (!bbox.every((v) => isFinite(v))) {
+                clearPanToFeature();
+                return;
+            }
+
+            const [minLon, minLat, maxLon, maxLat] = bbox;
+            const centerLon = (minLon + maxLon) / 2;
+            const centerLat = (minLat + maxLat) / 2;
+
+            // Calculate zoom to fit the feature with some padding
+            const latDiff = maxLat - minLat;
+            const lonDiff = maxLon - minLon;
+            const maxDiff = Math.max(latDiff, lonDiff);
+
+            let zoom = 14; // Default for points
+            if (maxDiff > 0) {
+                zoom = Math.floor(Math.log2(360 / maxDiff)) - 1;
+                zoom = Math.max(1, Math.min(zoom, 18));
+            }
+
+            setViewState({
+                longitude: centerLon,
+                latitude: centerLat,
+                zoom,
+            });
+        } finally {
+            clearPanToFeature();
+        }
+    }, [panToFeatureId, transformedFeatures, setViewState, clearPanToFeature]);
+
     const handleMove = useCallback(
         (evt: { viewState: { longitude: number; latitude: number; zoom: number } }) => {
             setViewState({
@@ -262,36 +305,7 @@ export function MapContainer() {
             cursor={isDrawing ? 'crosshair' : undefined}
         >
             <NavigationControl position="top-right" />
-            <DrawingTools />
-            <div className="absolute right-2 top-24 flex flex-col gap-1">
-                <button
-                    onClick={toggleAutoPanToGeometry}
-                    className={`flex h-[29px] w-[29px] items-center justify-center rounded shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 ${
-                        autoPanToGeometry
-                            ? 'bg-primary-500 text-white hover:bg-primary-600'
-                            : 'bg-white text-neutral-700 hover:bg-neutral-100'
-                    }`}
-                    title={autoPanToGeometry ? 'Auto-pan enabled (click to disable)' : 'Auto-pan disabled (click to enable)'}
-                    aria-label={autoPanToGeometry ? 'Disable auto-pan to geometry' : 'Enable auto-pan to geometry'}
-                    aria-pressed={autoPanToGeometry}
-                >
-                    {autoPanToGeometry ? (
-                        <LocateFixed className="h-4 w-4" />
-                    ) : (
-                        <LocateOff className="h-4 w-4" />
-                    )}
-                </button>
-                {hasFeatures && (
-                    <button
-                        onClick={fitBounds}
-                        className="flex h-[29px] w-[29px] items-center justify-center rounded bg-white shadow-md hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                        title="Fit map to geometry"
-                        aria-label="Fit map to geometry"
-                    >
-                        <Maximize2 className="h-4 w-4 text-neutral-700" />
-                    </button>
-                )}
-            </div>
+            <DrawingTools onFitBounds={fitBounds} hasFeatures={hasFeatures} />
 
             {/* Drawing preview layer */}
             {drawingPreview && (
