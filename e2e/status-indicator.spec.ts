@@ -76,9 +76,9 @@ test.describe('Status Indicator', () => {
         // Wait for parsing
         await page.waitForTimeout(500);
 
-        // Check that an error is shown (red background)
-        const errorBadge = page.locator('.bg-red-100, .bg-red-900\\/50');
-        await expect(errorBadge).toBeVisible();
+        // Check that a red error icon is shown
+        const errorIcon = page.locator('svg.text-red-600, svg.text-red-400');
+        await expect(errorIcon).toBeVisible();
     });
 
     test('should show output area even with errors', async ({ page }) => {

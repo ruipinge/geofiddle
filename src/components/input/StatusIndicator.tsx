@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { XCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { useGeometryStore } from '@/stores/geometryStore';
 import { projectionLabels } from '@/lib/projections';
 import type { FormatType } from '@/types';
@@ -16,11 +16,11 @@ const formatLabels: Record<FormatType, string> = {
     shapefile: 'Shapefile',
 };
 
-interface ErrorBadgeProps {
+interface ErrorIconProps {
     error: string;
 }
 
-function ErrorBadge({ error }: ErrorBadgeProps) {
+function ErrorIcon({ error }: ErrorIconProps) {
     const [showTooltip, setShowTooltip] = useState(false);
 
     const handleClick = useCallback(() => {
@@ -35,9 +35,6 @@ function ErrorBadge({ error }: ErrorBadgeProps) {
         setShowTooltip(false);
     }, []);
 
-    // Truncate error for display
-    const shortError = error.length > 20 ? error.slice(0, 20) + '...' : error;
-
     return (
         <span className="relative inline-flex items-center">
             <button
@@ -45,14 +42,13 @@ function ErrorBadge({ error }: ErrorBadgeProps) {
                 onClick={handleClick}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
-                className="inline-flex items-center gap-1 rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-700 hover:bg-red-200 dark:bg-red-900/50 dark:text-red-300 dark:hover:bg-red-900/70"
+                className="inline-flex items-center"
                 aria-label="Show error details"
             >
-                <AlertCircle className="h-3 w-3" />
-                <span>{shortError}</span>
+                <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
             </button>
-            {showTooltip && error.length > 20 && (
-                <div className="absolute left-0 top-full z-50 mt-1 max-w-xs rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-700 shadow-lg dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+            {showTooltip && (
+                <div className="absolute left-0 top-full z-50 mt-1 max-w-xs whitespace-normal rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-700 shadow-lg dark:border-red-800 dark:bg-red-950 dark:text-red-300">
                     {error}
                 </div>
             )}
@@ -99,8 +95,17 @@ export function StatusIndicator() {
     // Show success when we have parsed features and no errors
     const showSuccess = !hasError && hasParsedFeatures;
 
+    // Combine errors for display
+    const errorMessage = parseError || coordinateError;
+
     return (
         <div className="inline-flex items-center gap-1.5">
+            {/* Success/Error indicator comes first */}
+            {showSuccess && (
+                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+            )}
+            {errorMessage && <ErrorIcon error={errorMessage} />}
+
             {/* Auto-detected format tag (only value, no icon/label) */}
             {isFormatAuto && formatValue && (
                 <span className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-medium text-neutral-600 dark:bg-neutral-700 dark:text-neutral-300">
@@ -114,17 +119,6 @@ export function StatusIndicator() {
                     {projectionValue}
                 </span>
             )}
-
-            {/* Success indicator - shown when parsing succeeded (regardless of auto/manual) */}
-            {showSuccess && (
-                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
-            )}
-
-            {/* Parse error */}
-            {parseError && <ErrorBadge error={parseError} />}
-
-            {/* Coordinate error */}
-            {coordinateError && <ErrorBadge error={coordinateError} />}
         </div>
     );
 }
