@@ -28,14 +28,14 @@ export function InputArea() {
     );
 
     return (
-        <div className="border-b border-neutral-200 p-4 dark:border-neutral-700">
-            <div className="mb-3 flex items-center gap-2">
+        <div className="border-b border-neutral-200 p-3 md:p-4 dark:border-neutral-700">
+            <div className="mb-2 flex items-center gap-2 md:mb-3">
                 <h2 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Input Geometry
                 </h2>
                 <StatusIndicator />
             </div>
-            <div className="mb-3 flex gap-2">
+            <div className="mb-2 flex gap-2 md:mb-3">
                 <FormatSelect
                     value={inputFormat}
                     onChange={setInputFormat}

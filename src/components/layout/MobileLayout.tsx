@@ -21,7 +21,7 @@ export function MobileLayout() {
                 )}
             </div>
 
-            {/* Bottom tab bar */}
+            {/* Bottom tab bar - compact */}
             <nav
                 className="flex shrink-0 border-t border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900"
                 role="tablist"
@@ -32,13 +32,13 @@ export function MobileLayout() {
                     aria-selected={activeTab === 'input'}
                     aria-controls="input-panel"
                     onClick={() => { setActiveTab('input'); }}
-                    className={`flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
+                    className={`flex flex-1 items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors ${
                         activeTab === 'input'
                             ? 'text-primary-600 dark:text-primary-400'
                             : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200'
                     }`}
                 >
-                    <FileText className="h-5 w-5" />
+                    <FileText className="h-4 w-4" />
                     <span>Input</span>
                 </button>
                 <button
@@ -46,13 +46,13 @@ export function MobileLayout() {
                     aria-selected={activeTab === 'map'}
                     aria-controls="map-panel"
                     onClick={() => { setActiveTab('map'); }}
-                    className={`flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
+                    className={`flex flex-1 items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors ${
                         activeTab === 'map'
                             ? 'text-primary-600 dark:text-primary-400'
                             : 'text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200'
                     }`}
                 >
-                    <Map className="h-5 w-5" />
+                    <Map className="h-4 w-4" />
                     <span>Map</span>
                 </button>
             </nav>

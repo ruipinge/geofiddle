@@ -26,11 +26,11 @@ export function ConversionArea() {
     const hasFeatures = features.length > 0;
 
     return (
-        <div className="flex-1 p-4">
-            <h2 className="mb-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
+        <div className="flex-1 p-3 md:p-4">
+            <h2 className="mb-2 text-sm font-medium text-neutral-700 md:mb-3 dark:text-neutral-300">
                 Output
             </h2>
-            <div className="mb-3 flex gap-2">
+            <div className="mb-2 flex gap-2 md:mb-3">
                 <div className="flex-1">
                     <label className="label">Format</label>
                     <select
