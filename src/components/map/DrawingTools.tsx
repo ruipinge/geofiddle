@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 import { MapPin, Minus, Pentagon, X, Check, LocateFixed, LocateOff, Maximize2, Map, Globe } from 'lucide-react';
 import { useDrawingStore, type DrawingMode } from '@/stores/drawingStore';
-import { useGeometryStore, addFeatureIds } from '@/stores/geometryStore';
+import { useGeometryStore } from '@/stores/geometryStore';
 import { useUIStore } from '@/stores/uiStore';
-import type { Feature, Point, LineString, Polygon } from 'geojson';
+import { appendGeometry } from '@/lib/geometry/appendGeometry';
+import type { Point, LineString, Polygon } from 'geojson';
 
 interface DrawingToolsProps {
     onFitBounds?: () => void;
@@ -12,7 +13,14 @@ interface DrawingToolsProps {
 
 export function DrawingTools({ onFitBounds, hasFeatures = false }: DrawingToolsProps) {
     const { mode, setMode, currentPoints, reset } = useDrawingStore();
-    const { features, setFeatures } = useGeometryStore();
+    const {
+        rawText,
+        inputFormat,
+        inputProjection,
+        detectedFormat,
+        detectedProjection,
+        setRawText,
+    } = useGeometryStore();
     const { autoPanToGeometry, toggleAutoPanToGeometry, mapProvider, setMapProvider } = useUIStore();
 
     const toggleProvider = useCallback(() => {
@@ -58,20 +66,19 @@ export function DrawingTools({ onFitBounds, hasFeatures = false }: DrawingToolsP
         }
 
         if (geometry) {
-            const newFeature: Feature = {
-                type: 'Feature',
+            const result = appendGeometry({
                 geometry,
-                properties: {
-                    name: `Drawn ${mode}`,
-                },
-            };
-
-            const updatedFeatures = addFeatureIds([...features, newFeature]);
-            setFeatures(updatedFeatures);
+                rawText,
+                inputFormat,
+                inputProjection,
+                detectedFormat,
+                detectedProjection,
+            });
+            setRawText(result.newText);
         }
 
         reset();
-    }, [mode, currentPoints, features, setFeatures, reset]);
+    }, [mode, currentPoints, rawText, inputFormat, inputProjection, detectedFormat, detectedProjection, setRawText, reset]);
 
     const handleCancel = useCallback(() => {
         reset();

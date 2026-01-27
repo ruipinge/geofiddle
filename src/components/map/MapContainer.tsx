@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, lazy, Suspense } from 'react';
 import { MapLibreMap } from './providers/maplibre';
 import { DrawingTools } from './DrawingTools';
 import { useMapStore } from '@/stores/mapStore';
-import { useGeometryStore, addFeatureIds } from '@/stores/geometryStore';
+import { useGeometryStore } from '@/stores/geometryStore';
 import { useDrawingStore } from '@/stores/drawingStore';
 import { useUIStore } from '@/stores/uiStore';
 import {
@@ -11,6 +11,7 @@ import {
     validateWGS84Coordinates,
     type SupportedProjection,
 } from '@/lib/projections';
+import { appendGeometry } from '@/lib/geometry/appendGeometry';
 import * as turf from '@turf/turf';
 import type { Geometry, Position } from 'geojson';
 
@@ -63,7 +64,18 @@ function MapLoadingFallback() {
 
 export function MapContainer() {
     const { viewState, setViewState, basemap, panToFeatureId, clearPanToFeature } = useMapStore();
-    const { features, selectedFeatureId, hoveredFeatureId, inputProjection, detectedProjection, setCoordinateError, setFeatures } = useGeometryStore();
+    const {
+        features,
+        selectedFeatureId,
+        hoveredFeatureId,
+        rawText,
+        inputFormat,
+        inputProjection,
+        detectedFormat,
+        detectedProjection,
+        setCoordinateError,
+        setRawText,
+    } = useGeometryStore();
     const { mode: drawingMode, currentPoints, addPoint, reset: resetDrawing } = useDrawingStore();
     const { autoPanToGeometry, mapProvider } = useUIStore();
 
@@ -226,26 +238,26 @@ export function MapContainer() {
             const point: Position = [lng, lat];
 
             if (drawingMode === 'point') {
-                // For points, create feature immediately
-                const newFeature = {
-                    type: 'Feature' as const,
+                // For points, create feature immediately and add to input text
+                const result = appendGeometry({
                     geometry: {
-                        type: 'Point' as const,
+                        type: 'Point',
                         coordinates: point,
                     },
-                    properties: {
-                        name: 'Drawn point',
-                    },
-                };
-                const updatedFeatures = addFeatureIds([...features, newFeature]);
-                setFeatures(updatedFeatures);
+                    rawText,
+                    inputFormat,
+                    inputProjection,
+                    detectedFormat,
+                    detectedProjection,
+                });
+                setRawText(result.newText);
                 resetDrawing();
             } else {
                 // For lines and polygons, add point to current drawing
                 addPoint(point);
             }
         },
-        [drawingMode, features, setFeatures, addPoint, resetDrawing]
+        [drawingMode, rawText, inputFormat, inputProjection, detectedFormat, detectedProjection, setRawText, addPoint, resetDrawing]
     );
 
     // Create drawing preview GeoJSON
