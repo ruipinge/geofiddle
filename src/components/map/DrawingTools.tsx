@@ -3,7 +3,6 @@ import { MapPin, Minus, Pentagon, X, Check, LocateFixed, LocateOff, Maximize2, M
 import { useDrawingStore, type DrawingMode } from '@/stores/drawingStore';
 import { useGeometryStore, addFeatureIds } from '@/stores/geometryStore';
 import { useUIStore } from '@/stores/uiStore';
-import { useMapStore } from '@/stores/mapStore';
 import type { Feature, Point, LineString, Polygon } from 'geojson';
 
 interface DrawingToolsProps {
@@ -14,12 +13,11 @@ interface DrawingToolsProps {
 export function DrawingTools({ onFitBounds, hasFeatures = false }: DrawingToolsProps) {
     const { mode, setMode, currentPoints, reset } = useDrawingStore();
     const { features, setFeatures } = useGeometryStore();
-    const { autoPanToGeometry, toggleAutoPanToGeometry } = useUIStore();
-    const { provider, setProvider } = useMapStore();
+    const { autoPanToGeometry, toggleAutoPanToGeometry, mapProvider, setMapProvider } = useUIStore();
 
     const toggleProvider = useCallback(() => {
-        setProvider(provider === 'maplibre' ? 'google' : 'maplibre');
-    }, [provider, setProvider]);
+        setMapProvider(mapProvider === 'maplibre' ? 'google' : 'maplibre');
+    }, [mapProvider, setMapProvider]);
 
     const handleSelectTool = useCallback((newMode: DrawingMode) => {
         if (mode === newMode) {
@@ -168,10 +166,10 @@ export function DrawingTools({ onFitBounds, hasFeatures = false }: DrawingToolsP
                 <button
                     onClick={toggleProvider}
                     className="flex h-8 w-8 items-center justify-center rounded text-neutral-700 transition-colors hover:bg-neutral-100"
-                    title={provider === 'maplibre' ? 'Switch to Google Maps' : 'Switch to MapLibre'}
-                    aria-label={provider === 'maplibre' ? 'Switch to Google Maps' : 'Switch to MapLibre'}
+                    title={mapProvider === 'maplibre' ? 'Switch to Google Maps' : 'Switch to MapLibre'}
+                    aria-label={mapProvider === 'maplibre' ? 'Switch to Google Maps' : 'Switch to MapLibre'}
                 >
-                    {provider === 'maplibre' ? (
+                    {mapProvider === 'maplibre' ? (
                         <Map className="h-4 w-4" />
                     ) : (
                         <Globe className="h-4 w-4" />

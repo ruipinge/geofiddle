@@ -62,10 +62,10 @@ function MapLoadingFallback() {
 }
 
 export function MapContainer() {
-    const { viewState, setViewState, basemap, provider, panToFeatureId, clearPanToFeature } = useMapStore();
+    const { viewState, setViewState, basemap, panToFeatureId, clearPanToFeature } = useMapStore();
     const { features, selectedFeatureId, hoveredFeatureId, inputProjection, detectedProjection, setCoordinateError, setFeatures } = useGeometryStore();
     const { mode: drawingMode, currentPoints, addPoint, reset: resetDrawing } = useDrawingStore();
-    const { autoPanToGeometry } = useUIStore();
+    const { autoPanToGeometry, mapProvider } = useUIStore();
 
     // Determine the effective source projection
     const sourceProjection = useMemo((): SupportedProjection => {
@@ -305,7 +305,7 @@ export function MapContainer() {
         <DrawingTools onFitBounds={fitBounds} hasFeatures={hasFeatures} />
     );
 
-    if (provider === 'google') {
+    if (mapProvider === 'google') {
         return (
             <Suspense fallback={<MapLoadingFallback />}>
                 <GoogleMap {...mapProviderProps}>
