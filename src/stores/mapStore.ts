@@ -1,14 +1,17 @@
 import { create } from 'zustand';
-import type { MapViewState, Basemap } from '@/types';
+import { persist } from 'zustand/middleware';
+import type { MapViewState, Basemap, MapProvider } from '@/types';
 
 interface MapState {
     viewState: MapViewState;
     basemap: Basemap;
+    provider: MapProvider;
     panToFeatureId: string | null;
 
     // Actions
     setViewState: (viewState: MapViewState) => void;
     setBasemap: (basemap: Basemap) => void;
+    setProvider: (provider: MapProvider) => void;
     panToFeature: (featureId: string) => void;
     clearPanToFeature: () => void;
 }
@@ -19,24 +22,37 @@ const DEFAULT_VIEW_STATE: MapViewState = {
     zoom: 10,
 };
 
-export const useMapStore = create<MapState>((set) => ({
-    viewState: DEFAULT_VIEW_STATE,
-    basemap: 'osm',
-    panToFeatureId: null,
+export const useMapStore = create<MapState>()(
+    persist(
+        (set) => ({
+            viewState: DEFAULT_VIEW_STATE,
+            basemap: 'osm',
+            provider: 'maplibre',
+            panToFeatureId: null,
 
-    setViewState: (viewState) => {
-        set({ viewState });
-    },
+            setViewState: (viewState) => {
+                set({ viewState });
+            },
 
-    setBasemap: (basemap) => {
-        set({ basemap });
-    },
+            setBasemap: (basemap) => {
+                set({ basemap });
+            },
 
-    panToFeature: (featureId) => {
-        set({ panToFeatureId: featureId });
-    },
+            setProvider: (provider) => {
+                set({ provider });
+            },
 
-    clearPanToFeature: () => {
-        set({ panToFeatureId: null });
-    },
-}));
+            panToFeature: (featureId) => {
+                set({ panToFeatureId: featureId });
+            },
+
+            clearPanToFeature: () => {
+                set({ panToFeatureId: null });
+            },
+        }),
+        {
+            name: 'geofiddle-map',
+            partialize: (state) => ({ provider: state.provider }),
+        }
+    )
+);

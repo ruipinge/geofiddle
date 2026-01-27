@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef, useMemo } from 'react';
-import Map, { NavigationControl, Source, Layer, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre';
-import { GeometryLayer } from './GeometryLayer';
+import { useCallback, useEffect, useMemo, lazy, Suspense } from 'react';
+import { MapLibreMap } from './providers/maplibre';
 import { DrawingTools } from './DrawingTools';
 import { useMapStore } from '@/stores/mapStore';
 import { useGeometryStore, addFeatureIds } from '@/stores/geometryStore';
@@ -14,7 +13,11 @@ import {
 } from '@/lib/projections';
 import * as turf from '@turf/turf';
 import type { Geometry, Position } from 'geojson';
-import 'maplibre-gl/dist/maplibre-gl.css';
+
+// Lazy load Google Maps provider
+const GoogleMap = lazy(() =>
+    import('./providers/google').then((mod) => ({ default: mod.GoogleMap }))
+);
 
 // Extract all coordinates from features for projection detection
 function extractAllCoordinates(features: { geometry: Geometry | null }[]): Position[] {
@@ -50,10 +53,17 @@ function extractAllCoordinates(features: { geometry: Geometry | null }[]): Posit
     return coords;
 }
 
+function MapLoadingFallback() {
+    return (
+        <div className="flex h-full w-full items-center justify-center bg-neutral-100">
+            <div className="text-neutral-600">Loading map...</div>
+        </div>
+    );
+}
+
 export function MapContainer() {
-    const mapRef = useRef<MapRef>(null);
-    const { viewState, setViewState, basemap, panToFeatureId, clearPanToFeature } = useMapStore();
-    const { features, inputProjection, detectedProjection, setCoordinateError, setFeatures } = useGeometryStore();
+    const { viewState, setViewState, basemap, provider, panToFeatureId, clearPanToFeature } = useMapStore();
+    const { features, selectedFeatureId, hoveredFeatureId, inputProjection, detectedProjection, setCoordinateError, setFeatures } = useGeometryStore();
     const { mode: drawingMode, currentPoints, addPoint, reset: resetDrawing } = useDrawingStore();
     const { autoPanToGeometry } = useUIStore();
 
@@ -205,25 +215,14 @@ export function MapContainer() {
         }
     }, [panToFeatureId, transformedFeatures, setViewState, clearPanToFeature]);
 
-    const handleMove = useCallback(
-        (evt: { viewState: { longitude: number; latitude: number; zoom: number } }) => {
-            setViewState({
-                longitude: evt.viewState.longitude,
-                latitude: evt.viewState.latitude,
-                zoom: evt.viewState.zoom,
-            });
-        },
-        [setViewState]
-    );
-
     // Handle map click for drawing
-    const handleClick = useCallback(
-        (evt: MapLayerMouseEvent) => {
+    const handleMapClick = useCallback(
+        (lngLat: { lng: number; lat: number }) => {
             if (drawingMode === 'none') {
                 return;
             }
 
-            const { lng, lat } = evt.lngLat;
+            const { lng, lat } = lngLat;
             const point: Position = [lng, lat];
 
             if (drawingMode === 'point') {
@@ -255,11 +254,11 @@ export function MapContainer() {
             return null;
         }
 
-        const features: GeoJSON.Feature[] = [];
+        const previewFeatures: GeoJSON.Feature[] = [];
 
         // Add points
         currentPoints.forEach((point, index) => {
-            features.push({
+            previewFeatures.push({
                 type: 'Feature',
                 geometry: { type: 'Point', coordinates: point },
                 properties: { index },
@@ -273,7 +272,7 @@ export function MapContainer() {
                 ? [...currentPoints, firstPoint] // Close polygon preview
                 : currentPoints;
 
-            features.push({
+            previewFeatures.push({
                 type: 'Feature',
                 geometry: { type: 'LineString', coordinates: lineCoords },
                 properties: {},
@@ -282,58 +281,44 @@ export function MapContainer() {
 
         return {
             type: 'FeatureCollection' as const,
-            features,
+            features: previewFeatures,
         };
     }, [drawingMode, currentPoints]);
-
-    const mapStyle =
-        basemap === 'satellite'
-            ? 'https://api.maptiler.com/maps/hybrid/style.json?key=get_your_own_key'
-            : 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 
     const hasFeatures = transformedFeatures.length > 0;
     const isDrawing = drawingMode !== 'none';
 
-    return (
-        <Map
-            ref={mapRef}
-            {...viewState}
-            onMove={handleMove}
-            onClick={handleClick}
-            mapStyle={mapStyle}
-            style={{ width: '100%', height: '100%' }}
-            cursor={isDrawing ? 'crosshair' : undefined}
-        >
-            <NavigationControl position="top-right" />
-            <DrawingTools onFitBounds={fitBounds} hasFeatures={hasFeatures} />
+    // Common props for all map providers
+    const mapProviderProps = {
+        viewState,
+        onViewStateChange: setViewState,
+        basemap,
+        features: transformedFeatures,
+        selectedFeatureId,
+        hoveredFeatureId,
+        isDrawing,
+        drawingPreview,
+        onMapClick: handleMapClick,
+    };
 
-            {/* Drawing preview layer */}
-            {drawingPreview && (
-                <Source id="drawing-preview" type="geojson" data={drawingPreview}>
-                    <Layer
-                        id="drawing-preview-line"
-                        type="line"
-                        paint={{
-                            'line-color': '#f97316',
-                            'line-width': 2,
-                            'line-dasharray': [2, 2],
-                        }}
-                        filter={['==', '$type', 'LineString']}
-                    />
-                    <Layer
-                        id="drawing-preview-points"
-                        type="circle"
-                        paint={{
-                            'circle-radius': 6,
-                            'circle-color': '#f97316',
-                            'circle-stroke-color': '#ffffff',
-                            'circle-stroke-width': 2,
-                        }}
-                        filter={['==', '$type', 'Point']}
-                    />
-                </Source>
-            )}
-            <GeometryLayer />
-        </Map>
+    const drawingTools = (
+        <DrawingTools onFitBounds={fitBounds} hasFeatures={hasFeatures} />
+    );
+
+    if (provider === 'google') {
+        return (
+            <Suspense fallback={<MapLoadingFallback />}>
+                <GoogleMap {...mapProviderProps}>
+                    {drawingTools}
+                </GoogleMap>
+            </Suspense>
+        );
+    }
+
+    // Default: MapLibre
+    return (
+        <MapLibreMap {...mapProviderProps}>
+            {drawingTools}
+        </MapLibreMap>
     );
 }

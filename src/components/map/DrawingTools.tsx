@@ -1,8 +1,9 @@
 import { useCallback } from 'react';
-import { MapPin, Minus, Pentagon, X, Check, LocateFixed, LocateOff, Maximize2 } from 'lucide-react';
+import { MapPin, Minus, Pentagon, X, Check, LocateFixed, LocateOff, Maximize2, Map, Globe } from 'lucide-react';
 import { useDrawingStore, type DrawingMode } from '@/stores/drawingStore';
 import { useGeometryStore, addFeatureIds } from '@/stores/geometryStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useMapStore } from '@/stores/mapStore';
 import type { Feature, Point, LineString, Polygon } from 'geojson';
 
 interface DrawingToolsProps {
@@ -14,6 +15,11 @@ export function DrawingTools({ onFitBounds, hasFeatures = false }: DrawingToolsP
     const { mode, setMode, currentPoints, reset } = useDrawingStore();
     const { features, setFeatures } = useGeometryStore();
     const { autoPanToGeometry, toggleAutoPanToGeometry } = useUIStore();
+    const { provider, setProvider } = useMapStore();
+
+    const toggleProvider = useCallback(() => {
+        setProvider(provider === 'maplibre' ? 'google' : 'maplibre');
+    }, [provider, setProvider]);
 
     const handleSelectTool = useCallback((newMode: DrawingMode) => {
         if (mode === newMode) {
@@ -154,6 +160,23 @@ export function DrawingTools({ onFitBounds, hasFeatures = false }: DrawingToolsP
                         <Maximize2 className="h-4 w-4" />
                     </button>
                 )}
+
+                {/* Separator */}
+                <div className="mx-0.5 w-px self-stretch bg-neutral-200" />
+
+                {/* Map provider toggle */}
+                <button
+                    onClick={toggleProvider}
+                    className="flex h-8 w-8 items-center justify-center rounded text-neutral-700 transition-colors hover:bg-neutral-100"
+                    title={provider === 'maplibre' ? 'Switch to Google Maps' : 'Switch to MapLibre'}
+                    aria-label={provider === 'maplibre' ? 'Switch to Google Maps' : 'Switch to MapLibre'}
+                >
+                    {provider === 'maplibre' ? (
+                        <Map className="h-4 w-4" />
+                    ) : (
+                        <Globe className="h-4 w-4" />
+                    )}
+                </button>
             </div>
 
             {/* Drawing status and actions */}

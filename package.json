@@ -43,6 +43,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@types/geojson": "^7946.0.15",
+    "@types/google.maps": "^3.58.1",
     "@types/node": "^22.10.2",
     "@types/proj4": "^2.5.5",
     "@types/react": "^18.3.17",

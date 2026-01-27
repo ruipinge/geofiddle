@@ -76,6 +76,9 @@ export type Theme = 'light' | 'dark' | 'system';
 // Basemap options
 export type Basemap = 'osm' | 'satellite';
 
+// Map provider options
+export type MapProvider = 'maplibre' | 'google';
+
 // Export format options
 export interface ExportOptions {
     format: FormatType;
