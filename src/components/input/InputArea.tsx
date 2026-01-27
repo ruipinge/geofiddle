@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { Trash2 } from 'lucide-react';
 import { DropZone } from './DropZone';
 import { TextEditor } from './TextEditor';
 import { FormatSelect } from './FormatSelect';
@@ -27,6 +28,10 @@ export function InputArea() {
         [setRawText]
     );
 
+    const handleClear = useCallback(() => {
+        setRawText('');
+    }, [setRawText]);
+
     return (
         <div className="border-b border-neutral-200 p-3 md:p-4 dark:border-neutral-700">
             <div className="mb-2 flex items-center gap-2 md:mb-3">
@@ -34,6 +39,16 @@ export function InputArea() {
                     Input Geometry
                 </h2>
                 <StatusIndicator />
+                {rawText && (
+                    <button
+                        onClick={handleClear}
+                        className="ml-auto rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-200 hover:text-neutral-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+                        title="Clear input"
+                        aria-label="Clear input"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                    </button>
+                )}
             </div>
             <div className="mb-2 flex gap-2 md:mb-3">
                 <FormatSelect
