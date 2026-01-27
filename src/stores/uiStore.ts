@@ -4,23 +4,26 @@ import type { Theme, MapProvider } from '@/types';
 
 interface UIState {
     theme: Theme;
-    leftPanelWidth: number;
+    leftPanelWidthPercent: number; // Percentage of container width (0-100)
     autoPanToGeometry: boolean;
     mapProvider: MapProvider;
 
     // Actions
     setTheme: (theme: Theme) => void;
-    setLeftPanelWidth: (width: number) => void;
+    setLeftPanelWidthPercent: (percent: number) => void;
     setAutoPanToGeometry: (enabled: boolean) => void;
     toggleAutoPanToGeometry: () => void;
     setMapProvider: (provider: MapProvider) => void;
 }
 
+// Default: 1/3 of width, Max: 2/3 of width
+const DEFAULT_LEFT_PANEL_WIDTH_PERCENT = 33.33;
+
 export const useUIStore = create<UIState>()(
     persist(
         (set) => ({
             theme: 'system',
-            leftPanelWidth: 400,
+            leftPanelWidthPercent: DEFAULT_LEFT_PANEL_WIDTH_PERCENT,
             autoPanToGeometry: true,
             mapProvider: 'maplibre',
 
@@ -28,8 +31,8 @@ export const useUIStore = create<UIState>()(
                 set({ theme });
             },
 
-            setLeftPanelWidth: (leftPanelWidth) => {
-                set({ leftPanelWidth });
+            setLeftPanelWidthPercent: (leftPanelWidthPercent) => {
+                set({ leftPanelWidthPercent });
             },
 
             setAutoPanToGeometry: (autoPanToGeometry) => {

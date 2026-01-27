@@ -3,21 +3,44 @@ import { useState, useCallback, useRef, useEffect, type ReactNode } from 'react'
 interface SplitPaneProps {
     left: ReactNode;
     right: ReactNode;
-    defaultLeftWidth: number;
-    minLeftWidth: number;
-    maxLeftWidth: number;
+    leftWidthPercent: number;
+    minLeftWidthPercent: number;
+    maxLeftWidthPercent: number;
+    onLeftWidthPercentChange: (percent: number) => void;
 }
 
 export function SplitPane({
     left,
     right,
-    defaultLeftWidth,
-    minLeftWidth,
-    maxLeftWidth,
+    leftWidthPercent,
+    minLeftWidthPercent,
+    maxLeftWidthPercent,
+    onLeftWidthPercentChange,
 }: SplitPaneProps) {
-    const [leftWidth, setLeftWidth] = useState(defaultLeftWidth);
     const [isDragging, setIsDragging] = useState(false);
+    const [containerWidth, setContainerWidth] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // Track container width for percentage calculations
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) {
+            return;
+        }
+
+        const updateWidth = () => {
+            setContainerWidth(container.getBoundingClientRect().width);
+        };
+
+        updateWidth();
+
+        const resizeObserver = new ResizeObserver(updateWidth);
+        resizeObserver.observe(container);
+
+        return () => {
+            resizeObserver.disconnect();
+        };
+    }, []);
 
     const handleMouseDown = useCallback(() => {
         setIsDragging(true);
@@ -35,7 +58,9 @@ export function SplitPane({
             }
             const containerRect = containerRef.current.getBoundingClientRect();
             const newWidth = e.clientX - containerRect.left;
-            setLeftWidth(Math.min(maxLeftWidth, Math.max(minLeftWidth, newWidth)));
+            const newPercent = (newWidth / containerRect.width) * 100;
+            const clampedPercent = Math.min(maxLeftWidthPercent, Math.max(minLeftWidthPercent, newPercent));
+            onLeftWidthPercentChange(clampedPercent);
         };
 
         const handleMouseUp = () => {
@@ -49,7 +74,10 @@ export function SplitPane({
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [isDragging, minLeftWidth, maxLeftWidth]);
+    }, [isDragging, minLeftWidthPercent, maxLeftWidthPercent, onLeftWidthPercentChange]);
+
+    // Calculate pixel width from percentage
+    const leftWidth = containerWidth > 0 ? (leftWidthPercent / 100) * containerWidth : 0;
 
     return (
         <main
@@ -72,10 +100,11 @@ export function SplitPane({
                 aria-label="Resize panels"
                 tabIndex={0}
                 onKeyDown={(e) => {
+                    const stepPercent = 2; // 2% per key press
                     if (e.key === 'ArrowLeft') {
-                        setLeftWidth((w) => Math.max(minLeftWidth, w - 20));
+                        onLeftWidthPercentChange(Math.max(minLeftWidthPercent, leftWidthPercent - stepPercent));
                     } else if (e.key === 'ArrowRight') {
-                        setLeftWidth((w) => Math.min(maxLeftWidth, w + 20));
+                        onLeftWidthPercentChange(Math.min(maxLeftWidthPercent, leftWidthPercent + stepPercent));
                     }
                 }}
                 className={`w-1 shrink-0 cursor-col-resize bg-neutral-200 transition-colors hover:bg-primary-400 focus-visible:bg-primary-500 focus-visible:outline-none dark:bg-neutral-700 dark:hover:bg-primary-500 ${

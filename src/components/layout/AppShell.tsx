@@ -5,8 +5,12 @@ import { LeftPanel } from './LeftPanel';
 import { MapContainer } from '@/components/map/MapContainer';
 import { useUIStore } from '@/stores/uiStore';
 
+// Min: ~20%, Max: 2/3 (66.67%)
+const MIN_LEFT_WIDTH_PERCENT = 20;
+const MAX_LEFT_WIDTH_PERCENT = 66.67;
+
 export function AppShell() {
-    const { theme, setTheme } = useUIStore();
+    const { theme, setTheme, leftPanelWidthPercent, setLeftPanelWidthPercent } = useUIStore();
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -50,9 +54,10 @@ export function AppShell() {
             <SplitPane
                 left={<LeftPanel />}
                 right={<MapContainer />}
-                defaultLeftWidth={400}
-                minLeftWidth={300}
-                maxLeftWidth={600}
+                leftWidthPercent={leftPanelWidthPercent}
+                minLeftWidthPercent={MIN_LEFT_WIDTH_PERCENT}
+                maxLeftWidthPercent={MAX_LEFT_WIDTH_PERCENT}
+                onLeftWidthPercentChange={setLeftPanelWidthPercent}
             />
         </div>
     );
