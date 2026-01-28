@@ -29,7 +29,7 @@ export function ConversionArea() {
     return (
         <div className="flex-1 p-3 md:p-4">
             <h2 className="mb-2 text-sm font-medium text-neutral-700 md:mb-3 dark:text-neutral-300">
-                Output
+                Conversion
             </h2>
             <div className="mb-2 flex gap-2 md:mb-3">
                 <div className="flex-1">
