@@ -165,13 +165,7 @@ function parseHash(hash: string): HashState {
     }
 
     if (parts[2]) {
-        // Decode base64 geometry
-        try {
-            result.geometry = atob(decodeURIComponent(parts[2]));
-        } catch {
-            // Try as plain text if base64 fails
-            result.geometry = decodeURIComponent(parts[2]);
-        }
+        result.geometry = decodeURIComponent(parts[2]);
     }
 
     return result;
@@ -188,7 +182,7 @@ function buildHash(state: HashState): string {
     const format = encodeURIComponent(state.format ?? 'auto');
     const projectionKey = state.projection ?? 'auto';
     const projection = encodeURIComponent(PROJECTION_TO_URL[projectionKey]);
-    const geometry = encodeURIComponent(btoa(state.geometry));
+    const geometry = encodeURIComponent(state.geometry);
 
     return `${format}/${projection}/${geometry}`;
 }
