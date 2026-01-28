@@ -3,124 +3,125 @@
 Plot, share, and convert geometries using different formats and projections.
 Try it at [geofiddle.com](https://geofiddle.com).
 
-Some of the most notable features:
+## Features
 
-- Format and Projection auto-detection
-- Direct links for easy sharing of geometries and conversions
-- Area and distance measurements (under development!)
-- Command line utility (node.js) for scripting and batch processing (under development!)
+- Format and projection auto-detection
+- Deep links for easy sharing of geometries and conversions
+- Interactive drawing tools (point, line, polygon)
+- Area and perimeter/length measurements
+- Bounding box (envelope) display with coordinate transformation
+- Geometry list with details, hover highlighting, and click-to-pan
+- Reverse geocoding for location context
+- Mobile-friendly responsive layout
+- Multiple map providers (MapLibre and Google Maps)
+- Dark mode support
 
-Supported formats:
+## Supported Formats
 
 - [GeoJSON](http://geojson.org/)
-- [Well-Known text](https://en.wikipedia.org/wiki/Well-known\_text) (WKT)
-- [Extended Well-Known
-  text](https://postgis.net/docs/using\_postgis\_dbmanagement.html#EWKB\_EWKT)
-  (EWKT)
-- [Polyline](https://developers.google.com/maps/documentation/utilities/polylinealgorithm)
-- [Delimiter-separated
-  values](https://en.wikipedia.org/wiki/Delimiter-separated\_values) (DSV)
+- [Well-Known Text](https://en.wikipedia.org/wiki/Well-known_text) (WKT)
+- [Extended Well-Known Text](https://postgis.net/docs/using_postgis_dbmanagement.html#EWKB_EWKT) (EWKT)
+- [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) (coordinate pairs)
+- [KML](https://developers.google.com/kml/documentation)
+- [GPX](https://www.topografix.com/gpx.asp)
+- [Polyline](https://developers.google.com/maps/documentation/utilities/polylinealgorithm) (precision 5 and 6)
+- [Shapefile](https://en.wikipedia.org/wiki/Shapefile) (.zip)
 
-Supported projections:
+## Supported Projections
 
-- [World Geodetic System
-  1984](https://en.wikipedia.org/wiki/World\_Geodetic\_System) (WGS84)
+- **WGS84** ([EPSG:4326](https://epsg.io/4326))
   - Unit: degree
-  - Axes: latitude, longitude
-  - [EPSG:4326](https://epsg.io/4326)
-- [British National
-  Grid](https://en.wikipedia.org/wiki/Ordnance\_Survey\_National\_Grid) (BNG)
-  aka Ordnance Survey National Grid
+  - Axes: longitude, latitude
+- **Web Mercator** ([EPSG:3857](https://epsg.io/3857))
   - Unit: metre
   - Axes: easting, northing
-  - [EPSG:27700](https://epsg.io/27700)
+- **British National Grid** ([EPSG:27700](https://epsg.io/27700))
+  - Unit: metre
+  - Axes: easting, northing
 
-## Demo and Examples
+## Examples
 
-Try writing some of the following geometries [here](https://geofiddle.com):
+Try pasting these geometries at [geofiddle.com](https://geofiddle.com):
 
+**GeoJSON Point (BNG coordinates):**
 ```json
 {
-    "coordinates": [
-        531473,
-        181763
-    ],
-    "type": "Point"
+    "type": "Point",
+    "coordinates": [531473, 181763]
 }
 ```
 
+**WKT Point (WGS84):**
 ```text
 POINT(-9.129814 38.736847)
 ```
 
+**CSV coordinates:**
 ```text
--0.1068354 51.5114059
+-0.1068354, 51.5114059
 ```
 
+**BNG coordinate pairs:**
 ```text
 200300 200200 200300 200300 200400 200300 200300 200200
 ```
 
-## Dependencies and Inspiration
+## Development
 
-- [Wicket](https://github.com/arthur-e/Wicket) for WKT and GeoJSON parsing and formatting
-- [Mapbox Polyline](https://github.com/mapbox/polyline) for Polyline encoding
-  and decoding
-- [Geodesy](https://github.com/chrisveness/geodesy) for projection conversions
-- [Webpack](https://webpack.js.org/), [Backbone](http://backbonejs.org/),
-  [jQuery](https://jquery.com/), [Lodash](https://lodash.com/),
-  [Jest](https://jestjs.io/)
-- [HTML5 Boilerplate](https://html5boilerplate.com/), [Material
-  Components](https://github.com/material-components/material-components-web)
-- [Google Maps Platform](https://cloud.google.com/maps-platform/maps/)
-- [GitHub Pages](https://pages.github.com)
+### Prerequisites
 
-## Development Environment
+- Node.js 18+
+- npm
 
-### Dev Server
-
-Using ```nvmw```, a simple [nvm](https://github.com/creationix/nvm) wrapper,
-GeoFiddle can be served locally by running:
+### Setup
 
 ```shell
-geofiddle > ./nvmw npm install
-geofiddle > ./nvmw npm test
-geofiddle > ./nvmw npm start
+npm install
 ```
 
-### Unit Tests
-
-Code can be tested by running:
+### Development Server
 
 ```shell
-geofiddle > ./nvmw npm install
-geofiddle > ./nvmw npm test
+npm run dev
 ```
 
-### Clean
+### Commands
 
-Downloaded, generated and/or temporary files including node.js modules, nvm
-node.js versions, coverage reports, etc. can be removed by running:
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Check code style |
+| `npm run lint:fix` | Fix code style issues |
+| `npm run typecheck` | Run TypeScript type checking |
+| `npm test` | Run unit tests |
+| `npm run clean` | Remove generated files |
 
-```shell
-geofiddle > ./nvmw npm run clean
-```
+### Google Maps API (Optional)
 
-### Google Maps JavaScript API
-
-So that the Google Map can be loaded without warnings and full featured,
-there's the need to create a file named ```PRIVATE.json``` with your Google
-Maps JavaScript API key and any existing [Map ID for custom map
-styling](https://developers.google.com/maps/documentation/javascript/cloud-based-map-styling#cloud_tooling).
-Without any costs (but requiring a credit card), an API key can be created
-[here](https://developers.google.com/maps/documentation/javascript/get-api-key).
-
-The file contents should look like this (although both values are dummy and
-will not work):
+To enable Google Maps as an alternative map provider, create a `PRIVATE.json` file in the project root:
 
 ```json
 {
-  "apiKey": "AIzaSyDg0pS7JeL2uo6IrPQ5FNV--GIrFp1M8CQ",
-  "mapId": "aba6eaf2002b017f"
+  "apiKey": "YOUR_GOOGLE_MAPS_API_KEY",
+  "mapId": "YOUR_MAP_ID"
 }
 ```
+
+Get an API key from the [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+
+## Tech Stack
+
+- [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vitejs.dev/) (build tool)
+- [Tailwind CSS](https://tailwindcss.com/) (styling)
+- [Zustand](https://zustand-demo.pmnd.rs/) (state management)
+- [MapLibre GL JS](https://maplibre.org/) (default map)
+- [Turf.js](https://turfjs.org/) (geospatial analysis)
+- [Proj4js](http://proj4js.org/) (coordinate transformations)
+- [Vitest](https://vitest.dev/) (testing)
+
+## License
+
+MIT
