@@ -57,6 +57,23 @@ function getGeometryIcon(type: Geometry['type']) {
 /**
  * Detail section that only renders when expanded (triggers reverse geocode)
  */
+/**
+ * Formats a property value for display
+ */
+function formatPropertyValue(value: unknown): string {
+    if (value === null || value === undefined) {
+        return '—';
+    }
+    if (typeof value === 'string') {
+        return value;
+    }
+    if (typeof value === 'number' || typeof value === 'boolean') {
+        return String(value);
+    }
+    // Objects, arrays, and other types
+    return JSON.stringify(value);
+}
+
 function GeometryDetails({ feature, calculations }: {
     feature: ParsedFeature;
     calculations: {
@@ -67,7 +84,7 @@ function GeometryDetails({ feature, calculations }: {
         formattedLength: string;
     };
 }) {
-    const { geometry } = feature;
+    const { geometry, properties } = feature;
 
     // Get centroid for reverse geocoding - only calculated when this component mounts
     const centroid = useMemo(() => getGeometryCentroid(geometry), [geometry]);
@@ -78,6 +95,13 @@ function GeometryDetails({ feature, calculations }: {
 
     const showArea = calculations.area !== null && calculations.area > 0;
     const showLength = calculations.length !== null && calculations.length > 0;
+
+    // Filter properties to display (exclude 'name' as it's shown in the title)
+    const displayProperties = useMemo(() => {
+        return Object.entries(properties)
+            .filter(([key]) => key !== 'name')
+            .filter(([, value]) => value !== null && value !== undefined);
+    }, [properties]);
 
     return (
         <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 border-t border-neutral-200 pt-2 text-xs dark:border-neutral-700">
@@ -123,6 +147,21 @@ function GeometryDetails({ feature, calculations }: {
                     <span className="font-medium text-neutral-700 dark:text-neutral-300">Centroid:</span>{' '}
                     {centroid.lat.toFixed(6)}, {centroid.lon.toFixed(6)}
                 </div>
+            )}
+
+            {/* GeoJSON Properties */}
+            {displayProperties.length > 0 && (
+                <>
+                    <div className="col-span-2 mt-2 border-t border-neutral-200 pt-2 font-medium text-neutral-700 dark:border-neutral-700 dark:text-neutral-300">
+                        Properties
+                    </div>
+                    {displayProperties.map(([key, value]) => (
+                        <div key={key} className="col-span-2 text-neutral-500 dark:text-neutral-400">
+                            <span className="font-medium text-neutral-700 dark:text-neutral-300">{key}:</span>{' '}
+                            <span className="break-all">{formatPropertyValue(value)}</span>
+                        </div>
+                    ))}
+                </>
             )}
         </div>
     );
