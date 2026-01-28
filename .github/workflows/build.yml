@@ -28,8 +28,8 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
-      - name: Test
-        run: npm run test:unit
+      - name: Test with coverage
+        run: npm run test:unit -- --coverage
 
       - name: Build
         run: npm run build
@@ -37,14 +37,15 @@ jobs:
       - name: Copy static files
         run: cp -r static/* dist/
 
-      - name: Coveralls
+      - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
         with:
           file: coverage/lcov.info
+        continue-on-error: true
 
-      - name: Upload artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: static-files
+          name: dist
           path: dist
           retention-days: 1
