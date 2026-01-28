@@ -14,6 +14,25 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         sourcemap: true,
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    maplibre: ['maplibre-gl', 'react-map-gl'],
+                },
+            },
+        },
+    },
+    optimizeDeps: {
+        include: [
+            '@mapbox/geojsonhint',
+            '@mapbox/geojsonhint > jsonlint-lines',
+        ],
+        esbuildOptions: {
+            // Handle CommonJS modules
+            define: {
+                global: 'globalThis',
+            },
+        },
     },
     server: {
         port: 3000,
