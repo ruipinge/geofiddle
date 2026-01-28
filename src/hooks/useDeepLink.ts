@@ -6,7 +6,9 @@ import type { FormatType, ProjectionType } from '@/types';
 /**
  * Hook that syncs geometry state to/from URL hash for deep linking.
  * URL format: #format/projection/encodedGeometry
- * Example: #geojson/EPSG:4326/eyJ0eXBlIjoiUG9pbnQiLC...
+ * Example: #geojson/wgs84/eyJ0eXBlIjoiUG9pbnQiLC...
+ *
+ * Projection URL identifiers: wgs84, bng, web-mercator, auto
  */
 export function useDeepLink(): void {
     const {
@@ -126,6 +128,25 @@ interface HashState {
     geometry?: string;
 }
 
+// URL-friendly projection identifiers
+const PROJECTION_TO_URL: Record<ProjectionType | 'auto', string> = {
+    'auto': 'auto',
+    'EPSG:4326': 'wgs84',
+    'EPSG:27700': 'bng',
+    'EPSG:3857': 'web-mercator',
+};
+
+const URL_TO_PROJECTION: Record<string, ProjectionType | 'auto'> = {
+    'auto': 'auto',
+    'wgs84': 'EPSG:4326',
+    'bng': 'EPSG:27700',
+    'web-mercator': 'EPSG:3857',
+    // Also support legacy EPSG codes in URL for backwards compatibility
+    'EPSG:4326': 'EPSG:4326',
+    'EPSG:27700': 'EPSG:27700',
+    'EPSG:3857': 'EPSG:3857',
+};
+
 /**
  * Parses URL hash into state object
  * Format: format/projection/base64EncodedGeometry
@@ -139,7 +160,8 @@ function parseHash(hash: string): HashState {
     }
 
     if (parts[1]) {
-        result.projection = decodeURIComponent(parts[1]) as ProjectionType | 'auto';
+        const urlProjection = decodeURIComponent(parts[1]);
+        result.projection = URL_TO_PROJECTION[urlProjection] ?? 'auto';
     }
 
     if (parts[2]) {
@@ -164,7 +186,8 @@ function buildHash(state: HashState): string {
     }
 
     const format = encodeURIComponent(state.format ?? 'auto');
-    const projection = encodeURIComponent(state.projection ?? 'auto');
+    const projectionKey = state.projection ?? 'auto';
+    const projection = encodeURIComponent(PROJECTION_TO_URL[projectionKey]);
     const geometry = encodeURIComponent(btoa(state.geometry));
 
     return `${format}/${projection}/${geometry}`;
