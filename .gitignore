@@ -5,7 +5,7 @@ Thumbs.db
 npm-debug.log
 coverage
 dist
-PRIVATE.json
+/PRIVATE.json
 
 # Vite
 .vite
