@@ -14,15 +14,6 @@ declare module 'wellknown' {
     export function stringify(geojson: Geometry | Feature): string;
 }
 
-declare module '@mapbox/geojsonhint' {
-    interface HintError {
-        message: string;
-        line?: number;
-    }
-
-    export function hint(geojson: unknown): HintError[];
-}
-
 declare module 'shpjs' {
     import type { FeatureCollection } from 'geojson';
 

@@ -23,7 +23,6 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
-    "@mapbox/geojsonhint": "^3.3.0",
     "@mapbox/togeojson": "^0.16.2",
     "@sentry/react": "^10.37.0",
     "@turf/turf": "^7.1.0",

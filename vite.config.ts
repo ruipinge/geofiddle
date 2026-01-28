@@ -22,18 +22,6 @@ export default defineConfig({
             },
         },
     },
-    optimizeDeps: {
-        include: [
-            '@mapbox/geojsonhint',
-            '@mapbox/geojsonhint > jsonlint-lines',
-        ],
-        esbuildOptions: {
-            // Handle CommonJS modules
-            define: {
-                global: 'globalThis',
-            },
-        },
-    },
     server: {
         port: 3000,
         open: true,

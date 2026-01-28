@@ -1,6 +1,77 @@
-import { hint } from '@mapbox/geojsonhint';
 import type { Feature, FeatureCollection, Geometry, GeoJsonObject } from 'geojson';
 import type { ParseResult, ParsedFeature, FormatType } from '@/types';
+
+const VALID_GEOJSON_TYPES = [
+    'Point',
+    'MultiPoint',
+    'LineString',
+    'MultiLineString',
+    'Polygon',
+    'MultiPolygon',
+    'GeometryCollection',
+    'Feature',
+    'FeatureCollection',
+] as const;
+
+/**
+ * Validates a parsed GeoJSON object and returns any errors
+ */
+function validateGeoJSON(obj: unknown): string[] {
+    const errors: string[] = [];
+
+    if (!obj || typeof obj !== 'object') {
+        errors.push('GeoJSON must be an object');
+        return errors;
+    }
+
+    const geoObj = obj as Record<string, unknown>;
+
+    if (!geoObj.type) {
+        errors.push('GeoJSON must have a "type" property');
+        return errors;
+    }
+
+    if (typeof geoObj.type !== 'string') {
+        errors.push('"type" must be a string');
+        return errors;
+    }
+
+    if (!VALID_GEOJSON_TYPES.includes(geoObj.type as typeof VALID_GEOJSON_TYPES[number])) {
+        errors.push(`Invalid GeoJSON type: "${geoObj.type}"`);
+        return errors;
+    }
+
+    // Validate geometry types have coordinates
+    const geometryTypes = ['Point', 'MultiPoint', 'LineString', 'MultiLineString', 'Polygon', 'MultiPolygon'];
+    if (geometryTypes.includes(geoObj.type)) {
+        if (!('coordinates' in geoObj)) {
+            errors.push(`${geoObj.type} must have "coordinates" property`);
+        }
+    }
+
+    // Validate Feature has geometry
+    if (geoObj.type === 'Feature') {
+        if (!('geometry' in geoObj)) {
+            errors.push('Feature must have "geometry" property');
+        }
+    }
+
+    // Validate FeatureCollection has features array
+    if (geoObj.type === 'FeatureCollection') {
+        if (!Array.isArray(geoObj.features)) {
+            errors.push('FeatureCollection must have "features" array');
+        }
+    }
+
+    // Validate GeometryCollection has geometries array
+    if (geoObj.type === 'GeometryCollection') {
+        if (!Array.isArray(geoObj.geometries)) {
+            errors.push('GeometryCollection must have "geometries" array');
+        }
+    }
+
+    return errors;
+}
 
 /**
  * Splits input into multiple JSON objects.
@@ -45,14 +116,11 @@ function parseSingleGeoJSON(jsonStr: string): { features: Feature[]; errors: Arr
         };
     }
 
-    const hintErrors = hint(parsed);
-    if (hintErrors.length > 0) {
+    const validationErrors = validateGeoJSON(parsed);
+    if (validationErrors.length > 0) {
         return {
             features: [],
-            errors: hintErrors.map((err) => ({
-                message: err.message,
-                line: err.line,
-            })),
+            errors: validationErrors.map((message) => ({ message })),
         };
     }
 
@@ -190,18 +258,6 @@ export function detectGeoJSON(input: string): boolean {
         return false;
     }
 
-    const geoJsonTypes = [
-        'Point',
-        'MultiPoint',
-        'LineString',
-        'MultiLineString',
-        'Polygon',
-        'MultiPolygon',
-        'GeometryCollection',
-        'Feature',
-        'FeatureCollection',
-    ];
-
     // Try to parse multiple JSON objects
     const jsonObjects = splitJsonObjects(trimmed);
 
@@ -217,7 +273,8 @@ export function detectGeoJSON(input: string): boolean {
         }
 
         const parsed = JSON.parse(firstJson) as { type?: string };
-        return typeof parsed.type === 'string' && geoJsonTypes.includes(parsed.type);
+        return typeof parsed.type === 'string' &&
+            VALID_GEOJSON_TYPES.includes(parsed.type as typeof VALID_GEOJSON_TYPES[number]);
     } catch {
         return false;
     }
