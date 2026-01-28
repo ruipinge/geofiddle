@@ -11,6 +11,8 @@ export function MapLibreMap({
     features,
     selectedFeatureId,
     hoveredFeatureId,
+    isEnvelopeHovered,
+    envelope,
     isDrawing,
     drawingPreview,
     onMapClick,
@@ -85,6 +87,8 @@ export function MapLibreMap({
                 features={features}
                 selectedFeatureId={selectedFeatureId}
                 hoveredFeatureId={hoveredFeatureId}
+                isEnvelopeHovered={isEnvelopeHovered}
+                envelope={envelope}
             />
         </Map>
     );

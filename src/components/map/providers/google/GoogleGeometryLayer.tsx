@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { ParsedFeature } from '@/types';
-import type { FeatureCollection } from 'geojson';
+import type { FeatureCollection, Polygon } from 'geojson';
+import type { BBox } from '../types';
 
 // Style colors matching MapLibre
 const COLORS = {
@@ -24,6 +25,11 @@ const COLORS = {
         stroke: '#f97316',
         fillOpacity: 0.2,
     },
+    envelope: {
+        fill: '#10b981', // emerald-500
+        stroke: '#059669', // emerald-600
+        fillOpacity: 0.1,
+    },
 };
 
 interface GoogleGeometryLayerProps {
@@ -31,6 +37,8 @@ interface GoogleGeometryLayerProps {
     features: ParsedFeature[];
     selectedFeatureId: string | null;
     hoveredFeatureId: string | null;
+    isEnvelopeHovered: boolean;
+    envelope: BBox | null;
     drawingPreview: GeoJSON.FeatureCollection | null;
 }
 
@@ -39,10 +47,13 @@ export function GoogleGeometryLayer({
     features,
     selectedFeatureId,
     hoveredFeatureId,
+    isEnvelopeHovered,
+    envelope,
     drawingPreview,
 }: GoogleGeometryLayerProps) {
     const dataLayerRef = useRef<google.maps.Data | null>(null);
     const drawingLayerRef = useRef<google.maps.Data | null>(null);
+    const envelopeLayerRef = useRef<google.maps.Data | null>(null);
 
     // Initialize data layers
     useEffect(() => {
@@ -60,11 +71,18 @@ export function GoogleGeometryLayer({
         drawingLayer.setMap(map);
         drawingLayerRef.current = drawingLayer;
 
+        // Create envelope layer
+        const envelopeLayer = new google.maps.Data();
+        envelopeLayer.setMap(map);
+        envelopeLayerRef.current = envelopeLayer;
+
         return () => {
             dataLayer.setMap(null);
             drawingLayer.setMap(null);
+            envelopeLayer.setMap(null);
             dataLayerRef.current = null;
             drawingLayerRef.current = null;
+            envelopeLayerRef.current = null;
         };
     }, [map]);
 
@@ -188,6 +206,61 @@ export function GoogleGeometryLayer({
             zIndex: 10,
         });
     }, [drawingPreview]);
+
+    // Update envelope display
+    useEffect(() => {
+        const envelopeLayer = envelopeLayerRef.current;
+        if (!envelopeLayer) {
+            return;
+        }
+
+        // Clear existing envelope
+        envelopeLayer.forEach((feature: google.maps.Data.Feature) => {
+            envelopeLayer.remove(feature);
+        });
+
+        if (!isEnvelopeHovered || !envelope) {
+            return;
+        }
+
+        // Create envelope polygon
+        const [minLon, minLat, maxLon, maxLat] = envelope;
+        const envelopePolygon: Polygon = {
+            type: 'Polygon',
+            coordinates: [[
+                [minLon, minLat],
+                [maxLon, minLat],
+                [maxLon, maxLat],
+                [minLon, maxLat],
+                [minLon, minLat],
+            ]],
+        };
+
+        const geojson: FeatureCollection = {
+            type: 'FeatureCollection',
+            features: [{
+                type: 'Feature',
+                geometry: envelopePolygon,
+                properties: {},
+            }],
+        };
+
+        try {
+            envelopeLayer.addGeoJson(geojson);
+        } catch {
+            // GeoJSON parsing failed silently
+        }
+
+        // Style envelope
+        envelopeLayer.setStyle({
+            fillColor: COLORS.envelope.fill,
+            fillOpacity: COLORS.envelope.fillOpacity,
+            strokeColor: COLORS.envelope.stroke,
+            strokeWeight: 2,
+            strokeOpacity: 0.8,
+            zIndex: 0,
+        });
+    }, [isEnvelopeHovered, envelope]);
 
     return null;
 }

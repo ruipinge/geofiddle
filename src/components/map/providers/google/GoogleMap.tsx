@@ -10,6 +10,8 @@ export function GoogleMap({
     features,
     selectedFeatureId,
     hoveredFeatureId,
+    isEnvelopeHovered,
+    envelope,
     isDrawing,
     drawingPreview,
     onMapClick,
@@ -178,6 +180,8 @@ export function GoogleMap({
                     features={features}
                     selectedFeatureId={selectedFeatureId}
                     hoveredFeatureId={hoveredFeatureId}
+                    isEnvelopeHovered={isEnvelopeHovered}
+                    envelope={envelope}
                     drawingPreview={drawingPreview}
                 />
             )}

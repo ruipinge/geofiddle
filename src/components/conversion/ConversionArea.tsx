@@ -1,6 +1,7 @@
 import { useConversionStore } from '@/stores/conversionStore';
 import { useGeometryStore } from '@/stores/geometryStore';
 import { ConversionResult } from './ConversionResult';
+import { EnvelopeDisplay } from './EnvelopeDisplay';
 import { ExportActions } from './ExportActions';
 import type { FormatType, ProjectionType } from '@/types';
 
@@ -65,6 +66,7 @@ export function ConversionArea() {
                 </div>
             </div>
             <ConversionResult />
+            {hasFeatures && <EnvelopeDisplay />}
             {hasFeatures && <ExportActions />}
         </div>
     );

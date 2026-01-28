@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { Source, Layer, type FillLayer, type LineLayer, type CircleLayer } from 'react-map-gl/maplibre';
 import type { FilterSpecification } from 'maplibre-gl';
-import type { FeatureCollection } from 'geojson';
+import type { FeatureCollection, Polygon } from 'geojson';
 import type { ParsedFeature } from '@/types';
+import type { BBox } from '../types';
 
 // Base layers for non-selected features
 const fillLayer: FillLayer = {
@@ -106,16 +107,42 @@ const selectedPointLayer: CircleLayer = {
     },
 };
 
+// Envelope layer (shown when envelope is hovered)
+const envelopeFillLayer: FillLayer = {
+    id: 'envelope-fill',
+    type: 'fill',
+    source: 'envelope-source',
+    paint: {
+        'fill-color': '#10b981', // emerald-500
+        'fill-opacity': 0.1,
+    },
+};
+
+const envelopeLineLayer: LineLayer = {
+    id: 'envelope-line',
+    type: 'line',
+    source: 'envelope-source',
+    paint: {
+        'line-color': '#059669', // emerald-600
+        'line-width': 2,
+        'line-dasharray': [4, 2],
+    },
+};
+
 interface MapLibreGeometryLayerProps {
     features: ParsedFeature[];
     selectedFeatureId: string | null;
     hoveredFeatureId: string | null;
+    isEnvelopeHovered: boolean;
+    envelope: BBox | null;
 }
 
 export function MapLibreGeometryLayer({
     features,
     selectedFeatureId,
     hoveredFeatureId,
+    isEnvelopeHovered,
+    envelope,
 }: MapLibreGeometryLayerProps) {
     // Create filters for hover, selected, and base features
     const filters = useMemo(() => {
@@ -143,6 +170,32 @@ export function MapLibreGeometryLayer({
 
         return { selectedFilter, hoverFilter, baseExcludeFilter };
     }, [selectedFeatureId, hoveredFeatureId]);
+
+    // Create envelope GeoJSON when hovered
+    const envelopeGeojson = useMemo(() => {
+        if (!isEnvelopeHovered || !envelope) {
+            return null;
+        }
+        const [minLon, minLat, maxLon, maxLat] = envelope;
+        const envelopePolygon: Polygon = {
+            type: 'Polygon',
+            coordinates: [[
+                [minLon, minLat],
+                [maxLon, minLat],
+                [maxLon, maxLat],
+                [minLon, maxLat],
+                [minLon, minLat],
+            ]],
+        };
+        return {
+            type: 'FeatureCollection' as const,
+            features: [{
+                type: 'Feature' as const,
+                geometry: envelopePolygon,
+                properties: {},
+            }],
+        };
+    }, [isEnvelopeHovered, envelope]);
 
     if (features.length === 0) {
         return null;
@@ -174,6 +227,7 @@ export function MapLibreGeometryLayer({
         : (['==', '$type', 'Point'] as FilterSpecification);
 
     return (
+    <>
         <Source id="geometry-source" type="geojson" data={geojson}>
             {/* Base layers - show non-selected/non-hovered features */}
             <Layer {...fillLayer} filter={baseFillFilter} />
@@ -216,5 +270,14 @@ export function MapLibreGeometryLayer({
                 </>
             )}
         </Source>
+
+        {/* Envelope layer - show when envelope is hovered */}
+        {envelopeGeojson && (
+            <Source id="envelope-source" type="geojson" data={envelopeGeojson}>
+                <Layer {...envelopeFillLayer} />
+                <Layer {...envelopeLineLayer} />
+            </Source>
+        )}
+    </>
     );
 }

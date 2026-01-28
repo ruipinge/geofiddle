@@ -63,7 +63,7 @@ function MapLoadingFallback() {
 }
 
 export function MapContainer() {
-    const { viewState, setViewState, basemap, panToFeatureId, clearPanToFeature } = useMapStore();
+    const { viewState, setViewState, basemap, panToFeatureId, clearPanToFeature, isEnvelopeHovered } = useMapStore();
     const {
         features,
         selectedFeatureId,
@@ -300,6 +300,23 @@ export function MapContainer() {
     const hasFeatures = transformedFeatures.length > 0;
     const isDrawing = drawingMode !== 'none';
 
+    // Calculate envelope (bounding box) for all features
+    const envelope = useMemo(() => {
+        if (transformedFeatures.length === 0) {
+            return null;
+        }
+        try {
+            const featureCollection = turf.featureCollection(transformedFeatures);
+            const bbox = turf.bbox(featureCollection);
+            if (!bbox.every((v) => isFinite(v))) {
+                return null;
+            }
+            return bbox as [number, number, number, number];
+        } catch {
+            return null;
+        }
+    }, [transformedFeatures]);
+
     // Common props for all map providers
     const mapProviderProps = {
         viewState,
@@ -308,6 +325,8 @@ export function MapContainer() {
         features: transformedFeatures,
         selectedFeatureId,
         hoveredFeatureId,
+        isEnvelopeHovered,
+        envelope,
         isDrawing,
         drawingPreview,
         onMapClick: handleMapClick,
