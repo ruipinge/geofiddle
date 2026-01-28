@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
+import { Copy } from 'lucide-react';
 import { useGeometryStore } from '@/stores/geometryStore';
 import { useConversionStore } from '@/stores/conversionStore';
 import { format } from '@/lib/parsers';
@@ -82,6 +83,12 @@ export function ConversionResult() {
         }
     }, [features, outputFormat, sourceProjection, outputProjection]);
 
+    const handleCopy = useCallback(async () => {
+        if (convertedOutput) {
+            await navigator.clipboard.writeText(convertedOutput);
+        }
+    }, [convertedOutput]);
+
     if (isParsing) {
         return (
             <div className="mb-3 flex items-center gap-2 rounded-md border border-neutral-200 bg-neutral-100 p-3 text-sm text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400">
@@ -96,8 +103,20 @@ export function ConversionResult() {
 
     // Always show output area, even if empty due to errors
     return (
-        <pre className="mb-3 max-h-48 min-h-[3rem] overflow-auto rounded-md border border-neutral-200 bg-neutral-100 p-3 font-mono text-sm text-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100">
-            {convertedOutput || ' '}
-        </pre>
+        <div className="relative mb-3">
+            <pre className="max-h-48 min-h-[3rem] overflow-auto rounded-md border border-neutral-200 bg-neutral-100 p-3 pr-10 font-mono text-sm text-neutral-900 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100">
+                {convertedOutput || ' '}
+            </pre>
+            {convertedOutput && (
+                <button
+                    onClick={handleCopy}
+                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded text-neutral-500 transition-colors hover:bg-neutral-200 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+                    title="Copy to clipboard"
+                    aria-label="Copy converted geometry to clipboard"
+                >
+                    <Copy className="h-4 w-4" />
+                </button>
+            )}
+        </div>
     );
 }

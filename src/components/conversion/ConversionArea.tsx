@@ -28,9 +28,12 @@ export function ConversionArea() {
 
     return (
         <div className="flex-1 p-3 md:p-4">
-            <h2 className="mb-2 text-sm font-medium text-neutral-700 md:mb-3 dark:text-neutral-300">
-                Conversion
-            </h2>
+            <div className="mb-2 flex items-center justify-between md:mb-3">
+                <h2 className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    Conversion
+                </h2>
+                {hasFeatures && <ExportActions />}
+            </div>
             <div className="mb-2 flex gap-2 md:mb-3">
                 <div className="flex-1">
                     <label className="label">Format</label>
@@ -67,7 +70,6 @@ export function ConversionArea() {
             </div>
             <ConversionResult />
             {hasFeatures && <EnvelopeDisplay />}
-            {hasFeatures && <ExportActions />}
         </div>
     );
 }

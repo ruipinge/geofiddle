@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Link } from 'lucide-react';
 import { DropZone } from './DropZone';
 import { TextEditor } from './TextEditor';
 import { FormatSelect } from './FormatSelect';
@@ -32,6 +32,10 @@ export function InputArea() {
         setRawText('');
     }, [setRawText]);
 
+    const handleShare = useCallback(async () => {
+        await navigator.clipboard.writeText(window.location.href);
+    }, []);
+
     return (
         <div className="border-b border-neutral-200 p-3 md:p-4 dark:border-neutral-700">
             <div className="mb-2 flex items-center gap-2 md:mb-3">
@@ -39,16 +43,28 @@ export function InputArea() {
                     Input Geometry
                 </h2>
                 <StatusIndicator />
-                {rawText && (
-                    <button
-                        onClick={handleClear}
-                        className="ml-auto rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-200 hover:text-neutral-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
-                        title="Clear input"
-                        aria-label="Clear input"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </button>
-                )}
+                <div className="ml-auto flex gap-1">
+                    {rawText && (
+                        <button
+                            onClick={handleShare}
+                            className="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-200 hover:text-neutral-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+                            title="Copy link to clipboard"
+                            aria-label="Copy shareable link to clipboard"
+                        >
+                            <Link className="h-4 w-4" />
+                        </button>
+                    )}
+                    {rawText && (
+                        <button
+                            onClick={handleClear}
+                            className="rounded p-1 text-neutral-400 transition-colors hover:bg-neutral-200 hover:text-neutral-600 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+                            title="Clear input"
+                            aria-label="Clear input"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </button>
+                    )}
+                </div>
             </div>
             <div className="mb-2 flex gap-2 md:mb-3">
                 <FormatSelect

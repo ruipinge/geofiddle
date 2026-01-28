@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { Download, Copy, Link } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useGeometryStore } from '@/stores/geometryStore';
 import { useConversionStore } from '@/stores/conversionStore';
 import { format } from '@/lib/parsers';
@@ -118,12 +118,6 @@ export function ExportActions() {
         }
     }, [features, outputFormat, sourceProjection, outputProjection]);
 
-    const handleCopy = useCallback(async () => {
-        if (convertedOutput) {
-            await navigator.clipboard.writeText(convertedOutput);
-        }
-    }, [convertedOutput]);
-
     const handleDownload = useCallback(() => {
         if (!convertedOutput) {
             return;
@@ -141,34 +135,17 @@ export function ExportActions() {
         URL.revokeObjectURL(url);
     }, [convertedOutput, outputFormat]);
 
-    const handleShare = useCallback(async () => {
-        await navigator.clipboard.writeText(window.location.href);
-    }, []);
-
     const isDisabled = !convertedOutput;
 
     return (
-        <div className="flex gap-2">
-            <button
-                onClick={handleCopy}
-                disabled={isDisabled}
-                className="btn-secondary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-                <Copy className="h-4 w-4" />
-                Copy
-            </button>
-            <button
-                onClick={handleDownload}
-                disabled={isDisabled}
-                className="btn-secondary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-                <Download className="h-4 w-4" />
-                Download
-            </button>
-            <button onClick={handleShare} className="btn-secondary flex-1">
-                <Link className="h-4 w-4" />
-                Share
-            </button>
-        </div>
+        <button
+            onClick={handleDownload}
+            disabled={isDisabled}
+            className="flex h-7 w-7 items-center justify-center rounded text-neutral-500 transition-colors hover:bg-neutral-200 hover:text-neutral-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+            title="Download"
+            aria-label="Download converted geometry"
+        >
+            <Download className="h-4 w-4" />
+        </button>
     );
 }
