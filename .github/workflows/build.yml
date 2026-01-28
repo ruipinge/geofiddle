@@ -33,6 +33,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          SENTRY_RELEASE: ${{ github.sha }}
 
       - name: Copy static files
         run: cp -r static/* dist/

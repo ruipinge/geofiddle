@@ -25,6 +25,17 @@ jobs:
           name: dist
           path: dist
 
+      - name: Create Sentry release and upload source maps
+        uses: getsentry/action-release@v3
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        with:
+          sourcemaps: dist/assets
+          version: ${{ github.sha }}
+          url_prefix: ~/assets
+
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:

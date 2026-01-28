@@ -5,6 +5,9 @@ import path from 'path';
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [react()],
+    define: {
+        __SENTRY_RELEASE__: JSON.stringify(process.env.SENTRY_RELEASE || 'development'),
+    },
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src'),

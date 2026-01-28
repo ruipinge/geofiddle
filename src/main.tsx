@@ -4,6 +4,8 @@ import * as Sentry from '@sentry/react';
 import App from './App';
 import './index.css';
 
+declare const __SENTRY_RELEASE__: string;
+
 interface PrivateConfig {
     apiKey?: string;
     mapId?: string;
@@ -20,6 +22,7 @@ async function initSentry(): Promise<void> {
         if (config.sentryDsn) {
             Sentry.init({
                 dsn: config.sentryDsn,
+                release: __SENTRY_RELEASE__,
                 environment: import.meta.env.MODE,
                 enabled: import.meta.env.PROD,
                 integrations: [
