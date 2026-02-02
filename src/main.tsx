@@ -14,25 +14,27 @@ interface PrivateConfig {
 }
 
 function initGoogleAnalytics(measurementId: string): void {
+    // Initialize dataLayer and gtag function (must be global for gtag.js)
+    const dataLayer = window.dataLayer ?? [];
+    window.dataLayer = dataLayer;
+    window.gtag = function gtag(...args: unknown[]): void {
+        dataLayer.push(args);
+    };
+
+    window.gtag('js', new Date());
+    window.gtag('config', measurementId);
+
     // Load gtag.js script
     const script = document.createElement('script');
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
     document.head.appendChild(script);
-
-    // Initialize gtag
-    window.dataLayer = window.dataLayer ?? [];
-    const dataLayer = window.dataLayer;
-    function gtag(...args: unknown[]): void {
-        dataLayer.push(args);
-    }
-    gtag('js', new Date());
-    gtag('config', measurementId);
 }
 
 declare global {
     interface Window {
         dataLayer?: unknown[];
+        gtag?: (...args: unknown[]) => void;
     }
 }
 
