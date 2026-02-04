@@ -36,7 +36,7 @@ export function DrawingTools({ onFitBounds, hasFeatures = false }: DrawingToolsP
         }
     }, [mode, setMode, reset]);
 
-    const handleFinish = useCallback(() => {
+    const handleFinish = useCallback(async () => {
         if (currentPoints.length === 0) {
             reset();
             return;
@@ -66,7 +66,7 @@ export function DrawingTools({ onFitBounds, hasFeatures = false }: DrawingToolsP
         }
 
         if (geometry) {
-            const result = appendGeometry({
+            const result = await appendGeometry({
                 geometry,
                 rawText,
                 inputFormat,

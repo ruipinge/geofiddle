@@ -1,6 +1,16 @@
-import { gpx as gpxToGeoJSON } from '@mapbox/togeojson';
-import type { Feature } from 'geojson';
+import type { Feature, FeatureCollection } from 'geojson';
 import type { ParseResult, ParsedFeature, FormatType } from '@/types';
+
+// Lazy-loaded togeojson module (XMLSerializer not available in all Web Worker contexts)
+let gpxToGeoJSON: ((doc: Document) => FeatureCollection) | null = null;
+
+async function getGpxConverter(): Promise<(doc: Document) => FeatureCollection> {
+    if (!gpxToGeoJSON) {
+        const togeojson = await import('@mapbox/togeojson');
+        gpxToGeoJSON = togeojson.gpx;
+    }
+    return gpxToGeoJSON;
+}
 
 /**
  * Splits input into multiple GPX documents.
@@ -42,7 +52,7 @@ function splitGpxDocuments(input: string): string[] {
 /**
  * Parses a single GPX document and returns features or errors
  */
-function parseSingleGpx(gpxStr: string, featureOffset: number): { features: ParsedFeature[]; errors: Array<{ message: string }> } {
+async function parseSingleGpx(gpxStr: string, featureOffset: number): Promise<{ features: ParsedFeature[]; errors: Array<{ message: string }> }> {
     const parser = new DOMParser();
     const doc = parser.parseFromString(gpxStr, 'text/xml');
 
@@ -54,7 +64,8 @@ function parseSingleGpx(gpxStr: string, featureOffset: number): { features: Pars
         };
     }
 
-    const geojson = gpxToGeoJSON(doc);
+    const converter = await getGpxConverter();
+    const geojson = converter(doc);
 
     if (geojson.features.length === 0) {
         return {
@@ -86,7 +97,7 @@ function parseSingleGpx(gpxStr: string, featureOffset: number): { features: Pars
  * Parses GPX string into GeoJSON features.
  * Supports multiple concatenated GPX documents.
  */
-export function parseGpx(input: string): ParseResult {
+export async function parseGpx(input: string): Promise<ParseResult> {
     const trimmed = input.trim();
 
     if (!trimmed) {
@@ -115,7 +126,7 @@ export function parseGpx(input: string): ParseResult {
                 continue;
             }
 
-            const result = parseSingleGpx(gpxStr, allFeatures.length);
+            const result = await parseSingleGpx(gpxStr, allFeatures.length);
 
             if (result.errors.length > 0) {
                 const prefix = gpxDocs.length > 1 ? `Document ${String(i + 1)}: ` : '';

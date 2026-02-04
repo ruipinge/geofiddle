@@ -57,7 +57,7 @@ export interface ParserResponse {
     detectedProjection: ProjectionType | null;
 }
 
-self.onmessage = (e: MessageEvent<ParserRequest>) => {
+self.onmessage = async (e: MessageEvent<ParserRequest>) => {
     const { id, rawText, inputFormat, inputProjection } = e.data;
 
     if (!rawText.trim()) {
@@ -103,7 +103,7 @@ self.onmessage = (e: MessageEvent<ParserRequest>) => {
 
     // Parse the input
     try {
-        const result = parse(rawText, formatToUse);
+        const result = await parse(rawText, formatToUse);
 
         // If no projection detected from format, detect from coordinates
         let finalProjection = detectedProjection ?? result.detectedProjection ?? null;

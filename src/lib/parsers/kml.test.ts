@@ -44,14 +44,14 @@ const sampleKmlPolygon = `<?xml version="1.0" encoding="UTF-8"?>
 </kml>`;
 
 describe('parseKml', () => {
-    it('should return empty features for empty input', () => {
-        const result = parseKml('');
+    it('should return empty features for empty input', async () => {
+        const result = await parseKml('');
         expect(result.features).toEqual([]);
         expect(result.errors).toEqual([]);
     });
 
-    it('should parse a point', () => {
-        const result = parseKml(sampleKmlPoint);
+    it('should parse a point', async () => {
+        const result = await parseKml(sampleKmlPoint);
         expect(result.errors).toEqual([]);
         expect(result.features).toHaveLength(1);
         const geom = result.features[0]?.geometry;
@@ -62,42 +62,42 @@ describe('parseKml', () => {
         }
     });
 
-    it('should parse a linestring', () => {
-        const result = parseKml(sampleKmlLine);
+    it('should parse a linestring', async () => {
+        const result = await parseKml(sampleKmlLine);
         expect(result.errors).toEqual([]);
         expect(result.features).toHaveLength(1);
         const geom = result.features[0]?.geometry;
         expect(geom?.type).toBe('LineString');
     });
 
-    it('should parse a polygon', () => {
-        const result = parseKml(sampleKmlPolygon);
+    it('should parse a polygon', async () => {
+        const result = await parseKml(sampleKmlPolygon);
         expect(result.errors).toEqual([]);
         expect(result.features).toHaveLength(1);
         const geom = result.features[0]?.geometry;
         expect(geom?.type).toBe('Polygon');
     });
 
-    it('should extract name from placemark', () => {
-        const result = parseKml(sampleKmlPoint);
+    it('should extract name from placemark', async () => {
+        const result = await parseKml(sampleKmlPoint);
         const feature = result.features[0];
         expect(feature?.properties.name).toBe('Test Point');
     });
 
-    it('should detect projection as WGS84', () => {
-        const result = parseKml(sampleKmlPoint);
+    it('should detect projection as WGS84', async () => {
+        const result = await parseKml(sampleKmlPoint);
         expect(result.detectedProjection).toBe('EPSG:4326');
     });
 
-    it('should return error for invalid XML', () => {
-        const result = parseKml('<kml><invalid>');
+    it('should return error for invalid XML', async () => {
+        const result = await parseKml('<kml><invalid>');
         expect(result.errors).toHaveLength(1);
         expect(result.features).toEqual([]);
     });
 
-    it('should parse multiple concatenated KML documents', () => {
+    it('should parse multiple concatenated KML documents', async () => {
         const input = sampleKmlPoint + sampleKmlLine;
-        const result = parseKml(input);
+        const result = await parseKml(input);
 
         expect(result.errors).toEqual([]);
         expect(result.features).toHaveLength(2);
@@ -105,10 +105,10 @@ describe('parseKml', () => {
         expect(result.features[1]?.geometry.type).toBe('LineString');
     });
 
-    it('should parse multiple KML without XML declarations', () => {
+    it('should parse multiple KML without XML declarations', async () => {
         const kml1 = '<kml xmlns="http://www.opengis.net/kml/2.2"><Placemark><Point><coordinates>0,0</coordinates></Point></Placemark></kml>';
         const kml2 = '<kml xmlns="http://www.opengis.net/kml/2.2"><Placemark><Point><coordinates>1,1</coordinates></Point></Placemark></kml>';
-        const result = parseKml(kml1 + kml2);
+        const result = await parseKml(kml1 + kml2);
 
         expect(result.errors).toEqual([]);
         expect(result.features).toHaveLength(2);

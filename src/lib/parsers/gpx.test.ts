@@ -38,14 +38,14 @@ const sampleGpxRoute = `<?xml version="1.0" encoding="UTF-8"?>
 </gpx>`;
 
 describe('parseGpx', () => {
-    it('should return empty features for empty input', () => {
-        const result = parseGpx('');
+    it('should return empty features for empty input', async () => {
+        const result = await parseGpx('');
         expect(result.features).toEqual([]);
         expect(result.errors).toEqual([]);
     });
 
-    it('should parse a waypoint', () => {
-        const result = parseGpx(sampleGpxWaypoint);
+    it('should parse a waypoint', async () => {
+        const result = await parseGpx(sampleGpxWaypoint);
         expect(result.errors).toEqual([]);
         expect(result.features).toHaveLength(1);
         const geom = result.features[0]?.geometry;
@@ -56,42 +56,42 @@ describe('parseGpx', () => {
         }
     });
 
-    it('should parse a track', () => {
-        const result = parseGpx(sampleGpxTrack);
+    it('should parse a track', async () => {
+        const result = await parseGpx(sampleGpxTrack);
         expect(result.errors).toEqual([]);
         expect(result.features).toHaveLength(1);
         const geom = result.features[0]?.geometry;
         expect(geom?.type).toBe('LineString');
     });
 
-    it('should parse a route', () => {
-        const result = parseGpx(sampleGpxRoute);
+    it('should parse a route', async () => {
+        const result = await parseGpx(sampleGpxRoute);
         expect(result.errors).toEqual([]);
         expect(result.features).toHaveLength(1);
         const geom = result.features[0]?.geometry;
         expect(geom?.type).toBe('LineString');
     });
 
-    it('should extract name from track', () => {
-        const result = parseGpx(sampleGpxTrack);
+    it('should extract name from track', async () => {
+        const result = await parseGpx(sampleGpxTrack);
         const feature = result.features[0];
         expect(feature?.properties.name).toBe('Test Track');
     });
 
-    it('should detect projection as WGS84', () => {
-        const result = parseGpx(sampleGpxWaypoint);
+    it('should detect projection as WGS84', async () => {
+        const result = await parseGpx(sampleGpxWaypoint);
         expect(result.detectedProjection).toBe('EPSG:4326');
     });
 
-    it('should return error for invalid XML', () => {
-        const result = parseGpx('<gpx><invalid>');
+    it('should return error for invalid XML', async () => {
+        const result = await parseGpx('<gpx><invalid>');
         expect(result.errors).toHaveLength(1);
         expect(result.features).toEqual([]);
     });
 
-    it('should parse multiple concatenated GPX documents', () => {
+    it('should parse multiple concatenated GPX documents', async () => {
         const input = sampleGpxWaypoint + sampleGpxTrack;
-        const result = parseGpx(input);
+        const result = await parseGpx(input);
 
         expect(result.errors).toEqual([]);
         expect(result.features).toHaveLength(2);
@@ -99,10 +99,10 @@ describe('parseGpx', () => {
         expect(result.features[1]?.geometry.type).toBe('LineString');
     });
 
-    it('should parse multiple GPX without XML declarations', () => {
+    it('should parse multiple GPX without XML declarations', async () => {
         const gpx1 = '<gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1"><wpt lat="0" lon="0"><name>P1</name></wpt></gpx>';
         const gpx2 = '<gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1"><wpt lat="1" lon="1"><name>P2</name></wpt></gpx>';
-        const result = parseGpx(gpx1 + gpx2);
+        const result = await parseGpx(gpx1 + gpx2);
 
         expect(result.errors).toEqual([]);
         expect(result.features).toHaveLength(2);

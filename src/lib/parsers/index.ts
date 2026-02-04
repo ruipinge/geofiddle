@@ -24,7 +24,7 @@ const parsers: Partial<Record<FormatType, FormatParser>> = {
 /**
  * Parses input with the specified format
  */
-export function parse(input: string, format: FormatType): ParseResult {
+export async function parse(input: string, format: FormatType): Promise<ParseResult> {
     const parser = parsers[format];
 
     if (!parser) {

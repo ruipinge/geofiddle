@@ -51,7 +51,7 @@ export interface FormatOptions {
 // Format parser interface
 export interface FormatParser {
     name: FormatType;
-    parse(input: string): ParseResult;
+    parse(input: string): ParseResult | Promise<ParseResult>;
     format(features: Feature[], options?: FormatOptions): string;
     detect(input: string): boolean;
 }

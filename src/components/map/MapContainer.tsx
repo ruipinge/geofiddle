@@ -229,7 +229,7 @@ export function MapContainer() {
 
     // Handle map click for drawing
     const handleMapClick = useCallback(
-        (lngLat: { lng: number; lat: number }) => {
+        async (lngLat: { lng: number; lat: number }) => {
             if (drawingMode === 'none') {
                 return;
             }
@@ -239,7 +239,7 @@ export function MapContainer() {
 
             if (drawingMode === 'point') {
                 // For points, create feature immediately and add to input text
-                const result = appendGeometry({
+                const result = await appendGeometry({
                     geometry: {
                         type: 'Point',
                         coordinates: point,

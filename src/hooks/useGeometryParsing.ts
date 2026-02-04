@@ -173,7 +173,7 @@ export function useGeometryParsing(): void {
                 : null;
 
             try {
-                const result = parse(text, formatToUse);
+                const result = await parse(text, formatToUse);
 
                 if (result.errors.length > 0) {
                     setParseError(result.errors.map((e) => e.message).join('\n'));

@@ -1,6 +1,16 @@
-import { kml as kmlToGeoJSON } from '@mapbox/togeojson';
-import type { Feature } from 'geojson';
+import type { Feature, FeatureCollection } from 'geojson';
 import type { ParseResult, ParsedFeature, FormatType } from '@/types';
+
+// Lazy-loaded togeojson module (XMLSerializer not available in all Web Worker contexts)
+let kmlToGeoJSON: ((doc: Document) => FeatureCollection) | null = null;
+
+async function getKmlConverter(): Promise<(doc: Document) => FeatureCollection> {
+    if (!kmlToGeoJSON) {
+        const togeojson = await import('@mapbox/togeojson');
+        kmlToGeoJSON = togeojson.kml;
+    }
+    return kmlToGeoJSON;
+}
 
 /**
  * Splits input into multiple KML documents.
@@ -43,7 +53,7 @@ function splitKmlDocuments(input: string): string[] {
 /**
  * Parses a single KML document and returns features or errors
  */
-function parseSingleKml(kmlStr: string, featureOffset: number): { features: ParsedFeature[]; errors: Array<{ message: string }> } {
+async function parseSingleKml(kmlStr: string, featureOffset: number): Promise<{ features: ParsedFeature[]; errors: Array<{ message: string }> }> {
     const parser = new DOMParser();
     const doc = parser.parseFromString(kmlStr, 'text/xml');
 
@@ -55,7 +65,8 @@ function parseSingleKml(kmlStr: string, featureOffset: number): { features: Pars
         };
     }
 
-    const geojson = kmlToGeoJSON(doc);
+    const converter = await getKmlConverter();
+    const geojson = converter(doc);
 
     if (geojson.features.length === 0) {
         return {
@@ -87,7 +98,7 @@ function parseSingleKml(kmlStr: string, featureOffset: number): { features: Pars
  * Parses KML string into GeoJSON features.
  * Supports multiple concatenated KML documents.
  */
-export function parseKml(input: string): ParseResult {
+export async function parseKml(input: string): Promise<ParseResult> {
     const trimmed = input.trim();
 
     if (!trimmed) {
@@ -116,7 +127,7 @@ export function parseKml(input: string): ParseResult {
                 continue;
             }
 
-            const result = parseSingleKml(kmlStr, allFeatures.length);
+            const result = await parseSingleKml(kmlStr, allFeatures.length);
 
             if (result.errors.length > 0) {
                 const prefix = kmlDocs.length > 1 ? `Document ${String(i + 1)}: ` : '';

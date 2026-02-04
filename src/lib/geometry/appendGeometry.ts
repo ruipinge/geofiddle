@@ -24,7 +24,7 @@ interface AppendGeometryResult {
  * - Transforms geometry from WGS84 to target projection if needed
  * - Formats and appends in a format-appropriate way
  */
-export function appendGeometry(options: AppendGeometryOptions): AppendGeometryResult {
+export async function appendGeometry(options: AppendGeometryOptions): Promise<AppendGeometryResult> {
     const {
         geometry,
         rawText,
@@ -67,7 +67,7 @@ export function appendGeometry(options: AppendGeometryOptions): AppendGeometryRe
     }
 
     // Try to parse existing text to combine with new geometry
-    const parseResult = parse(trimmedText, effectiveFormat);
+    const parseResult = await parse(trimmedText, effectiveFormat);
 
     // If parsing succeeds and we have features, combine them
     if (parseResult.features.length > 0) {
@@ -83,7 +83,7 @@ export function appendGeometry(options: AppendGeometryOptions): AppendGeometryRe
     const actualFormat = detectFormat(trimmedText);
     if (actualFormat && actualFormat !== effectiveFormat) {
         // Try parsing with detected format and combining
-        const actualParseResult = parse(trimmedText, actualFormat);
+        const actualParseResult = await parse(trimmedText, actualFormat);
         if (actualParseResult.features.length > 0) {
             const allFeatures = [...actualParseResult.features, newFeature];
             return {
