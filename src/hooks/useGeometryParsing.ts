@@ -148,9 +148,23 @@ export function useGeometryParsing(): void {
     const parseSync = useCallback(
         async (text: string) => {
             // Dynamic import to avoid bundling in main thread when using worker
-            const { parse } = await import('@/lib/parsers');
-            const { detectFormat, detectProjection } = await import('@/lib/utils/format-detection');
-            const { detectProjectionFromCoordinates } = await import('@/lib/projections');
+            let parse, detectFormat, detectProjection, detectProjectionFromCoordinates;
+            try {
+                const parsersModule = await import('@/lib/parsers');
+                const formatDetectionModule = await import('@/lib/utils/format-detection');
+                const projectionsModule = await import('@/lib/projections');
+                parse = parsersModule.parse;
+                detectFormat = formatDetectionModule.detectFormat;
+                detectProjection = formatDetectionModule.detectProjection;
+                detectProjectionFromCoordinates = projectionsModule.detectProjectionFromCoordinates;
+            } catch (err) {
+                // Handle stale chunk errors (happens when app is updated while user has it open)
+                if (err instanceof Error && err.message.includes('dynamically imported module')) {
+                    setParseError('App was updated. Please refresh the page.');
+                    return;
+                }
+                throw err;
+            }
 
             if (!text.trim()) {
                 setFeatures([]);
